@@ -3,1771 +3,1301 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rotación Mensual — Supervisores JS · Jerárquicos Salud</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>JS Operaciones — Jerárquicos Salud</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ── Reset & base ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --blue:    #003087;
-  --blue-md: #0047b3;
-  --blue-lt: #e8eef8;
-  --blue-xs: #f0f4fb;
-  --green:   #00a651;
-  --green-lt:#e6f7ee;
-  --gray-90: #1a1d23;
-  --gray-70: #4a4f5c;
-  --gray-50: #8a909e;
-  --gray-20: #d8dce6;
-  --gray-10: #f2f4f8;
-  --white:   #ffffff;
+  --impulsa:#00554e; --impulsa-lt:#e0f2f0; --impulsa-md:#007a72;
+  --elite:#4a537d;   --elite-lt:#eef0f8;
+  --conecta:#b688ea; --conecta-lt:#f5effd;
+  --avanza:#00cd94;  --avanza-lt:#e0fdf4;
+  --save:#f39c12;    --save-lt:#fef3cd;
+  --danger:#e74c3c;  --danger-lt:#fdeaea;
+  --white:#fff; --bg:#f1f5f9; --border:#e2e8f0;
+  --text:#1e293b; --muted:#64748b;
+  --sidebar-w:220px;
+  --header-h:56px;
+  --radius:12px; --radius-lg:18px;
+  --shadow:0 2px 8px rgba(0,0,0,.07);
+  --shadow-lg:0 8px 28px rgba(0,0,0,.1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
 
-  /* rol colors */
-  --c-guardia-a:  #dbeafe; --t-guardia-a:  #1e3a8a;
-  --c-guardia-b:  #bfdbfe; --t-guardia-b:  #1e3a8a;
-  --c-bandeja:    #d1fae5; --t-bandeja:    #064e3b;
-  --c-kh:         #ede9fe; --t-kh:         #3b0764;
-  --c-entrena:    #fce7f3; --t-entrena:    #831843;
-  --c-deslogueo-a:#fef9c3; --t-deslogueo-a:#713f12;
-  --c-deslogueo-b:#fef08a; --t-deslogueo-b:#713f12;
-  --c-7076:       #e0f2fe; --t-7076:       #075985;
-  --c-solo7076:   #bae6fd; --t-solo7076:   #0c4a6e;
-  --c-subtareas:  #ccfbf1; --t-subtareas:  #134e4a;
-  --c-des7076:    #fef9c3; --t-des7076:    #713f12;
-  --c-7076des:    #fde68a; --t-7076des:    #92400e;
-  --c-licencia:   #f8fafc; --t-licencia:   #64748b;
-  --c-feriado:    #fef3c7; --t-feriado:    #92400e;
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);background:var(--impulsa);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:.3s;}
+.sb-brand{padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.1);}
+.sb-logo{background:white;color:var(--impulsa);width:36px;height:36px;border-radius:9px;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.sb-title{color:white;font-size:13px;font-weight:700;line-height:1.2;}
+.sb-sub{color:rgba(255,255,255,.5);font-size:10px;margin-top:2px;}
+.sb-nav{padding:12px 10px;flex:1;overflow-y:auto;}
+.sb-section{font-size:9px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;padding:10px 10px 4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;color:rgba(255,255,255,.7);font-size:12.5px;font-weight:500;transition:.15s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;}
+.nav-item:hover{background:rgba(255,255,255,.1);color:white;}
+.nav-item.active{background:rgba(255,255,255,.18);color:white;font-weight:700;}
+.nav-item .ni-icon{font-size:16px;width:22px;text-align:center;flex-shrink:0;}
+.sb-sync{padding:12px 14px;border-top:1px solid rgba(255,255,255,.1);font-size:10px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:6px;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#6ee7b7;flex-shrink:0;}
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --shadow:    0 1px 3px rgba(0,48,135,.08), 0 4px 16px rgba(0,48,135,.06);
-  --shadow-md: 0 2px 8px rgba(0,48,135,.12), 0 8px 32px rgba(0,48,135,.08);
-}
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{height:var(--header-h);background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.topbar-title{font-size:15px;font-weight:700;color:var(--text);flex:1;}
+.topbar-title small{display:block;font-size:10px;font-weight:400;color:var(--muted);margin-top:1px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:white;font-family:inherit;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;transition:.15s;white-space:nowrap;}
+.btn:hover{background:var(--bg);}
+.btn-primary{background:var(--impulsa);color:white;border-color:var(--impulsa);}
+.btn-primary:hover{background:var(--impulsa-md);}
+.btn-save{background:var(--save);color:white;border-color:var(--save);}
+.btn-save:hover{opacity:.9;}
+.btn-danger{background:var(--danger-lt);color:var(--danger);border-color:var(--danger);}
+.content{padding:24px;flex:1;}
 
-body {
-  font-family: 'DM Sans', system-ui, sans-serif;
-  background: var(--gray-10);
-  color: var(--gray-90);
-  min-height: 100vh;
-  font-size: 14px;
-}
+/* ── CARDS ── */
+.card{background:white;border-radius:var(--radius-lg);box-shadow:var(--shadow);margin-bottom:18px;}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.card-header h2{font-size:14px;font-weight:700;color:var(--text);flex:1;}
+.card-body{padding:20px;}
+.section-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
 
-/* ── Header ── */
-.header {
-  background: var(--blue);
-  color: var(--white);
-  padding: 0 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 56px;
-  position: sticky;
-  top: 0;
-  z-index: 200;
-  box-shadow: 0 2px 12px rgba(0,0,0,.18);
-}
-.header-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.header-logo {
-  width: 32px;
-  height: 32px;
-  background: var(--green);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: 600;
-  color: white;
-  flex-shrink: 0;
-}
-.header-title {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -.01em;
-}
-.header-sub {
-  font-size: 12px;
-  opacity: .65;
-  margin-top: 1px;
-}
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+/* ── SCREENS ── */
+.screen{display:none;animation:fadeIn .3s ease;}
+.screen.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── Page wrap ── */
-.page { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1.5rem 3rem; }
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:20px;}
+.stat-card{background:white;border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);border-left:4px solid var(--impulsa);}
+.stat-val{font-size:22px;font-weight:800;color:var(--impulsa);line-height:1;}
+.stat-lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-top:4px;}
 
-/* ── Control bar ── */
-.controls {
-  background: var(--white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-.month-nav {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.nav-btn {
-  width: 32px; height: 32px;
-  border: 1px solid var(--gray-20);
-  border-radius: var(--radius-sm);
-  background: var(--white);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--gray-70);
-  font-size: 16px;
-  transition: all .15s;
-}
-.nav-btn:hover { background: var(--blue-lt); color: var(--blue); border-color: var(--blue); }
-.month-display {
-  font-size: 16px;
-  font-weight: 600;
-  min-width: 160px;
-  text-align: center;
-  color: var(--blue);
-}
-.divider { width: 1px; height: 28px; background: var(--gray-20); }
+/* ══════════════════════════════════════
+   SECCIÓN 1: ROTACIÓN DIARIA
+══════════════════════════════════════ */
+.rot-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.month-nav{display:flex;align-items:center;gap:6px;}
+.nav-btn{width:30px;height:30px;border:1px solid var(--border);border-radius:8px;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:15px;transition:.15s;}
+.nav-btn:hover{background:var(--impulsa-lt);color:var(--impulsa);border-color:var(--impulsa);}
+.month-disp{font-size:14px;font-weight:700;min-width:140px;text-align:center;color:var(--impulsa);}
+.view-tabs{display:flex;gap:3px;background:var(--bg);border-radius:8px;padding:3px;}
+.view-tab{padding:4px 12px;border-radius:6px;border:none;background:none;font-family:inherit;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:.15s;}
+.view-tab.active{background:white;color:var(--impulsa);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.08);}
 
-.offset-control {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--gray-70);
-}
-.offset-control label { font-weight: 500; white-space: nowrap; }
-.offset-control select {
-  border: 1px solid var(--gray-20);
-  border-radius: var(--radius-sm);
-  padding: 4px 8px;
-  font-family: inherit;
-  font-size: 13px;
-  color: var(--gray-90);
-  background: var(--white);
-  cursor: pointer;
-}
+.duplas-bar{background:var(--impulsa-lt);border:1px solid #b2dfdb;border-radius:10px;padding:10px 16px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:11px;}
+.duplas-bar-title{font-size:9px;font-weight:700;color:var(--impulsa);text-transform:uppercase;letter-spacing:.05em;width:100%;}
+.dupla-pill{background:white;border:1px solid #b2dfdb;border-radius:20px;padding:3px 10px;font-weight:600;font-size:10px;color:var(--impulsa);}
+.dupla-pill b{color:var(--elite);}
 
-.view-tabs {
-  display: flex;
-  gap: 4px;
-  background: var(--gray-10);
-  border-radius: var(--radius-sm);
-  padding: 3px;
-}
-.view-tab {
-  padding: 4px 12px;
-  border-radius: 5px;
-  border: none;
-  background: none;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--gray-50);
-  cursor: pointer;
-  transition: all .15s;
-}
-.view-tab.active {
-  background: var(--white);
-  color: var(--blue);
-  box-shadow: 0 1px 4px rgba(0,48,135,.12);
-}
+/* tabla rotacion */
+.rot-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
+.rot-table{width:100%;border-collapse:collapse;min-width:700px;}
+.rot-table thead th{background:var(--bg);color:var(--muted);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:9px 6px;text-align:center;border-bottom:2px solid var(--border);white-space:nowrap;position:sticky;top:0;}
+.rot-table thead th.col-sup{text-align:left;padding-left:14px;min-width:150px;position:sticky;left:0;z-index:3;background:var(--bg);}
+.rot-table tbody tr{border-bottom:1px solid var(--border);}
+.rot-table tbody tr:hover td{background:#fafbff;}
+.rot-table tbody td{padding:5px 4px;text-align:center;vertical-align:middle;}
+.rot-table tbody td.col-sup{text-align:left;padding:8px 14px;font-weight:600;font-size:12px;white-space:nowrap;position:sticky;left:0;z-index:2;background:white;}
+.rot-table tbody tr:hover td.col-sup{background:#fafbff;}
+.rot-table tfoot td{background:var(--bg);font-size:9px;font-weight:700;color:var(--muted);padding:5px 3px;border-top:1px solid var(--border);text-align:center;}
+.rot-table tfoot td.col-sup{text-align:left;padding-left:14px;position:sticky;left:0;background:var(--bg);}
 
-.spacer { flex: 1; }
+.chip{display:inline-block;padding:4px 6px;border-radius:6px;font-size:9.5px;font-weight:600;line-height:1.3;cursor:pointer;border:none;text-align:center;width:calc(100% - 4px);transition:.12s;}
+.chip:hover{opacity:.82;transform:scale(.97);}
+.chip.guardia-a{background:#dbeafe;color:#1e3a8a;}
+.chip.guardia-b{background:#bfdbfe;color:#1e3a8a;}
+.chip.bandeja{background:#d1fae5;color:#064e3b;}
+.chip.kh{background:#ede9fe;color:#3b0764;}
+.chip.entrena{background:#fce7f3;color:#831843;}
+.chip.r7076{background:#e0f2fe;color:#075985;}
+.chip.solo7076{background:#bae6fd;color:#0c4a6e;}
+.chip.des7076{background:#fef9c3;color:#713f12;}
+.chip.r7076des{background:#fde68a;color:#92400e;}
+.chip.licencia{background:#f1f5f9;color:#64748b;border:1px dashed var(--border);}
+.chip.feriado-cell{background:#fef3c7;color:#92400e;opacity:.5;cursor:default;}
+.dash-cell{color:#cbd5e1;font-size:14px;}
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--gray-20);
-  background: var(--white);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--gray-70);
-  cursor: pointer;
-  transition: all .15s;
-  text-decoration: none;
-}
-.btn:hover { background: var(--gray-10); border-color: var(--gray-50); }
-.btn-primary {
-  background: var(--blue);
-  color: var(--white);
-  border-color: var(--blue);
-}
-.btn-primary:hover { background: var(--blue-md); }
-.btn-green {
-  background: var(--green);
-  color: var(--white);
-  border-color: var(--green);
-}
-.btn-green:hover { background: #008a44; }
+.legend-bar{background:white;border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;box-shadow:var(--shadow);}
+.legend-bar .lt{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.leg-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;}
 
-/* ── Info banner ── */
-.info-banner {
-  background: var(--blue-xs);
-  border: 1px solid var(--blue-lt);
-  border-radius: var(--radius-md);
-  padding: .75rem 1.25rem;
-  margin-bottom: 1.25rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 13px;
-  color: var(--blue);
-  line-height: 1.5;
-}
-.info-banner .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-.info-banner strong { font-weight: 600; }
+.ok-bar{background:#d1fae5;border:1px solid #6ee7b7;border-radius:10px;padding:10px 14px;margin-top:12px;font-size:11px;color:#065f46;}
+.alert-bar{background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:10px 14px;margin-top:12px;font-size:11px;color:#92400e;}
+.alert-bar ul{margin:6px 0 0 16px;}
 
-/* ── Legend ── */
-.legend-bar {
-  background: var(--white);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow);
-  padding: .75rem 1.25rem;
-  margin-bottom: 1.25rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: .5rem 1.25rem;
-  align-items: center;
-}
-.legend-title { font-size: 11px; font-weight: 600; color: var(--gray-50); text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
-.leg { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--gray-70); }
-.leg-pill {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-}
+/* resumen mensual */
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.res-card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;}
+.res-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.res-name{font-size:12px;font-weight:700;}
+.res-total{background:var(--impulsa-lt);color:var(--impulsa);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:800;}
+.res-bars{display:flex;flex-direction:column;gap:4px;}
+.res-bar-row{display:flex;align-items:center;gap:6px;font-size:10px;}
+.res-bar-lbl{width:85px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}
+.res-bar-track{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.res-bar-fill{height:100%;border-radius:3px;}
+.res-bar-cnt{width:14px;text-align:right;color:var(--muted);font-weight:700;flex-shrink:0;}
 
-/* ── Table view ── */
-.table-card {
-  background: var(--white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-}
-.table-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  /* Mostrar scrollbar siempre visible en desktop como pista visual */
-  scrollbar-width: thin;
-  scrollbar-color: var(--gray-20) transparent;
-}
-.table-wrap::-webkit-scrollbar { height: 6px; }
-.table-wrap::-webkit-scrollbar-track { background: transparent; }
-.table-wrap::-webkit-scrollbar-thumb { background: var(--gray-20); border-radius: 10px; }
-table { width: 100%; border-collapse: collapse; min-width: 900px; }
-thead th {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--gray-50);
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  padding: 10px 6px;
-  background: var(--gray-10);
-  border-bottom: 2px solid var(--gray-20);
-  text-align: center;
-  white-space: nowrap;
-}
-thead th.col-sup {
-  text-align: left;
-  padding-left: 1.25rem;
-  min-width: 150px;
-  position: sticky;
-  left: 0;
-  z-index: 3;
-  background: var(--gray-10);
-  box-shadow: 2px 0 6px rgba(0,48,135,.08);
-}
-thead th.col-day { min-width: 68px; }
-thead th.feriado-head { background: var(--c-feriado); color: var(--t-feriado); }
-thead th.licencia-head { background: var(--gray-10); color: var(--gray-50); opacity: .6; }
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px);}
+.modal-box{background:white;border-radius:var(--radius-lg);padding:24px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.modal-title{font-size:15px;font-weight:800;margin-bottom:4px;color:var(--text);}
+.modal-sub{font-size:11px;color:var(--muted);margin-bottom:16px;}
+.modal-roles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.modal-role-btn{padding:8px 10px;border-radius:9px;border:2px solid transparent;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;transition:.15s;text-align:left;}
+.modal-role-btn.selected{outline:3px solid var(--impulsa);outline-offset:1px;}
+.modal-actions{display:flex;gap:8px;}
 
-tbody tr { border-bottom: 1px solid var(--gray-10); }
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover td { background: #fafbff; }
-tbody td { padding: 5px 4px; text-align: center; vertical-align: middle; }
-tbody td.col-sup {
-  text-align: left;
-  padding: 8px 1.25rem;
-  font-weight: 500;
-  font-size: 13px;
-  white-space: nowrap;
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  background: var(--white);
-  box-shadow: 2px 0 6px rgba(0,48,135,.06);
-}
-tbody tr:hover td.col-sup { background: #fafbff; }
-tbody td.col-sup .initials {
-  display: inline-flex;
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  background: var(--blue-lt);
-  color: var(--blue);
-  font-size: 10px;
-  font-weight: 700;
-  align-items: center;
-  justify-content: center;
-  margin-right: 7px;
-  flex-shrink: 0;
-  vertical-align: middle;
-}
-.role-chip {
-  display: inline-block;
-  width: calc(100% - 4px);
-  padding: 6px 4px;
-  border-radius: 5px;
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 1.4;
-  cursor: pointer;
-  border: none;
-  transition: opacity .12s, transform .08s;
-  text-align: center;
-}
-.role-chip:hover { opacity: .82; transform: scale(.97); }
+/* ══════════════════════════════════════
+   SECCIÓN 2: DISTRIBUCIÓN ANUAL
+══════════════════════════════════════ */
+.da-table-wrap{overflow:auto;}
+.da-table{width:100%;border-collapse:collapse;min-width:600px;}
+.da-table th{background:var(--impulsa);color:white;padding:11px 14px;font-size:11px;font-weight:700;text-align:left;}
+.da-table td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:top;}
+.da-table tr:hover td{background:#fafbff;}
+.mes-num{font-size:10px;font-weight:800;color:var(--muted);width:28px;display:inline-block;}
+.mes-name{font-weight:700;font-size:12px;}
+.chip-da{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin:2px;}
+.chip-h{background:#e0f2f0;color:#00554e;}
+.chip-tc{background:#ede9fe;color:#4a537d;}
+.chip-ts{background:#fef3cd;color:#92610a;}
+.sel-da{border:1px solid var(--border);border-radius:8px;padding:5px 8px;font-family:inherit;font-size:11px;width:100%;background:white;color:var(--text);cursor:pointer;margin:2px 0;}
+.sel-h{border-color:#b2dfdb;background:#f0fdf9;}
+.sel-tc{border-color:#c4b5fd;background:#faf5ff;}
+.sel-ts{border-color:#fcd34d;background:#fffbeb;}
 
-.role-chip.guardia-a   { background: var(--c-guardia-a); color: var(--t-guardia-a); }
-.role-chip.guardia-b   { background: var(--c-guardia-b); color: var(--t-guardia-b); }
-.role-chip.bandeja     { background: var(--c-bandeja);   color: var(--t-bandeja); }
-.role-chip.kh          { background: var(--c-kh);        color: var(--t-kh); }
-.role-chip.entrena     { background: var(--c-entrena);   color: var(--t-entrena); }
-.role-chip.deslogueo-a { background: var(--c-deslogueo-a); color: var(--t-deslogueo-a); }
-.role-chip.deslogueo-b { background: var(--c-deslogueo-b); color: var(--t-deslogueo-b); }
-.role-chip.r7076       { background: var(--c-7076);      color: var(--t-7076); }
-.role-chip.solo7076    { background: var(--c-solo7076);  color: var(--t-solo7076); }
-.role-chip.subtareas   { background: var(--c-subtareas);  color: var(--t-subtareas); }
-.role-chip.des7076     { background: var(--c-des7076);    color: var(--t-des7076); }
-.role-chip.r7076des    { background: var(--c-7076des);    color: var(--t-7076des); }
-.role-chip.licencia    { background: var(--c-licencia);  color: var(--t-licencia); border: 1px dashed var(--gray-20); }
-.role-chip.feriado-cell { background: var(--c-feriado);  color: var(--t-feriado); opacity: .5; cursor: default; }
-td.feriado-col { background: #fffbeb; }
+.da-res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;}
+.da-res-card{background:white;border-radius:var(--radius);padding:12px 14px;box-shadow:var(--shadow);}
+.da-res-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.da-res-name{font-size:11px;font-weight:700;}
+.da-res-total{background:var(--impulsa-lt);color:var(--impulsa);padding:1px 7px;border-radius:20px;font-size:10px;font-weight:800;}
+.da-res-tags{display:flex;flex-wrap:wrap;gap:3px;}
+.tag{display:inline-block;padding:2px 6px;border-radius:6px;font-size:9px;font-weight:600;}
+.tag-h{background:#e0f2f0;color:#00554e;}
+.tag-tc{background:#ede9fe;color:#4a537d;}
+.tag-ts{background:#fef3cd;color:#92610a;}
 
-.summary-row td { 
-  background: var(--gray-10) !important; 
-  font-size: 10px; 
-  font-weight: 600; 
-  color: var(--gray-50);
-  padding: 5px 3px;
-  border-top: 1px solid var(--gray-20);
-}
-.summary-row td.col-sup {
-  padding-left: 1.25rem;
-  color: var(--gray-70);
-  font-size: 11px;
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  background: var(--gray-10) !important;
-  box-shadow: 2px 0 6px rgba(0,48,135,.06);
-}
+/* ══════════════════════════════════════
+   SECCIÓN 3: GUARDIAS SÁBADOS
+══════════════════════════════════════ */
+.sab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:20px;}
+.sab-card{background:white;border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);}
+.sab-card h3{font-size:12px;font-weight:700;color:var(--impulsa);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--avanza);}
+.guardia-item{display:grid;grid-template-columns:80px 1fr;align-items:center;padding:6px 0;border-bottom:1px solid #f5f5f5;}
+.guardia-item:last-child{border:none;}
+.fecha-lbl{font-size:10px;font-weight:700;color:var(--muted);}
+.sel-sup{background:#f8fafc;color:var(--impulsa);border:1px solid var(--border);padding:5px;border-radius:7px;font-size:11px;font-weight:600;width:100%;cursor:pointer;}
+.fer-table{width:100%;border-collapse:collapse;font-size:11px;}
+.fer-table th{background:var(--bg);color:var(--muted);padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:1px solid var(--border);}
+.fer-table td{padding:8px 10px;border-bottom:1px solid var(--border);}
+.fer-input{border:1px solid var(--border);padding:6px 8px;border-radius:7px;font-family:inherit;font-size:11px;width:100%;background:white;}
+.btn-del{background:var(--danger-lt);color:var(--danger);border:none;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:11px;}
+.sab-res-table{width:100%;border-collapse:collapse;font-size:11px;}
+.sab-res-table th{background:var(--impulsa);color:white;padding:9px 12px;text-align:left;font-size:10px;font-weight:700;}
+.sab-res-table td{padding:9px 12px;border-bottom:1px solid var(--border);}
+.sab-res-table .cnt{font-weight:800;color:var(--avanza);font-size:15px;text-align:center;}
+.sab-res-table .dates{font-size:10px;color:var(--muted);line-height:1.6;}
 
-/* ── Summary cards view ── */
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
-}
-.sup-card {
-  background: var(--white);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow);
-  padding: 1rem 1.1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.sup-card-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--gray-10);
-}
-.sup-avatar {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  background: var(--blue-lt);
-  color: var(--blue);
-  font-size: 12px;
-  font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.sup-name { font-size: 13px; font-weight: 600; color: var(--gray-90); line-height: 1.2; }
-.sup-days { font-size: 11px; color: var(--gray-50); }
-.role-bars { display: flex; flex-direction: column; gap: 5px; }
-.role-bar-row { display: flex; align-items: center; gap: 6px; font-size: 11px; }
-.role-bar-label { width: 90px; color: var(--gray-70); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
-.role-bar-track { flex: 1; height: 6px; background: var(--gray-10); border-radius: 3px; overflow: hidden; }
-.role-bar-fill { height: 100%; border-radius: 3px; }
-.role-bar-count { width: 16px; text-align: right; color: var(--gray-50); font-weight: 600; flex-shrink: 0; }
+/* ══════════════════════════════════════
+   SECCIÓN 4: PLANILLA HORARIOS
+══════════════════════════════════════ */
+.ph-wrap{overflow:auto;max-height:70vh;border-radius:var(--radius-lg);box-shadow:var(--shadow);}
+.ph-table{width:100%;border-collapse:collapse;min-width:900px;}
+.ph-table thead th{position:sticky;top:0;background:#f8fafc;z-index:25;padding:10px 8px;font-size:10px;font-weight:700;color:var(--impulsa);border-bottom:2px solid var(--border);text-align:center;}
+.ph-sticky{position:sticky;left:0;background:white;z-index:30;padding:12px 16px;width:220px;border-right:2px solid var(--border);}
+thead th.ph-sticky{z-index:40;background:#f8fafc;}
+.ph-sup-name{font-weight:700;font-size:12px;color:var(--impulsa);display:block;}
+.ph-dupla{font-size:10px;color:var(--muted);font-style:italic;margin-top:2px;}
+.ph-dupla-input{font-size:10px;color:var(--muted);font-style:italic;border:none;background:transparent;width:115px;cursor:pointer;outline:none;}
+.ph-dupla-input:focus{background:#f0fbf9;border-radius:4px;color:var(--text);font-style:normal;padding:1px 4px;}
+.ph-week-btns{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap;}
+.ph-wbtn{width:24px;height:24px;font-size:9px;border-radius:5px;border:1px solid var(--border);background:white;cursor:pointer;font-weight:600;}
+.ph-wbtn:hover{background:var(--impulsa);color:white;border-color:var(--impulsa);}
+.ph-wbtn-h{width:30px;height:20px;font-size:9px;border-radius:5px;border:1px solid var(--border);background:#f8f8f8;cursor:pointer;font-weight:600;color:var(--muted);}
+.ph-wbtn-h:hover{background:var(--impulsa);color:white;}
+.ph-wlbl{font-size:8px;color:var(--muted);width:100%;margin-top:3px;text-transform:uppercase;}
+.ph-table tbody td{padding:4px 5px;text-align:center;border-bottom:1px solid var(--border);}
+.ph-badge{width:82px;padding:5px 0;border-radius:7px;font-size:10px;font-weight:800;cursor:pointer;display:inline-block;text-align:center;}
+.bg-home{background:var(--conecta-lt);color:var(--conecta);}
+.bg-pres{background:var(--avanza-lt);color:#059669;}
+.bg-lic{background:var(--elite-lt);color:var(--elite);}
+.ph-time{width:82px;padding:4px 0;border-radius:6px;font-size:9px;font-weight:700;cursor:pointer;display:inline-block;text-align:center;background:var(--bg);color:var(--impulsa);border:1px solid var(--border);margin-top:3px;}
+.ph-foot td{background:var(--bg);font-size:10px;font-weight:700;padding:7px 5px;border-top:2px solid var(--border);text-align:center;}
+.ph-cnt-valid{background:#d1fae5;color:#065f46;padding:3px 8px;border-radius:6px;display:inline-block;}
+.ph-cnt-invalid{background:#fdeaea;color:var(--danger);padding:3px 8px;border-radius:6px;display:inline-block;}
+.ph-guards-table{width:100%;border-collapse:collapse;font-size:12px;}
+.ph-guards-table td{padding:10px 12px;border-bottom:1px solid var(--border);}
+.ph-guards-table td:first-child{font-weight:700;color:var(--impulsa);width:170px;}
+.ph-guards-table td[contenteditable]{outline:none;}
+.ph-guards-table td[contenteditable]:focus{background:#f0fdf9;border-radius:4px;}
 
-/* ── Weekly summary ── */
-.week-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{width:0;overflow:hidden;}
+  .sidebar.open{width:var(--sidebar-w);}
+  .main{margin-left:0;}
+  .mob-menu-btn{display:flex!important;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .sab-grid{grid-template-columns:1fr;}
 }
-.week-block {
-  background: var(--white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-.week-header {
-  background: var(--blue);
-  color: var(--white);
-  padding: .6rem 1.25rem;
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.week-header .badge {
-  background: rgba(255,255,255,.2);
-  border-radius: 20px;
-  padding: 2px 8px;
-  font-size: 11px;
-  font-weight: 500;
-}
+.mob-menu-btn{display:none;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-size:18px;flex-shrink:0;}
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;}
+.mob-overlay.open{display:block;}
 
-/* ── Modal ── */
-.modal-bg {
-  position: fixed; inset: 0;
-  background: rgba(0,10,40,.45);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 500;
-  animation: fadein .15s ease;
-}
-@keyframes fadein { from { opacity: 0 } to { opacity: 1 } }
-.modal {
-  background: var(--white);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  width: 340px;
-  max-width: 94vw;
-  overflow: hidden;
-  animation: slidein .18s ease;
-}
-@keyframes slidein { from { transform: translateY(10px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
-.modal-head {
-  background: var(--blue);
-  color: var(--white);
-  padding: 1rem 1.25rem;
-}
-.modal-head h3 { font-size: 15px; font-weight: 600; }
-.modal-head p { font-size: 12px; opacity: .7; margin-top: 2px; }
-.modal-body { padding: 1rem 1.25rem; }
-.modal-section { margin-bottom: .9rem; }
-.modal-section-label {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .07em;
-  color: var(--gray-50);
-  margin-bottom: 6px;
-}
-.role-picker {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 5px;
-}
-.role-option {
-  padding: 7px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 2px solid transparent;
-  text-align: center;
-  transition: all .12s;
-}
-.role-option:hover { filter: brightness(.93); }
-.role-option.sel { outline: 2.5px solid var(--blue); outline-offset: 1px; }
-.modal-footer {
-  padding: .9rem 1.25rem;
-  border-top: 1px solid var(--gray-10);
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-/* ── Alert bar ── */
-.alert-bar {
-  background: #fffbeb;
-  border: 1px solid #fcd34d;
-  border-radius: var(--radius-md);
-  padding: .7rem 1rem;
-  margin-top: 1rem;
-  font-size: 12px;
-  color: #92400e;
-  line-height: 1.5;
-}
-.alert-bar strong { font-weight: 600; }
-.ok-bar {
-  background: var(--green-lt);
-  border: 1px solid #6ee7b7;
-  border-radius: var(--radius-md);
-  padding: .6rem 1rem;
-  margin-top: 1rem;
-  font-size: 12px;
-  color: #065f46;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* ── Print ── */
-@media print {
-  .header, .controls, .info-banner, .legend-bar, .modal-bg { display: none !important; }
-  .page { padding: 0; }
-  .table-card { box-shadow: none; border: 1px solid #ddd; }
-  body { background: white; }
-}
-
-/* ── Responsive ── */
-@media (max-width: 900px) {
-  .page { padding: 1rem 1rem 2rem; max-width: 100%; }
-  .header { padding: 0 1rem; }
-  .header-title { font-size: 13px; }
-  .header-sub { font-size: 10px; }
-  .header-right { gap: 6px; }
-  .btn { padding: 5px 10px; font-size: 12px; }
-  .controls { gap: .6rem; padding: .75rem 1rem; flex-wrap: wrap; }
-  .divider { display: none; }
-  .spacer { display: none; }
-  .month-display { min-width: 110px; font-size: 14px; }
-  .info-banner { font-size: 11px; }
-  .legend-bar { gap: .4rem .75rem; }
-  .leg-pill { font-size: 10px; padding: 2px 6px; }
-  .summary-grid { grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 8px; }
-}
-
-@media (max-width: 600px) {
-  .page { padding: .75rem .5rem 2rem; }
-  .header { height: auto; padding: .6rem 1rem; flex-wrap: wrap; gap: 8px; }
-  .header-brand { gap: 8px; }
-  .header-logo { width: 28px; height: 28px; font-size: 12px; }
-  .header-title { font-size: 12px; }
-  .header-right { width: 100%; justify-content: flex-end; }
-  .controls { padding: .6rem .75rem; }
-  .offset-control { display: none; }  /* en mobile, offset se oculta */
-  .view-tabs { flex: 1; justify-content: center; }
-  .month-display { min-width: 90px; font-size: 13px; }
-  /* Tabla: chips más pequeños en móvil */
-  .role-chip { font-size: 9px; padding: 4px 2px; }
-  thead th.col-day { min-width: 54px; }
-  thead th.col-sup { min-width: 120px; }
-  tbody td.col-sup { padding: 6px .75rem; font-size: 11px; }
-  tbody td.col-sup .initials { width: 22px; height: 22px; font-size: 9px; margin-right: 5px; }
-  /* Summary cards */
-  .summary-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
-  .sup-card { padding: .75rem; }
-  .sup-name { font-size: 11px; }
-  .role-bar-label { width: 70px; font-size: 10px; }
-  /* Duplas banner */
-  #duplas-banner { flex-direction: column; align-items: flex-start; gap: 6px; }
+@media print{
+  .sidebar,.topbar,.mob-menu-btn,.btn,.no-print{display:none!important;}
+  .main{margin-left:0;}
+  .content{padding:0;}
+  .ph-wrap{max-height:none;overflow:visible;}
+  .chip{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .ph-badge{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header class="header">
-  <div class="header-brand">
-    <div class="header-logo">JS</div>
-    <div>
-      <div class="header-title">Rotación de Tareas Mensuales</div>
-      <div class="header-sub">Supervisores · Jerárquicos Salud</div>
-    </div>
-  </div>
-  <div class="header-right">
-    <span id="sync-indicator" style="font-size:11px;color:rgba(255,255,255,.65);display:flex;align-items:center;gap:5px;">
-      <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:#6ee7b7;display:inline-block;"></span>
-      <span id="sync-text">Sincronizado</span>
-    </span>
-    <button class="btn btn-green" onclick="exportCSV()">📄 Exportar PDF</button>
-    <button class="btn btn-primary" onclick="window.print()">⎙ Imprimir</button>
-  </div>
-</header>
+<!-- MOBILE OVERLAY -->
+<div class="mob-overlay" id="mob-overlay" onclick="closeSidebar()"></div>
 
-<!-- PAGE -->
-<main class="page">
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">JS</div>
+    <div class="sb-title">JS Operaciones</div>
+    <div class="sb-sub">Jerárquicos Salud</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section">Organización</div>
+    <button class="nav-item active" onclick="goTo('rotacion')" id="nav-rotacion">
+      <span class="ni-icon">📅</span> Rotación Diaria
+    </button>
+    <button class="nav-item" onclick="goTo('anual')" id="nav-anual">
+      <span class="ni-icon">📆</span> Distribución Anual
+    </button>
+    <button class="nav-item" onclick="goTo('sabados')" id="nav-sabados">
+      <span class="ni-icon">🛡️</span> Guardias Sábados
+    </button>
+    <button class="nav-item" onclick="goTo('horarios')" id="nav-horarios">
+      <span class="ni-icon">🕐</span> Planilla Horarios
+    </button>
+  </div>
+  <div class="sb-sync">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-text">Conectando...</span>
+  </div>
+</nav>
 
-  <!-- CONTROLS -->
-  <div class="controls">
-    <div class="month-nav">
-      <button class="nav-btn" onclick="changeMonth(-1)" title="Mes anterior">‹</button>
-      <div class="month-display" id="month-display"></div>
-      <button class="nav-btn" onclick="changeMonth(1)" title="Mes siguiente">›</button>
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="mob-menu-btn" onclick="openSidebar()">☰</button>
+    <div class="topbar-title" id="topbar-title">
+      Rotación Diaria
+      <small id="topbar-sub">Distribución mensual de tareas</small>
     </div>
-    <div class="divider"></div>
-    <div class="offset-control">
-      <label>Ajuste fino (posición +):</label>
-      <select id="offset-sel" onchange="render()">
-        <!-- populated by JS -->
-      </select>
-    </div>
-    <div class="divider"></div>
-    <div class="view-tabs">
-      <button class="view-tab active" id="tab-tabla" onclick="switchView('tabla',this)">Tabla</button>
-      <button class="view-tab" id="tab-semanal" onclick="switchView('semanal',this)">Semanal</button>
-      <button class="view-tab" id="tab-resumen" onclick="switchView('resumen',this)">Resumen</button>
-    </div>
-    <div class="spacer"></div>
-    <button class="btn" onclick="resetOverrides()" title="Eliminar todos los ajustes manuales">↺ Resetear ajustes</button>
+    <div id="topbar-actions" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"></div>
   </div>
 
-  <!-- INFO BANNER -->
-  <div class="info-banner">
-    <span class="icon">ℹ</span>
-    <div>
-      <strong>Rotación en cascada · Fair-Share por Rol + Cuotas + Anti-Consecutivos.</strong>
-      <strong>Guardias por mes (Jul→Dic):</strong> Duplas rotan mensualmente según calendario. La dupla 07-15 tiene más tareas diarias.
-      <strong>Distribución diaria:</strong> 1 KH+WSP · 1 Entrena2+WSP · 1 Bandejas · 2×Des+7076 · 2×Deslogueo+7076 · 2×7076 · 1×7076+Sub.
-      <strong>Equidad:</strong> Des+7076 y Deslogueo+7076 son iguales para los 12 supervisores. Dupla 07-15 recibe más KH, Entrena2, Bandejas, 7076, 7076+Sub.
-      <strong>Anti-consecutivos:</strong> máx. 2 días seguidos de cualquier tarea. Clic en celda para ajuste manual.
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══ SCREEN: ROTACIÓN ══ -->
+    <div class="screen active" id="screen-rotacion">
+      <div class="card">
+        <div class="card-header">
+          <div class="rot-controls">
+            <div class="month-nav">
+              <button class="nav-btn" onclick="rotChangeMonth(-1)">‹</button>
+              <div class="month-disp" id="rot-month-disp"></div>
+              <button class="nav-btn" onclick="rotChangeMonth(1)">›</button>
+            </div>
+            <div class="view-tabs">
+              <button class="view-tab active" onclick="rotSetView('tabla',this)">Tabla</button>
+              <button class="view-tab" onclick="rotSetView('semanal',this)">Semanal</button>
+              <button class="view-tab" onclick="rotSetView('resumen',this)">Resumen</button>
+            </div>
+            <button class="btn" onclick="rotResetOverrides()">↺ Resetear</button>
+            <button class="btn btn-primary" onclick="rotExportPDF()">📄 PDF</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0 0 16px;">
+          <div style="padding:16px 16px 8px;">
+            <div class="duplas-bar" id="rot-duplas-bar"></div>
+            <div class="legend-bar" id="rot-legend"></div>
+          </div>
+          <div id="rot-content" style="padding:0 16px;"></div>
+          <div id="rot-alerts" style="padding:0 16px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN: DISTRIBUCIÓN ANUAL ══ -->
+    <div class="screen" id="screen-anual">
+      <div class="card">
+        <div class="card-header">
+          <h2>Distribución Anual de Tareas</h2>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="number" id="da-year" value="2026" min="2026" max="2035" style="width:90px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-weight:700;font-size:13px;" onchange="daRender()">
+            <label style="font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="checkbox" id="da-edit-mode" onchange="daRender()" style="cursor:pointer;">
+              Modo edición
+            </label>
+            <button class="btn btn-primary" onclick="daSave()">💾 Guardar</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <div class="da-table-wrap">
+            <table class="da-table">
+              <thead>
+                <tr>
+                  <th style="width:120px;">Mes</th>
+                  <th style="background:#00554e;">🕐 Horarios Supervisores</th>
+                  <th style="background:#4a537d;">📋 Tareas Colaboradores</th>
+                  <th style="background:#92610a;">🎯 Tareas Supervisores</th>
+                </tr>
+              </thead>
+              <tbody id="da-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Resumen de carga anual</h2></div>
+        <div class="card-body">
+          <div class="da-res-grid" id="da-res-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN: GUARDIAS SÁBADOS ══ -->
+    <div class="screen" id="screen-sabados">
+      <div class="card">
+        <div class="card-header">
+          <h2>Guardias de Sábados</h2>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="number" id="sab-year" value="2026" min="2026" max="2035" style="width:90px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-weight:700;font-size:13px;" onchange="sabRender()">
+            <button class="btn btn-primary" onclick="sabSave()">💾 Guardar</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="sab-grid" id="sab-grid"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2>Feriados y Fines de Semana Largos</h2>
+          <button class="btn btn-primary" onclick="sabAddFeriado()">＋ Agregar feriado</button>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <div style="overflow-x:auto;">
+            <table class="fer-table">
+              <thead><tr><th>Día Feriado</th><th>Sábado de Guardia</th><th>Motivo</th><th>Responsable</th><th></th></tr></thead>
+              <tbody id="sab-fer-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Resumen de carga anual</h2></div>
+        <div class="card-body" style="padding:0;">
+          <div style="overflow-x:auto;">
+            <table class="sab-res-table">
+              <thead><tr><th>Supervisor</th><th style="width:80px;text-align:center;">Total</th><th>Fechas asignadas</th></tr></thead>
+              <tbody id="sab-res-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN: PLANILLA HORARIOS ══ -->
+    <div class="screen" id="screen-horarios">
+      <div class="card">
+        <div class="card-header">
+          <h2>Planilla de Horarios</h2>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="month" id="ph-month" value="2026-07" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:12px;" onchange="phRender()">
+            <button class="btn" onclick="phAutoAB()">⚡ Auto A/B</button>
+            <button class="btn btn-primary" onclick="phSave()">💾 Guardar</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <div class="ph-wrap">
+            <table class="ph-table" id="ph-table">
+              <thead><tr id="ph-header"><th class="ph-sticky">Supervisor / Dupla</th></tr></thead>
+              <tbody id="ph-body"></tbody>
+              <tfoot><tr id="ph-foot" class="ph-foot"><td class="ph-sticky" style="text-align:left;padding-left:16px;"><b>Presenciales (Meta: 6)</b></td></tr></tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" class="ph-bottom">
+        <div class="card">
+          <div class="card-header"><h2>Guardias Semanales</h2></div>
+          <div class="card-body" style="padding:0;">
+            <table class="ph-guards-table" id="ph-guards-table">
+              <tbody id="ph-guards-body">
+                <tr style="background:#f0fbf9;"><td>Apertura (07-15):</td><td contenteditable="true">Lumila Perri y David Leiva</td></tr>
+                <tr><td>Lunes:</td><td contenteditable="true">Martin Paraván y Marcos Cortella</td></tr>
+                <tr><td>Martes:</td><td contenteditable="true">Alejandra Sosa y Ximena Epelbaum</td></tr>
+                <tr><td>Miércoles:</td><td contenteditable="true">Gisela Spies y Victoria Palombizio</td></tr>
+                <tr><td>Jueves:</td><td contenteditable="true">Fabricio Figueroa y Jesica Carrasco</td></tr>
+                <tr><td>Viernes:</td><td contenteditable="true">Yanina Pacheco y Sol Celli</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2>Sábados del Mes</h2></div>
+          <div class="card-body" style="padding:0;">
+            <table class="ph-guards-table">
+              <thead style="background:var(--bg);"><tr><th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--muted);">FECHA</th><th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--muted);">RESPONSABLE</th></tr></thead>
+              <tbody id="ph-sab-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- MODAL ROTACIÓN -->
+<div class="modal-bg" id="rot-modal" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-title" id="rot-modal-title">Ajustar asignación</div>
+    <div class="modal-sub" id="rot-modal-sub"></div>
+    <div class="modal-roles" id="rot-modal-roles"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="rotSaveOverride()">Guardar</button>
+      <button class="btn" onclick="rotClearOverride()">Restaurar automático</button>
+      <button class="btn" onclick="rotCloseModal()">Cancelar</button>
     </div>
   </div>
-
-  <div class="legend-bar">
-    <span class="legend-title">Roles</span>
-    <div class="leg"><span class="leg-pill" style="background:var(--c-guardia-a);color:var(--t-guardia-a)">Guardia A</span></div>
-    <div class="leg"><span class="leg-pill" style="background:var(--c-guardia-b);color:var(--t-guardia-b)">Guardia B</span></div>
-    <div class="leg"><span class="leg-pill" style="background:var(--c-bandeja);color:var(--t-bandeja)">Bandejas</span> <small style="color:var(--gray-50);font-size:10px">1/día</small></div>
-    <div class="leg"><span class="leg-pill" style="background:var(--c-kh);color:var(--t-kh)">KH + WSP</span> <small style="color:var(--gray-50);font-size:10px">1/día · dupla 07-15</small></div>
-    <div class="leg"><span class="leg-pill" style="background:var(--c-entrena);color:var(--t-entrena)">Entrena2 + WSP</span> <small style="color:var(--gray-50);font-size:10px">1/día · dupla 07-15</small></div>
-    <div class="leg"><span class="leg-pill" style="background:var(--c-7076);color:var(--t-7076)">7076 + Subtareas</span> <small style="color:var(--gray-50);font-size:10px">1/día</small></div>
-    <div class="leg"><span class="leg-pill" style="background:var(--c-solo7076);color:var(--t-solo7076)">7076</span> <small style="color:var(--gray-50);font-size:10px">2/día</small></div>
-    <div class="leg"><span class="leg-pill" style="background:var(--c-des7076);color:var(--t-des7076)">Deslogueo + 7076</span></div>
-    <div class="leg"><span class="leg-pill" style="background:var(--c-7076des);color:var(--t-7076des)">7076 + Deslogueo</span></div>
-    <div class="leg"><span class="leg-pill" style="background:var(--c-licencia);color:var(--t-licencia);border:1px dashed var(--gray-20)">Licencia</span></div>
-  </div>
-
-  <!-- MAIN CONTENT -->
-  <div id="main-content"></div>
-
-</main>
-
-<!-- MODAL CONTAINER -->
-<div id="modal-root"></div>
+</div>
 
 <script>
-// ═══════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════
-const SUPERVISORS = [
-  'Sol Celli','Lumila Perri','Alejandra Sosa','Victoria Palombizio',
-  'David Leiva','Ximena Epelbaum','Fabricio Figueroa','Jesica Carrasco',
-  'Yanina Pacheco','Marcos Cortella','Gisela Spies','Martin Paravan'
-];
-
-const ROLES = [
-  { id:'guardia-a', label:'Guardia A',         cls:'guardia-a',  bg:'var(--c-guardia-a)',  fg:'var(--t-guardia-a)',  group:'base' },
-  { id:'guardia-b', label:'Guardia B',         cls:'guardia-b',  bg:'var(--c-guardia-b)',  fg:'var(--t-guardia-b)',  group:'base' },
-  { id:'bandeja',   label:'Bandejas',           cls:'bandeja',    bg:'var(--c-bandeja)',    fg:'var(--t-bandeja)',    group:'base' },
-  { id:'kh',        label:'KH + WSP',          cls:'kh',         bg:'var(--c-kh)',         fg:'var(--t-kh)',         group:'base' },
-  { id:'entrena',   label:'Entrena2 + WSP',    cls:'entrena',    bg:'var(--c-entrena)',    fg:'var(--t-entrena)',    group:'base' },
-  { id:'r7076',     label:'7076 + Subtareas',  cls:'r7076',      bg:'var(--c-7076)',       fg:'var(--t-7076)',       group:'linea' },
-  { id:'solo7076',  label:'7076',              cls:'solo7076',   bg:'var(--c-solo7076)',   fg:'var(--t-solo7076)',   group:'linea' },
-  { id:'des7076',   label:'Deslogueo + 7076',  cls:'des7076',    bg:'var(--c-des7076)',    fg:'var(--t-des7076)',    group:'linea' },
-  { id:'r7076des',  label:'7076 + Deslogueo',  cls:'r7076des',   bg:'var(--c-7076des)',    fg:'var(--t-7076des)',    group:'linea' },
-  { id:'licencia',  label:'Licencia',          cls:'licencia',   bg:'var(--c-licencia)',   fg:'var(--t-licencia)',   group:'extra' },
-];
-
-// Roles visibles en resumen y tabla de equidad
-const ROLE_IDS = ['guardia-a','guardia-b','bandeja','kh','entrena','r7076','solo7076','des7076','r7076des'];
-const MESES       = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const DIAS_CORTO  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-
-// ── Supabase ──────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════════════════════════
 const SB_URL = 'https://vadqwxrbonrbohvbeqdo.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhZHF3eHJib25yYm9odmJlcWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MDc5ODUsImV4cCI6MjA5NzM4Mzk4NX0.Z9RATLBJ2UKY-TydxtTP1JWlvRgkSsIK9kEAOjrmyy0';
-const sbH = () => ({ 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' });
+const sbH = () => ({'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'});
+
+async function sbGet(table, params='') {
+  try { const r = await fetch(SB_URL+'/rest/v1/'+table+params,{headers:sbH()}); return await r.json(); }
+  catch(e) { return null; }
+}
+async function sbUpsert(table, body) {
+  try {
+    const r = await fetch(SB_URL+'/rest/v1/'+table, {
+      method:'POST', headers:{...sbH(),'Prefer':'resolution=merge-duplicates'}, body:JSON.stringify(body)
+    });
+    return r.ok;
+  } catch(e) { return false; }
+}
+async function sbDelete(table, params) {
+  try { const r = await fetch(SB_URL+'/rest/v1/'+table+params,{method:'DELETE',headers:sbH()}); return r.ok; }
+  catch(e) { return false; }
+}
 
 function setSyncStatus(status) {
-  const dot  = document.getElementById('sync-dot');
-  const text = document.getElementById('sync-text');
-  if (!dot || !text) return;
-  if (status === 'saving') { dot.style.background = '#fcd34d'; text.textContent = 'Guardando...'; }
-  else if (status === 'ok') { dot.style.background = '#6ee7b7'; text.textContent = 'Sincronizado'; }
-  else { dot.style.background = '#f87171'; text.textContent = 'Sin conexión'; }
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-text');
+  if (!dot) return;
+  const map = {saving:['#fcd34d','Guardando...'], ok:['#6ee7b7','Sincronizado'], error:['#f87171','Sin conexión'], loading:['#93c5fd','Cargando...']};
+  const [c,t] = map[status] || map.ok;
+  dot.style.background = c; txt.textContent = t;
 }
 
-async function sbLoadOverrides() {
-  try {
-    const r = await fetch(SB_URL + '/rest/v1/rotacion_overrides?select=key,role_id', { headers: sbH() });
-    const rows = await r.json();
-    if (Array.isArray(rows)) {
-      overrides = {};
-      rows.forEach(row => { overrides[row.key] = row.role_id; });
-    }
-  } catch(e) { console.warn('No se pudo cargar overrides de Supabase:', e); }
+// ═══════════════════════════════════════════════════════════════
+// DATOS GLOBALES
+// ═══════════════════════════════════════════════════════════════
+const SUPERVISORS = ['Sol Celli','Lumila Perri','Alejandra Sosa','Victoria Palombizio','David Leiva','Ximena Epelbaum','Fabricio Figueroa','Jesica Carrasco','Yanina Pacheco','Marcos Cortella','Gisela Spies','Martin Paravan'];
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIAS_CORTO = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+// ═══════════════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ═══════════════════════════════════════════════════════════════
+const SCREENS = {
+  rotacion: {title:'Rotación Diaria', sub:'Distribución mensual de tareas'},
+  anual:    {title:'Distribución Anual', sub:'Asignación de roles por mes'},
+  sabados:  {title:'Guardias Sábados', sub:'Planificación anual de guardias'},
+  horarios: {title:'Planilla de Horarios', sub:'Gestión mensual de presencialidad'},
+};
+let currentScreen = 'rotacion';
+
+function goTo(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('screen-'+screen).classList.add('active');
+  document.getElementById('nav-'+screen).classList.add('active');
+  const info = SCREENS[screen];
+  document.getElementById('topbar-title').firstChild.textContent = info.title;
+  document.getElementById('topbar-sub').textContent = info.sub;
+  currentScreen = screen;
+  closeSidebar();
+  if (screen === 'anual')   daRender();
+  if (screen === 'sabados') sabRender();
+  if (screen === 'horarios') phRender();
 }
+function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('mob-overlay').classList.add('open'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('mob-overlay').classList.remove('open'); }
 
-async function sbSaveOverride(key, roleId) {
-  setSyncStatus('saving');
-  try {
-    await fetch(SB_URL + '/rest/v1/rotacion_overrides', {
-      method: 'POST',
-      headers: { ...sbH(), 'Prefer': 'resolution=merge-duplicates' },
-      body: JSON.stringify({ key, role_id: roleId, updated_at: new Date().toISOString() })
-    });
-    setSyncStatus('ok');
-  } catch(e) { setSyncStatus('error'); console.warn('Error guardando override:', e); }
-}
-
-async function sbDeleteOverride(key) {
-  try {
-    await fetch(SB_URL + '/rest/v1/rotacion_overrides?key=eq.' + encodeURIComponent(key), {
-      method: 'DELETE',
-      headers: sbH()
-    });
-  } catch(e) { console.warn('Error eliminando override:', e); }
-}
-
-async function sbClearAllOverrides() {
-  try {
-    await fetch(SB_URL + '/rest/v1/rotacion_overrides?id=gt.0', {
-      method: 'DELETE',
-      headers: sbH()
-    });
-  } catch(e) { console.warn('Error limpiando overrides:', e); }
-}
-
-// STATE
-let currentYear  = 2026;
-let currentMonth = 5; // 0-indexed
-let currentView  = 'tabla';
-let overrides    = {}; // key: "sup|YYYY-MM-DD" => roleId — sincronizado con Supabase
-
-// ═══════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════
-function getWorkDays(y, m) {
-  const days = [];
-  const d = new Date(y, m, 1);
-  // Avanzar hasta el primer lunes del mes
-  while (d.getDay() !== 1) {
-    d.setDate(d.getDate() + 1);
-    // Si nos pasamos de mes (mes que empieza en sábado/domingo y el lunes es del mes siguiente)
-    if (d.getMonth() !== m) break;
-  }
-  while (d.getMonth() === m) {
-    if (d.getDay() !== 0 && d.getDay() !== 6) days.push(new Date(d));
-    d.setDate(d.getDate() + 1);
-  }
-  return days;
-}
-
-function isHoliday(d) {
-  // Argentina: feriados nacionales hardcoded para 2026 (ampliable)
-  const holidays = ['2026-06-15','2026-07-09','2026-08-17','2026-10-12','2026-11-23','2026-12-08','2026-12-25'];
-  return holidays.includes(fmtDate(d));
-}
-
-function fmtDate(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function fmtDisp(d) { return `${DIAS_CORTO[d.getDay()]} ${d.getDate()}`; }
-function initials(name) { return name.split(' ').slice(0,2).map(w=>w[0]).join(''); }
-function okey(sup, date) { return `${sup}|${date}`; }
-
-function getOffset() { return parseInt(document.getElementById('offset-sel').value) || 0; }
-
-// ─────────────────────────────────────────────────────────────────
-// SISTEMA DE DUPLAS MENSUALES ROTANTES (Jul 2026 → Dic 2026)
-// Rotación: cada mes, viernes→07-15, 07-15→lunes, lunes→martes...
-//
-// Julio base:
-//   07-15:  Lumi + David
-//   Lunes:  Martin + Marcos
-//   Martes: Ale + Xime
-//   Mierc:  Gise + Vico
-//   Jueves: Fabri + Jesi
-//   Viernes:Yani + Sol
-//
-// Orden de rotación de posiciones (0=07-15,1=Lun,2=Mar,3=Mié,4=Jue,5=Vie):
-//   Cada mes: posición[n] = posición base[(n + mes_offset) % 6]
-// ─────────────────────────────────────────────────────────────────
-
-// Duplas base (en orden): [07-15, Lun, Mar, Mié, Jue, Vie]
-const DUPLAS_BASE = [
-  ['Lumila Perri',      'David Leiva'],        // 0: 07-15 en Julio
-  ['Martin Paravan',    'Marcos Cortella'],     // 1: Lun en Julio
-  ['Alejandra Sosa',    'Ximena Epelbaum'],     // 2: Mar en Julio
-  ['Gisela Spies',      'Victoria Palombizio'], // 3: Mié en Julio
-  ['Fabricio Figueroa', 'Jesica Carrasco'],     // 4: Jue en Julio
-  ['Yanina Pacheco',    'Sol Celli'],           // 5: Vie en Julio
+// ═══════════════════════════════════════════════════════════════
+// ══ MÓDULO 1: ROTACIÓN DIARIA ══
+// ═══════════════════════════════════════════════════════════════
+const ROLES = [
+  {id:'guardia-a',label:'Guardia A',   cls:'guardia-a', bg:'#dbeafe',fg:'#1e3a8a'},
+  {id:'guardia-b',label:'Guardia B',   cls:'guardia-b', bg:'#bfdbfe',fg:'#1e3a8a'},
+  {id:'bandeja',  label:'Bandejas',    cls:'bandeja',   bg:'#d1fae5',fg:'#064e3b'},
+  {id:'kh',       label:'KH + WSP',    cls:'kh',        bg:'#ede9fe',fg:'#3b0764'},
+  {id:'entrena',  label:'Entrena2+WSP',cls:'entrena',   bg:'#fce7f3',fg:'#831843'},
+  {id:'r7076',    label:'7076+Sub',    cls:'r7076',     bg:'#e0f2fe',fg:'#075985'},
+  {id:'solo7076', label:'7076',        cls:'solo7076',  bg:'#bae6fd',fg:'#0c4a6e'},
+  {id:'des7076',  label:'Des+7076',    cls:'des7076',   bg:'#fef9c3',fg:'#713f12'},
+  {id:'r7076des', label:'7076+Des',    cls:'r7076des',  bg:'#fde68a',fg:'#92400e'},
+  {id:'licencia', label:'Licencia',    cls:'licencia',  bg:'#f1f5f9',fg:'#64748b'},
 ];
-
-// Julio = mes 6 (0-indexed). Para cada mes, calcular offset respecto a Julio.
-// La rotación es: cada mes, el horario 07-15 pasa a Lunes, Lun→Mar...Vie→07-15
-// Es decir, las posiciones rotan: 07-15 <- Vie <- Jue <- Mié <- Mar <- Lun <- 07-15
-// En términos de duplas: cada mes, la dupla que estaba en posición P va a posición (P+1)%6
-// Así en Julio (offset 0): dupla 0 → pos 07-15, dupla 1 → Lun, etc.
-// En Agosto (offset 1): dupla 5 → pos 07-15, dupla 0 → Lun, dupla 1 → Mar, etc.
-// => posición_idx para una dupla D en mes_offset M: posición = (D - M + 6) % 6... 
-// Más simple: para mes offset M, la posición P tiene la dupla índice (P + M) % 6
-
-function getDuplasForMonth(year, month) {
-  // Offset respecto a Julio 2026 (mes 6)
-  const julioRef = (2026 - year) * 12 + 6; 
-  const offset   = ((month - 6) - (year - 2026) * 12); // meses desde Julio
-  // Normalizar offset (puede ser negativo si el mes es antes de Julio)
-  const off = ((offset % 6) + 6) % 6;
-
-  // Para cada posición (0=07-15, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie)
-  // La dupla asignada es DUPLAS_BASE[(posición + off) % 6]
-  // off=0 → Julio, off=1 → Agosto, etc.
-  
-  // Retorna: { '07-15': [sup1, sup2], 1: [sup1, sup2], 2: ..., 3:..., 4:..., 5:... }
-  const result = {};
-  // Posición 0 → 07-15 (sin guardia en sala, hace más tareas)
-  result['0715'] = DUPLAS_BASE[(0 + off) % 6];
-  // Posiciones 1-5 → Lun-Vie (guardia en sala)
-  for (let dow = 1; dow <= 5; dow++) {
-    result[dow] = DUPLAS_BASE[(dow + off) % 6];
-  }
-  return result;
-}
-
-function getGuardiaDupla(dow, year, month) {
-  const duplas = getDuplasForMonth(year, month);
-  return duplas[dow] || [];
-}
-
-function getDupla0715(year, month) {
-  return getDuplasForMonth(year, month)['0715'] || [];
-}
-
-// ═══════════════════════════════════════════
-// CALENDARIO DIARIO
-// Cada día hábil asigna a los 12 supervisores:
-//   2 → Guardia A/B  (fijas por dupla del día)
-//   1 → Bandeja      (1 por día, rotativo)
-//   1 → KH + WSP     (1 por día, rotativo)
-//   1 → Entrena2     (1 por día, rotativo)
-//   7 → 7076 (subtareas · des+7076 · 7076+des en cascada equitativa)
-// Sin deslogueo puro — eliminado.
-// ═══════════════════════════════════════════
-
-const _dailyCache = {};
-
-// Roles únicos: exactamente 1 por día, asignado en rotación entre los 10 no-guardia
-// ══════════════════════════════════════════════════════════════════
-// MOTOR DE ROTACIÓN — Cascada Fair-Share por Rol + Anti-Consecutivos
-//
-// Objetivo:
-//   • Todos los supervisores rotan por todos los roles (cascada real).
-//   • Deuda por rol: cada día en pool sin recibir el rol R → deuda[R]++.
-//     Cuando lo recibe → deuda[R] -= (nRoles-1). Así converge a equidad.
-//   • Distribución diaria garantizada:
-//       2 guardia · 1 bandeja · 1 kh · 1 entrena
-//       3 r7076 · 2 des7076 · 2 r7076des
-//   • Cuotas mensuales para Lumila y Yanina (sin guardia):
-//       des7076  ≤ 3    r7076des ≤ 3
-//     Para supervisores con guardia:
-//       des7076  ≤ 5    r7076des ≤ 5
-//   • Anti-consecutivos (best-effort): máx 2 días seguidos de
-//       r7076, bandeja, kh, entrena.
-//   • Los slots de cap se asignan PRIMERO (cuando hay más candidatos
-//     disponibles) para que las cuotas se respeten mejor.
-//   • La deuda acumula mes a mes → equidad continua todo el año.
-// ══════════════════════════════════════════════════════════════════
-
-const ANTI_CONSEC_ROLES = new Set(['r7076', 'solo7076', 'bandeja', 'kh', 'entrena', 'des7076', 'r7076des']);
-const ALL_TASK_ROLES    = ['bandeja','kh','entrena','r7076','solo7076','des7076','r7076des'];
-
-// ── Grupos anti-consecutivo ───────────────────────────────────
-// TAREAS: bandeja, kh, entrena  → máx 2 días seguidos en el grupo
-// LINEA:  r7076, solo7076, des7076, r7076des → máx 2 días seguidos en el grupo
-const GRUPO_TAREAS     = new Set(['bandeja','kh','entrena']);
-const GRUPO_LINEA      = new Set(['r7076','solo7076','des7076','r7076des']);
+const ALL_TASK_ROLES = ['bandeja','kh','entrena','r7076','solo7076','des7076','r7076des'];
+const ANTI_CONSEC_ROLES = new Set(ALL_TASK_ROLES);
+const GRUPO_TAREAS = new Set(['bandeja','kh','entrena']);
+const GRUPO_LINEA  = new Set(['r7076','solo7076','des7076','r7076des']);
 const MAX_CONSEC_ROL   = 2;
 const MAX_CONSEC_GRUPO = 2;
+const DAILY_SLOTS = ['des7076','des7076','r7076des','r7076des','solo7076','solo7076','r7076','bandeja','kh','entrena'];
 
-function getGrupo(roleId) {
-  if (GRUPO_TAREAS.has(roleId)) return 'tareas';
-  if (GRUPO_LINEA.has(roleId))  return 'linea';
-  return null;
-}
-
-// ORDEN DE ASIGNACIÓN:
-// Los slots "extras" (bandeja/kh/entrena/solo7076/r7076) van primero
-// con filtro que prioriza la dupla 07-15. Luego des7076/r7076des para el pool general.
-// Slots diarios: 10 asignaciones para los 10 supervisores disponibles (pool sin guardia hoy)
-// des7076/r7076des PRIMERO → cuando hay más candidatos → el cap actúa antes de agotar el pool
-// Luego los demás roles en orden de deuda fair-share
-const DAILY_SLOTS = [
-  'des7076','des7076','r7076des','r7076des',
-  'solo7076','solo7076','r7076',
-  'bandeja','kh','entrena',
+const DUPLAS_BASE = [
+  ['Lumila Perri','David Leiva'],
+  ['Martin Paravan','Marcos Cortella'],
+  ['Alejandra Sosa','Ximena Epelbaum'],
+  ['Gisela Spies','Victoria Palombizio'],
+  ['Fabricio Figueroa','Jesica Carrasco'],
+  ['Yanina Pacheco','Sol Celli'],
 ];
 
-function monthlyCap(sup, roleId, workdaysCount) {
-  if (roleId === 'des7076' || roleId === 'r7076des') {
-    // Equidad perfecta: floor/ceil de (dias*2)/12
-    return Math.ceil((workdaysCount * 2) / 12);
-  }
+function getDuplasForMonth(year, month) {
+  const off = (((month - 6) + (year - 2026)*12) % 6 + 6) % 6;
+  const result = {};
+  result['0715'] = DUPLAS_BASE[(0 + off) % 6];
+  for (let dow = 1; dow <= 5; dow++) result[dow] = DUPLAS_BASE[(dow + off) % 6];
+  return result;
+}
+function getGuardiaDupla(dow, year, month) { return getDuplasForMonth(year,month)[dow] || []; }
+function getDupla0715(year, month) { return getDuplasForMonth(year,month)['0715'] || []; }
+function getGrupo(rid) { if(GRUPO_TAREAS.has(rid))return'tareas'; if(GRUPO_LINEA.has(rid))return'linea'; return null; }
+
+function monthlyCap(rid, wdCount) {
+  if (rid==='des7076'||rid==='r7076des') return Math.ceil((wdCount*2)/12);
   return 999;
 }
 
-function buildDailyCal(year, month) {
+function getWorkDays(y, m) {
+  const days = [];
+  const d = new Date(y, m, 1);
+  while (d.getDay() !== 1) { d.setDate(d.getDate()+1); if(d.getMonth()!==m)break; }
+  while (d.getMonth() === m) { if(d.getDay()!==0&&d.getDay()!==6) days.push(new Date(d)); d.setDate(d.getDate()+1); }
+  return days;
+}
+
+const HOLIDAYS_2026 = ['2026-01-01','2026-03-03','2026-03-04','2026-03-24','2026-04-02','2026-04-03','2026-04-06','2026-05-01','2026-05-25','2026-06-15','2026-06-19','2026-07-09','2026-08-17','2026-10-09','2026-10-12','2026-11-20','2026-12-08','2026-12-25'];
+function isHoliday(d) { return HOLIDAYS_2026.includes(fmtDate(d)); }
+function fmtDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function fmtDisp(d)  { return `${DIAS_CORTO[d.getDay()]} ${d.getDate()}`; }
+
+let rotYear=2026, rotMonth=6;
+let rotOverrides = {};
+let rotCalCache  = {};
+let rotView      = 'tabla';
+let rotModalSup=null, rotModalDate=null, rotSelectedRole=null;
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function buildRotCal(year, month) {
   const key = `${year}-${month}`;
-  if (_dailyCache[key]) return _dailyCache[key];
-
-  const manualOff = getOffset();
-
-  // Cada mes arranca con deuda y consecutivos en cero.
-  // La equidad se logra dentro del mes, no acumulando entre meses.
-  const roleDeuda   = {};
-  const consec      = {};
-  const consecGrupo = {};
-  SUPERVISORS.forEach(s => {
-    roleDeuda[s]   = {};
-    consec[s]      = {};
-    consecGrupo[s] = { tareas: 0, linea: 0 };
-    ALL_TASK_ROLES.forEach(r => { roleDeuda[s][r] = 0; consec[s][r] = 0; });
-  });
-
+  if (rotCalCache[key]) return rotCalCache[key];
+  const workdays = getWorkDays(year, month).filter(d=>!isHoliday(d));
+  const wdCount  = workdays.length;
+  const mc = {}; const consec = {}; const consecGrupo = {};
+  SUPERVISORS.forEach(s=>{mc[s]={};consec[s]={};consecGrupo[s]={tareas:0,linea:0};ALL_TASK_ROLES.forEach(r=>{mc[s][r]=0;consec[s][r]=0;});});
+  const lastDes = {}; const COOLDOWN = 3;
+  SUPERVISORS.forEach(s=>{lastDes[s]={};ALL_TASK_ROLES.forEach(r=>lastDes[s][r]=-99);});
+  const roleDeuda = {}; SUPERVISORS.forEach(s=>{roleDeuda[s]={};ALL_TASK_ROLES.forEach(r=>roleDeuda[s][r]=0);});
   const calendar = {};
-  _runMonth(year, month, roleDeuda, consec, consecGrupo, calendar, manualOff);
 
-  _dailyCache[key] = calendar;
+  workdays.forEach((day,dayIdx)=>{
+    const fd=fmtDate(day), dow=day.getDay();
+    const duplaSala=getGuardiaDupla(dow,year,month);
+    const dayAssign={};
+    duplaSala.forEach((s,gi)=>{dayAssign[s]=gi===0?'guardia-a':'guardia-b';});
+
+    // Check overrides
+    const pool=SUPERVISORS.filter(s=>!duplaSala.includes(s));
+    const poolOff=[...pool];
+    const assignedToday=new Set();
+
+    DAILY_SLOTS.forEach(rid=>{
+      let cands=poolOff.filter(s=>!assignedToday.has(s));
+      if(ANTI_CONSEC_ROLES.has(rid)){const nc=cands.filter(s=>(consec[s][rid]||0)<MAX_CONSEC_ROL);if(nc.length)cands=nc;}
+      const grupo=getGrupo(rid);
+      if(grupo){const ng=cands.filter(s=>(consecGrupo[s][grupo]||0)<MAX_CONSEC_GRUPO);if(ng.length)cands=ng;}
+      if(rid==='des7076'||rid==='r7076des'){const sp=cands.filter(s=>(dayIdx-lastDes[s][rid])>=COOLDOWN);if(sp.length)cands=sp;}
+      const cap=monthlyCap(rid,wdCount);
+      if(cap<999){const uc=cands.filter(s=>mc[s][rid]<cap);if(uc.length)cands=uc;}
+      cands.sort((a,b)=>{const dr=roleDeuda[b][rid]-roleDeuda[a][rid];if(dr!==0)return dr;const dt=ALL_TASK_ROLES.reduce((ac,r)=>ac+roleDeuda[b][r]-roleDeuda[a][r],0);return dt!==0?dt:poolOff.indexOf(a)-poolOff.indexOf(b);});
+      const chosen=cands[0];
+      dayAssign[chosen]=rid; assignedToday.add(chosen); mc[chosen][rid]++;
+      if(rid==='des7076'||rid==='r7076des') lastDes[chosen][rid]=dayIdx;
+    });
+
+    SUPERVISORS.forEach(s=>{
+      const role=dayAssign[s];
+      const isG=role==='guardia-a'||role==='guardia-b';
+      if(!isG&&role){ALL_TASK_ROLES.forEach(r=>{roleDeuda[s][r]=role===r?roleDeuda[s][r]-(ALL_TASK_ROLES.length-1):roleDeuda[s][r]+1;});}
+      ALL_TASK_ROLES.forEach(r=>{consec[s][r]=(role===r)?(consec[s][r]||0)+1:0;});
+      const gh=getGrupo(role);
+      consecGrupo[s].tareas=(gh==='tareas')?(consecGrupo[s].tareas||0)+1:0;
+      consecGrupo[s].linea=(gh==='linea')?(consecGrupo[s].linea||0)+1:0;
+    });
+    calendar[fd]=dayAssign;
+  });
+  rotCalCache[key]=calendar;
   return calendar;
 }
 
-function _runMonth(year, month, roleDeuda, consec, consecGrupo, calendar, manualOff) {
-  const workdays  = getWorkDays(year, month).filter(d => !isHoliday(d));
-  const nRoles    = ALL_TASK_ROLES.length;
-  const wdCount   = workdays.length;
-
-  // Cap mensual para des7076/r7076des — equidad exacta entre los 12
-  const capDes = Math.ceil((wdCount * 2) / 12);
-
-  // Contadores mensuales
-  const mc = {};
-  // Cooldown: días desde la última vez que se asignó des7076 o r7076des a cada supervisor
-  // Mínimo 3 días hábiles entre asignaciones del mismo rol (espaciado)
-  const lastDes = {};  // lastDes[sup][rid] = índice del día en workdays
-  const COOLDOWN_DES = 3; // días hábiles mínimos entre des7076/r7076des del mismo supervisor
-  SUPERVISORS.forEach(s => {
-    mc[s] = {};
-    lastDes[s] = {};
-    ALL_TASK_ROLES.forEach(r => { mc[s][r] = 0; lastDes[s][r] = -99; });
-  });
-
-  workdays.forEach((day, dayIdx) => {
-    const fd  = fmtDate(day);
-    const dow = day.getDay();
-
-    // Dupla con guardia en sala hoy (reciben guardia-a / guardia-b)
-    const duplaSala = getGuardiaDupla(dow, year, month);
-    const dayAssign = {};
-    duplaSala.forEach((s, gi) => { dayAssign[s] = gi === 0 ? 'guardia-a' : 'guardia-b'; });
-
-    // Pool disponible = todos menos los 2 de guardia en sala hoy
-    const pool = SUPERVISORS.filter(s => !duplaSala.includes(s));
-    const off  = ((manualOff % pool.length) + pool.length) % pool.length;
-    const poolOff = [...pool.slice(off), ...pool.slice(0, off)];
-
-    const assignedToday = new Set();
-
-    DAILY_SLOTS.forEach(rid => {
-      // Todos en el pool son candidatos — sin priorizar a nadie por horario
-      let cands = poolOff.filter(s => !assignedToday.has(s));
-
-      // ── Anti-consecutivos HARD por ROL: máx 2 días seguidos del mismo rol ──
-      if (ANTI_CONSEC_ROLES.has(rid)) {
-        const noConsec = cands.filter(s => (consec[s][rid] || 0) < MAX_CONSEC_ROL);
-        if (noConsec.length > 0) cands = noConsec;
-      }
-
-      // ── Anti-consecutivos HARD por GRUPO: máx 2 días seguidos en TAREAS o LINEA ──
-      const grupo = getGrupo(rid);
-      if (grupo) {
-        const noGrupo = cands.filter(s => (consecGrupo[s][grupo] || 0) < MAX_CONSEC_GRUPO);
-        if (noGrupo.length > 0) cands = noGrupo;
-      }
-
-      // ── Espaciado mínimo para des7076 y r7076des (cooldown entre asignaciones) ──
-      if (rid === 'des7076' || rid === 'r7076des') {
-        const spaced = cands.filter(s => (dayIdx - lastDes[s][rid]) >= COOLDOWN_DES);
-        if (spaced.length > 0) cands = spaced;
-      }
-
-      // ── Cuota mensual para des7076/r7076des (equidad exacta entre 12) ──
-      if (rid === 'des7076' || rid === 'r7076des') {
-        const underCap = cands.filter(s => mc[s][rid] < capDes);
-        if (underCap.length > 0) cands = underCap;
-      }
-
-      // ── Fair-share: mayor deuda acumulada para este rol ──
-      cands.sort((a, b) => {
-        const dr = roleDeuda[b][rid] - roleDeuda[a][rid];
-        if (dr !== 0) return dr;
-        // Desempate: deuda total
-        const dt = ALL_TASK_ROLES.reduce((acc, r) => acc + roleDeuda[b][r] - roleDeuda[a][r], 0);
-        if (dt !== 0) return dt;
-        // Desempate final: posición en pool
-        return poolOff.indexOf(a) - poolOff.indexOf(b);
-      });
-
-      const chosen = cands[0];
-      dayAssign[chosen] = rid;
-      assignedToday.add(chosen);
-      mc[chosen][rid]++;
-      // Registrar cooldown
-      if (rid === 'des7076' || rid === 'r7076des') {
-        lastDes[chosen][rid] = dayIdx;
-      }
-    });
-
-    // ── Actualizar deuda y contadores consecutivos ──
-    SUPERVISORS.forEach(s => {
-      const role    = dayAssign[s];
-      const isGuard = role === 'guardia-a' || role === 'guardia-b';
-
-      // Solo actualizamos deuda de tareas (no de guardia)
-      if (!isGuard && role) {
-        ALL_TASK_ROLES.forEach(r => {
-          roleDeuda[s][r] = (role === r)
-            ? roleDeuda[s][r] - (nRoles - 1)
-            : roleDeuda[s][r] + 1;
-        });
-      }
-
-      // Consecutivos por rol
-      ALL_TASK_ROLES.forEach(r => {
-        consec[s][r] = (role === r) ? (consec[s][r] || 0) + 1 : 0;
-      });
-
-      // Consecutivos por grupo
-      const grupoHoy = getGrupo(role);
-      consecGrupo[s].tareas = (grupoHoy === 'tareas') ? (consecGrupo[s].tareas || 0) + 1 : 0;
-      consecGrupo[s].linea  = (grupoHoy === 'linea')  ? (consecGrupo[s].linea  || 0) + 1 : 0;
-    });
-
-    if (calendar) calendar[fd] = dayAssign;
-  });
+function getRotRole(sup, date) {
+  const fd=fmtDate(date);
+  const ovKey=`${sup}|${fd}`;
+  if(rotOverrides[ovKey]!==undefined){const rid=rotOverrides[ovKey];return rid?ROLES.find(r=>r.id===rid):null;}
+  const cal=buildRotCal(date.getFullYear(),date.getMonth());
+  const day=cal[fd];
+  if(!day||!day[sup])return null;
+  return ROLES.find(r=>r.id===day[sup])||null;
 }
 
-
-function getRole(sup, day) {
-  const fd = fmtDate(day);
-  const k  = okey(sup, fd);
-  if (overrides.hasOwnProperty(k)) return ROLES.find(r => r.id === overrides[k]) || ROLES.find(r => r.id === 'licencia');
-  if (isHoliday(day)) return null;
-  const cal       = buildDailyCal(currentYear, currentMonth);
-  const dayAssign = cal[fd];
-  if (dayAssign && dayAssign[sup]) return ROLES.find(r => r.id === dayAssign[sup]);
-  return null;
+function rotChangeMonth(delta) {
+  rotMonth+=delta;
+  if(rotMonth>11){rotMonth=0;rotYear++;}
+  if(rotMonth<0){rotMonth=11;rotYear--;}
+  rotCalCache={};
+  rotRender();
 }
-
-function getWeeks(days) {
-  const weeks = [];
-  let week = [];
-  days.forEach(d => {
-    week.push(d);
-    if (d.getDay() === 5 || d === days[days.length-1]) { weeks.push(week); week = []; }
-  });
-  if (week.length) weeks.push(week);
-  return weeks;
-}
-
-// ═══════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════
-async function init() {
-  // Poblar selector de offset fino
-  const sel = document.getElementById('offset-sel');
-  for (let i = 0; i < 8; i++) {
-    const opt = document.createElement('option');
-    opt.value = i;
-    opt.textContent = i === 0 ? `Sin ajuste (auto)` : `+${i} posición${i > 1 ? 'es' : ''}`;
-    sel.appendChild(opt);
-  }
-  // Cargar ajustes manuales desde Supabase antes de renderizar
-  document.getElementById('main-content').innerHTML =
-    '<div style="text-align:center;padding:3rem;color:var(--gray-50);font-size:14px;">⏳ Cargando ajustes...</div>';
-  await sbLoadOverrides();
-  render();
-}
-
-// ═══════════════════════════════════════════
-// RENDER ROUTER
-// ═══════════════════════════════════════════
-function changeMonth(dir) {
-  currentMonth += dir;
-  if (currentMonth < 0)  { currentMonth = 11; currentYear--; }
-  if (currentMonth > 11) { currentMonth = 0;  currentYear++; }
-  render();
-}
-
-function switchView(v, btn) {
-  currentView = v;
-  document.querySelectorAll('.view-tab').forEach(t=>t.classList.remove('active'));
+function rotSetView(v, btn) {
+  rotView=v;
+  document.querySelectorAll('.view-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  render();
+  rotRender();
 }
 
-async function resetOverrides() {
-  if (!Object.keys(overrides).length) return;
-  if (!confirm('¿Eliminar todos los ajustes manuales y volver a la rotación automática?')) return;
-  overrides = {};
-  render();
-  await sbClearAllOverrides();
-}
-
-function render() {
-  // Limpiar cache diario al re-renderizar (puede haber cambiado offset)
-  Object.keys(_dailyCache).forEach(k => delete _dailyCache[k]);
-  document.getElementById('month-display').textContent = `${MESES[currentMonth]} ${currentYear}`;
-  const work = getWorkDays(currentYear, currentMonth);
-  if      (currentView === 'tabla')   renderTabla(work);
-  else if (currentView === 'semanal') renderSemanal(work);
-  else                                renderResumen(work);
+function rotRender() {
+  document.getElementById('rot-month-disp').textContent = `${MESES[rotMonth]} ${rotYear}`;
+  const work = getWorkDays(rotYear, rotMonth);
   renderDuplasBanner();
+  renderRotLegend();
+  if(rotView==='tabla') renderRotTabla(work);
+  else if(rotView==='semanal') renderRotSemanal(work);
+  else renderRotResumen(work);
+  renderRotAlerts(work);
 }
 
 function renderDuplasBanner() {
-  const duplas = getDuplasForMonth(currentYear, currentMonth);
-  const pill = (sups, label, color) =>
-    `<span style="background:${color};padding:3px 10px;border-radius:20px;font-weight:600;font-size:11px;white-space:nowrap">
-      <span style="opacity:.65">${label}:</span> ${sups.map(s=>s.split(' ')[0]).join(' + ')}
-    </span>`;
-  const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
-  set('dupla-0715-badge', pill(duplas['0715'], '07-15 hs', '#bfdbfe'));
-  set('dupla-lun-badge',  pill(duplas[1], 'Lun', '#d1fae5'));
-  set('dupla-mar-badge',  pill(duplas[2], 'Mar', '#d1fae5'));
-  set('dupla-mie-badge',  pill(duplas[3], 'Mié', '#d1fae5'));
-  set('dupla-jue-badge',  pill(duplas[4], 'Jue', '#d1fae5'));
-  set('dupla-vie-badge',  pill(duplas[5], 'Vie', '#d1fae5'));
+  const duplas=getDuplasForMonth(rotYear,rotMonth);
+  const el=document.getElementById('rot-duplas-bar'); if(!el)return;
+  const items=[
+    {l:'07-15',s:duplas['0715']},{l:'Lun',s:duplas[1]},{l:'Mar',s:duplas[2]},
+    {l:'Mié',s:duplas[3]},{l:'Jue',s:duplas[4]},{l:'Vie',s:duplas[5]},
+  ];
+  el.innerHTML='<div class="duplas-bar-title">Duplas del mes</div>'+
+    items.map(d=>`<span class="dupla-pill"><b>${d.l}:</b> ${d.s.map(x=>x.split(' ')[0]).join(' + ')}</span>`).join('');
 }
 
-// ═══════════════════════════════════════════
-// TABLA COMPLETA
-// ═══════════════════════════════════════════
-function renderTabla(work) {
-  let html = `<div class="table-card"><div class="table-wrap"><table>`;
-
-  // thead
-  html += `<thead><tr><th class="col-sup">Supervisor</th>`;
-  work.forEach(d => {
-    const hol = isHoliday(d);
-    html += `<th class="col-day ${hol?'feriado-head':''}" title="${hol?'Feriado Nacional':''}">${fmtDisp(d)}${hol?' ✶':''}</th>`;
-  });
-  html += `</tr></thead><tbody>`;
-
-  // rows
-  SUPERVISORS.forEach(sup => {
-    html += `<tr><td class="col-sup"><span class="initials">${initials(sup)}</span>${sup}</td>`;
-    work.forEach(d => {
-      const role = getRole(sup, d);
-      const hol  = isHoliday(d);
-      const isOv = overrides.hasOwnProperty(okey(sup, fmtDate(d)));
-      if (hol && !isOv) {
-        html += `<td class="feriado-col"><button class="role-chip feriado-cell" onclick="openModal('${sup}','${fmtDate(d)}')" title="Feriado — click para ajustar">—</button></td>`;
-      } else if (!role) {
-        html += `<td><button class="role-chip licencia" onclick="openModal('${sup}','${fmtDate(d)}')">—</button></td>`;
-      } else {
-        const chip = `<button class="role-chip ${role.cls}${isOv?' ov':''}" onclick="openModal('${esc(sup)}','${fmtDate(d)}')" title="${role.label}${isOv?' · Ajuste manual':''}">${role.label.replace('7076 + ','7076\n+').replace('Deslogueo + ','Des\n+')}</button>`;
-        html += `<td>${chip}</td>`;
-      }
-    });
-    html += `</tr>`;
-  });
-
-  // summary row
-  html += `<tr class="summary-row"><td class="col-sup">Asignados</td>`;
-  work.forEach(d => {
-    const total = SUPERVISORS.filter(s => {
-      const r = getRole(s, d);
-      return r && r.id !== 'licencia';
-    }).length;
-    const color = total < 12 ? '#b45309' : 'var(--gray-50)';
-    html += `<td style="color:${color}">${total}/12</td>`;
-  });
-  html += `</tr></tbody></table></div>`;
-  html += buildAlerts(work);
-  html += buildTablaResumenMensual(work);
-  html += `</div>`;
-
-  document.getElementById('main-content').innerHTML = html;
+function renderRotLegend() {
+  const el=document.getElementById('rot-legend'); if(!el)return;
+  el.innerHTML='<span class="lt">Roles</span>'+
+    ROLES.filter(r=>r.id!=='licencia').map(r=>`<span class="leg-pill" style="background:${r.bg};color:${r.fg}">${r.label}</span>`).join('');
 }
 
-// ═══════════════════════════════════════════
-// VISTA SEMANAL
-// ═══════════════════════════════════════════
-function renderSemanal(work) {
-  const weeks = getWeeks(work);
-  const DIAS_FULL = ['Lunes','Martes','Miércoles','Jueves','Viernes'];
-  let html = `<div class="week-cards">`;
-  weeks.forEach((wDays, wi) => {
-    const label = `${wDays[0].getDate()} al ${wDays[wDays.length-1].getDate()} de ${MESES[currentMonth]}`;
-    html += `<div class="week-block">
-      <div class="week-header">
-        Semana ${wi+1}
-        <span class="badge">${label}</span>
-      </div>
-      <div class="table-wrap">
-      <table><thead><tr><th class="col-sup" style="font-size:11px;color:var(--gray-50)">Supervisor</th>`;
-    wDays.forEach(d => {
-      const hol = isHoliday(d);
-      const diaCompleto = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-      const diasNombre  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-      html += `<th class="col-day ${hol?'feriado-head':''}">${diasNombre[d.getDay()]}<br><span style="font-size:10px;font-weight:400;opacity:.75">${d.getDate()} ${MESES[currentMonth].slice(0,3)}</span>${hol?' ✶':''}</th>`;
+function renderRotTabla(work) {
+  const el=document.getElementById('rot-content');
+  const days=work;
+  let html=`<div class="rot-table-wrap"><table class="rot-table"><thead><tr><th class="col-sup">Supervisor</th>`;
+  days.forEach(d=>{const hol=isHoliday(d);html+=`<th class="col-day${hol?' feriado-head':''}">${DIAS_CORTO[d.getDay()]}<br><span style="font-size:9px;font-weight:400;opacity:.75">${d.getDate()} ${MESES[rotMonth].slice(0,3)}</span>${hol?' ✶':''}</th>`;});
+  html+=`</tr></thead><tbody>`;
+  SUPERVISORS.forEach(sup=>{
+    html+=`<tr><td class="col-sup"><span style="display:inline-flex;width:24px;height:24px;border-radius:50%;background:#dbeafe;color:#1e3a8a;font-size:9px;font-weight:800;align-items:center;justify-content:center;margin-right:6px;">${sup.split(' ').map(p=>p[0]).slice(0,2).join('')}</span>${sup}</td>`;
+    days.forEach(d=>{
+      if(isHoliday(d)){html+=`<td><span class="chip feriado-cell">Fer.</span></td>`;return;}
+      const r=getRotRole(sup,d);
+      const fd=fmtDate(d);const isOv=rotOverrides[`${sup}|${fd}`]!==undefined;
+      if(r)html+=`<td><span class="chip ${r.cls}" style="background:${r.bg};color:${r.fg}${isOv?';outline:2px solid #f59e0b':''}" onclick="rotOpenModal('${sup}','${fd}')">${r.label}</span></td>`;
+      else html+=`<td><span class="dash-cell">—</span></td>`;
     });
-    html += `</tr></thead><tbody>`;
-    SUPERVISORS.forEach(sup => {
-      html += `<tr><td class="col-sup"><span class="initials">${initials(sup)}</span>${sup}</td>`;
-      wDays.forEach(d => {
-        const role = getRole(sup, d);
-        const hol  = isHoliday(d);
-        const isOv = overrides.hasOwnProperty(okey(sup, fmtDate(d)));
-        if (hol && !isOv) {
-          html += `<td class="feriado-col"><button class="role-chip feriado-cell" onclick="openModal('${esc(sup)}','${fmtDate(d)}')">—</button></td>`;
-        } else if (!role) {
-          html += `<td><button class="role-chip licencia" onclick="openModal('${esc(sup)}','${fmtDate(d)}')">—</button></td>`;
-        } else {
-          html += `<td><button class="role-chip ${role.cls}" onclick="openModal('${esc(sup)}','${fmtDate(d)}')" title="${role.label}">${role.label.replace('7076 + ','7076\n+').replace('Deslogueo + ','Des\n+')}</button></td>`;
-        }
+    html+=`</tr>`;
+  });
+  html+=`</tbody><tfoot><tr><td class="col-sup">Asignados</td>`;
+  days.forEach(d=>{
+    if(isHoliday(d)){html+=`<td>—</td>`;return;}
+    const n=SUPERVISORS.filter(s=>getRotRole(s,d)).length;
+    html+=`<td style="font-size:10px;font-weight:800;color:${n===10?'#059669':'#e74c3c'}">${n}/12</td>`;
+  });
+  html+=`</tr></tfoot></table></div>`;
+  el.innerHTML=html;
+}
+
+function renderRotSemanal(work) {
+  const semanas=[];let sem=[];
+  work.forEach(d=>{if(d.getDay()===1&&sem.length){semanas.push(sem);sem=[];}sem.push(d);});
+  if(sem.length)semanas.push(sem);
+  const el=document.getElementById('rot-content');
+  let html='';
+  semanas.forEach((s,si)=>{
+    html+=`<div class="section-label">Semana ${si+1} · ${s[0].getDate()} al ${s[s.length-1].getDate()} de ${MESES[rotMonth]}</div>`;
+    html+=`<div class="rot-table-wrap" style="margin-bottom:16px;"><table class="rot-table"><thead><tr><th class="col-sup">Supervisor</th>`;
+    s.forEach(d=>html+=`<th class="col-day">${DIAS_CORTO[d.getDay()]}<br><span style="font-size:9px;opacity:.7">${d.getDate()}</span></th>`);
+    html+=`</tr></thead><tbody>`;
+    SUPERVISORS.forEach(sup=>{
+      html+=`<tr><td class="col-sup">${sup}</td>`;
+      s.forEach(d=>{
+        if(isHoliday(d)){html+=`<td><span class="chip feriado-cell">Fer.</span></td>`;return;}
+        const r=getRotRole(sup,d);
+        if(r)html+=`<td><span class="chip ${r.cls}" style="background:${r.bg};color:${r.fg}" onclick="rotOpenModal('${sup}','${fmtDate(d)}')">${r.label}</span></td>`;
+        else html+=`<td><span class="dash-cell">—</span></td>`;
       });
-      html += `</tr>`;
+      html+=`</tr>`;
     });
-    html += `</tbody></table></div></div>`;
+    html+=`</tbody></table></div>`;
   });
-  html += `</div>`;
-  html += buildAlerts(work);
-  document.getElementById('main-content').innerHTML = html;
+  document.getElementById('rot-content').innerHTML=html;
 }
 
-// ═══════════════════════════════════════════
-// RESUMEN POR SUPERVISOR
-// ═══════════════════════════════════════════
-function renderResumen(work) {
-  // Calcular conteos
-  const BAR_COLORS = {
-    'guardia-a':'#93c5fd','guardia-b':'#60a5fa','bandeja':'#6ee7b7',
-    'kh':'#c4b5fd','entrena':'#f9a8d4',
-    'r7076':'#7dd3fc','des7076':'#fef08a','r7076des':'#fed7aa'
-  };
-  const ALIAS_R = {};
-
-  let maxCount = 0;
-  const data = SUPERVISORS.map(sup => {
-    const counts = {};
-    ROLE_IDS.forEach(rid => counts[rid] = 0);
-    work.forEach(d => {
-      const role = getRole(sup, d);
-      if (!role || role.id === 'licencia') return;
-      const rid = ALIAS_R[role.id] || role.id;
-      if (counts.hasOwnProperty(rid)) {
-        counts[rid]++;
-        if (counts[rid] > maxCount) maxCount = counts[rid];
-      }
+function renderRotResumen(work) {
+  const days=work.filter(d=>!isHoliday(d));
+  const el=document.getElementById('rot-content');
+  let html='<div class="res-grid">';
+  const maxPerRole=Math.max(1,...ALL_TASK_ROLES.map(r=>Math.max(...SUPERVISORS.map(s=>days.filter(d=>getRotRole(s,d)?.id===r).length))));
+  SUPERVISORS.forEach(sup=>{
+    const total=days.filter(d=>getRotRole(sup,d)&&!['guardia-a','guardia-b'].includes(getRotRole(sup,d)?.id)).length;
+    html+=`<div class="res-card"><div class="res-head"><span class="res-name">${sup}</span><span class="res-total">${total}</span></div><div class="res-bars">`;
+    ALL_TASK_ROLES.forEach(rid=>{
+      const role=ROLES.find(r=>r.id===rid);
+      const cnt=days.filter(d=>getRotRole(sup,d)?.id===rid).length;
+      const pct=Math.round((cnt/Math.max(maxPerRole,1))*100);
+      html+=`<div class="res-bar-row"><span class="res-bar-lbl">${role.label}</span><div class="res-bar-track"><div class="res-bar-fill" style="width:${pct}%;background:${role.bg};"></div></div><span class="res-bar-cnt">${cnt}</span></div>`;
     });
-    const totalDays = work.filter(d => { const r=getRole(sup,d); return r && r.id!=='licencia'; }).length;
-    return { sup, counts, totalDays };
+    html+=`</div></div>`;
   });
-
-  let html = `<div class="summary-grid">`;
-  data.forEach(({ sup, counts, totalDays }) => {
-    html += `<div class="sup-card">
-      <div class="sup-card-header">
-        <div class="sup-avatar">${initials(sup)}</div>
-        <div>
-          <div class="sup-name">${sup}</div>
-          <div class="sup-days">${totalDays} días asignados</div>
-        </div>
-      </div>
-      <div class="role-bars">`;
-    ROLE_IDS.forEach(rid => {
-      const role  = ROLES.find(r=>r.id===rid);
-      const cnt   = counts[rid];
-      const pct   = maxCount ? Math.round(cnt/maxCount*100) : 0;
-      const color = BAR_COLORS[rid] || '#e2e8f0';
-      html += `<div class="role-bar-row">
-        <div class="role-bar-label" title="${role.label}">${role.label.replace('Deslogueo + ','Des+').replace('7076 + ','7076+').replace('Entrena2 + ','E2+')}</div>
-        <div class="role-bar-track"><div class="role-bar-fill" style="width:${pct}%;background:${color}"></div></div>
-        <div class="role-bar-count">${cnt}</div>
-      </div>`;
-    });
-    html += `</div></div>`;
-  });
-  html += `</div>`;
-
-  // Tabla de equidad
-  html += `<div class="table-card" style="margin-top:1.25rem">
-    <div style="padding:.9rem 1.25rem;border-bottom:1px solid var(--gray-10);font-size:14px;font-weight:600;color:var(--blue)">
-      Análisis de equidad — variación por rol
-    </div>
-    <div class="table-wrap">
-    <table>
-      <thead><tr>
-        <th class="col-sup">Rol</th>`;
-  SUPERVISORS.forEach(s => { html += `<th style="min-width:40px">${s.split(' ')[0]}</th>`; });
-  html += `<th>Mín</th><th>Máx</th><th>Diff</th></tr></thead><tbody>`;
-  ROLE_IDS.forEach(rid => {
-    const role   = ROLES.find(r=>r.id===rid);
-    const counts = data.map(d=>d.counts[rid]);
-    const mn = Math.min(...counts), mx = Math.max(...counts), diff = mx-mn;
-    const diffColor = diff === 0 ? 'var(--green)' : diff === 1 ? 'var(--gray-70)' : '#b45309';
-    html += `<tr>
-      <td class="col-sup"><span class="leg-pill" style="background:${BAR_COLORS[rid]||'#eee'};color:#1a1d23;font-size:11px">${role.label}</span></td>`;
-    counts.forEach(c => { html += `<td style="font-size:12px;font-weight:600;color:var(--gray-70)">${c}</td>`; });
-    html += `<td style="font-weight:700;color:var(--green)">${mn}</td>
-      <td style="font-weight:700;color:var(--blue)">${mx}</td>
-      <td style="font-weight:700;color:${diffColor}">${diff}</td>
-    </tr>`;
-  });
-  html += `</tbody></table></div></div>`;
-
-  document.getElementById('main-content').innerHTML = html;
+  html+='</div>';
+  el.innerHTML=html;
 }
 
-// ═══════════════════════════════════════════
-// TABLA RESUMEN MENSUAL (al pie de vista Tabla)
-// ═══════════════════════════════════════════
-function buildTablaResumenMensual(work) {
-  const BAR_COLORS = {
-    'guardia-a':'var(--c-guardia-a)','guardia-b':'var(--c-guardia-b)',
-    'bandeja':'var(--c-bandeja)','kh':'var(--c-kh)','entrena':'var(--c-entrena)',
-    'r7076':'var(--c-7076)','des7076':'var(--c-des7076)','r7076des':'var(--c-7076des)'
-  };
-
-  // Calcular conteos por supervisor y rol
-  const data = SUPERVISORS.map(sup => {
-    const counts = {};
-    ROLE_IDS.forEach(rid => counts[rid] = 0);
-    let total = 0;
-    work.forEach(d => {
-      const role = getRole(sup, d);
-      if (role && role.id !== 'licencia' && counts.hasOwnProperty(role.id)) {
-        counts[role.id]++;
-        total++;
-      }
+function renderRotAlerts(work) {
+  const days=work.filter(d=>!isHoliday(d));
+  const issues=[];
+  SUPERVISORS.forEach(sup=>{
+    ALL_TASK_ROLES.forEach(rid=>{
+      let consec=0;
+      days.forEach(d=>{
+        if(getRotRole(sup,d)?.id===rid){consec++;if(consec>MAX_CONSEC_ROL)issues.push(`<b>${sup.split(' ')[0]}</b>: ${consec} días seguidos de ${ROLES.find(r=>r.id===rid)?.label}`);}
+        else consec=0;
+      });
     });
-    return { sup, counts, total };
-  });
-
-  let html = `<div class="table-card" style="margin-top:1.25rem">
-    <div style="padding:.9rem 1.25rem;border-bottom:1px solid var(--gray-10);display:flex;align-items:center;gap:10px">
-      <span style="font-size:15px">📊</span>
-      <div>
-        <div style="font-size:14px;font-weight:600;color:var(--blue)">Resumen mensual de tareas</div>
-        <div style="font-size:11px;color:var(--gray-50);margin-top:1px">${MESES[currentMonth]} ${currentYear} — cantidad de días asignados por rol</div>
-      </div>
-    </div>
-    <div class="table-wrap">
-    <table>
-      <thead><tr>
-        <th class="col-sup" style="min-width:140px">Supervisor</th>`;
-
-  ROLE_IDS.forEach(rid => {
-    const role = ROLES.find(r => r.id === rid);
-    html += `<th class="col-day" style="min-width:52px;font-size:10px;line-height:1.3">
-      <span style="display:inline-block;padding:2px 6px;border-radius:20px;background:${BAR_COLORS[rid]||'#eee'};color:var(--gray-90)">${role.label.replace('Deslogueo + ','Des+').replace('7076 + ','7076+').replace('Entrena2 + ','E2+')}</span>
-    </th>`;
-  });
-  html += `<th class="col-day" style="min-width:44px;font-weight:700;color:var(--blue)">Total</th>`;
-  html += `</tr></thead><tbody>`;
-
-  data.forEach(({ sup, counts, total }) => {
-    html += `<tr><td class="col-sup"><span class="initials">${initials(sup)}</span>${sup.split(' ')[0]}</td>`;
-    ROLE_IDS.forEach(rid => {
-      const cnt = counts[rid];
-      const bg  = cnt > 0 ? BAR_COLORS[rid] || '#eee' : 'transparent';
-      html += `<td style="font-size:12px;font-weight:${cnt>0?'700':'400'};color:${cnt>0?'var(--gray-90)':'var(--gray-20)'};background:${bg}opacity:.3">${cnt > 0 ? cnt : '·'}</td>`;
-    });
-    html += `<td style="font-size:13px;font-weight:700;color:var(--blue)">${total}</td>`;
-    html += `</tr>`;
-  });
-
-  // Fila de totales por rol
-  html += `<tr class="summary-row" style="border-top:2px solid var(--gray-20)">
-    <td class="col-sup" style="font-weight:700;color:var(--gray-70)">Total columna</td>`;
-  ROLE_IDS.forEach(rid => {
-    const sum = data.reduce((acc, d) => acc + d.counts[rid], 0);
-    html += `<td style="font-size:11px;font-weight:700;color:var(--gray-50)">${sum}</td>`;
-  });
-  const grandTotal = data.reduce((acc, d) => acc + d.total, 0);
-  html += `<td style="font-size:12px;font-weight:700;color:var(--blue)">${grandTotal}</td></tr>`;
-
-  html += `</tbody></table></div></div>`;
-  return html;
-}
-
-// ═══════════════════════════════════════════
-// ALERTAS
-// ═══════════════════════════════════════════
-function buildAlerts(work) {
-  const issues = [];
-
-  // Verificar que cada día tenga exactamente 1 Bandeja, 1 KH, 1 Entrena2
-  work.forEach(d => {
-    if (isHoliday(d) && !SUPERVISORS.some(s => overrides.hasOwnProperty(okey(s, fmtDate(d))))) return;
-    const roles = SUPERVISORS.map(s => getRole(s, d)).filter(Boolean);
-    ['bandeja','kh','entrena'].forEach(rid => {
-      const count = roles.filter(r => r.id === rid).length;
-      const label = ROLES.find(r => r.id === rid).label;
-      if (count !== 1) issues.push(`<b>${fmtDisp(d)}</b>: ${count} persona(s) en ${label} (se esperaba 1)`);
-    });
-    // Verificar distribución 7076: 1 r7076 + 2 solo7076 + 2 des7076 + 2 r7076des por día
-    const exp7076 = { r7076: 1, solo7076: 2, des7076: 2, r7076des: 2 };
-    Object.entries(exp7076).forEach(([rid, exp]) => {
-      const count = roles.filter(r => r.id === rid).length;
-      const label = ROLES.find(r => r.id === rid).label;
-      if (count !== exp) issues.push(`<b>${fmtDisp(d)}</b>: ${count} en ${label} (se esperaban ${exp})`);
-    });
-    // Verificar que nadie quede sin rol
-    SUPERVISORS.forEach(s => {
-      const r = getRole(s, d);
-      if (!r || r.id === 'licencia') issues.push(`<b>${fmtDisp(d)}</b>: ${s.split(' ')[0]} sin rol asignado`);
-    });
-  });
-
-  // Verificar anti-consecutivos (máx 2 días seguidos) para todas las tareas rotativas
-  const consecVal2 = {};
-  const acroles = ['r7076','solo7076','bandeja','kh','entrena','des7076','r7076des'];
-  SUPERVISORS.forEach(s => { consecVal2[s] = {}; acroles.forEach(r => consecVal2[s][r] = 0); });
-  work.filter(d => !isHoliday(d)).forEach(d => {
-    SUPERVISORS.forEach(s => {
-      const r = getRole(s, d);
-      acroles.forEach(rid => {
-        if (r && r.id === rid) {
-          consecVal2[s][rid]++;
-          if (consecVal2[s][rid] > 2)
-            issues.push(`<b>${s.split(' ')[0]}</b>: ${consecVal2[s][rid]} días seguidos de ${ROLES.find(x=>x.id===rid).label}`);
-        } else {
-          consecVal2[s][rid] = 0;
-        }
+    ['tareas','linea'].forEach(grupo=>{
+      let consec=0;
+      days.forEach(d=>{
+        const rid=getRotRole(sup,d)?.id;
+        const g=(GRUPO_TAREAS.has(rid)?'tareas':GRUPO_LINEA.has(rid)?'linea':null);
+        if(g===grupo){consec++;if(consec>MAX_CONSEC_GRUPO)issues.push(`<b>${sup.split(' ')[0]}</b>: ${consec} días seguidos en grupo ${grupo.toUpperCase()}`);}
+        else if(g!==grupo)consec=0;
       });
     });
   });
+  const unique=[...new Set(issues)];
+  const el=document.getElementById('rot-alerts');
+  el.innerHTML=unique.length?`<div class="alert-bar">⚠️ Alertas:<ul>${unique.map(i=>`<li>${i}</li>`).join('')}</ul></div>`:`<div class="ok-bar">✓ Rotación correcta — sin consecutivos ni desequilibrios detectados.</div>`;
+}
 
-  // Verificar anti-consecutivos de GRUPO (máx 3 días seguidos en TAREAS o LÍNEA)
-  const consecGrupoV = {};
-  SUPERVISORS.forEach(s => { consecGrupoV[s] = { tareas: 0, linea: 0 }; });
-  work.filter(d => !isHoliday(d)).forEach(d => {
-    SUPERVISORS.forEach(s => {
-      const r = getRole(s, d);
-      const g = r ? getGrupo(r.id) : null;
-      ['tareas','linea'].forEach(grp => {
-        if (g === grp) {
-          consecGrupoV[s][grp]++;
-          if (consecGrupoV[s][grp] > MAX_CONSEC_GRUPO)
-            issues.push(`<b>${s.split(' ')[0]}</b>: ${consecGrupoV[s][grp]} días seguidos en grupo ${grp === 'tareas' ? 'TAREAS' : 'ATENCIÓN LÍNEA'}`);
-        } else {
-          consecGrupoV[s][grp] = 0;
-        }
-      });
+// Modal rotación
+function rotOpenModal(sup, fd) {
+  rotModalSup=sup; rotModalDate=fd; rotSelectedRole=rotOverrides[`${sup}|${fd}`]||null;
+  const d=new Date(fd+'T12:00:00');
+  document.getElementById('rot-modal-title').textContent=sup;
+  document.getElementById('rot-modal-sub').textContent=`${DIAS_CORTO[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`;
+  const rolesEl=document.getElementById('rot-modal-roles');
+  rolesEl.innerHTML=ROLES.filter(r=>r.id!=='guardia-a'&&r.id!=='guardia-b').map(r=>`
+    <button class="modal-role-btn ${rotSelectedRole===r.id?'selected':''}" style="background:${r.bg};color:${r.fg};" onclick="rotSelectRole('${r.id}',this)">${r.label}</button>
+  `).join('');
+  document.getElementById('rot-modal').style.display='flex';
+}
+function rotSelectRole(rid, btn) {
+  rotSelectedRole=rid;
+  document.querySelectorAll('.modal-role-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+async function rotSaveOverride() {
+  if(!rotSelectedRole)return;
+  const k=`${rotModalSup}|${rotModalDate}`;
+  rotOverrides[k]=rotSelectedRole;
+  rotCalCache={};
+  rotCloseModal(); rotRender();
+  setSyncStatus('saving');
+  const ok=await sbUpsert('rotacion_overrides',{key:k,role_id:rotSelectedRole,updated_at:new Date().toISOString()});
+  setSyncStatus(ok?'ok':'error');
+}
+async function rotClearOverride() {
+  const k=`${rotModalSup}|${rotModalDate}`;
+  delete rotOverrides[k];
+  rotCalCache={};
+  rotCloseModal(); rotRender();
+  setSyncStatus('saving');
+  await sbDelete('rotacion_overrides','?key=eq.'+encodeURIComponent(k));
+  setSyncStatus('ok');
+}
+function rotCloseModal() { document.getElementById('rot-modal').style.display='none'; }
+async function rotResetOverrides() {
+  if(!confirm('¿Eliminar todos los ajustes manuales?'))return;
+  rotOverrides={}; rotCalCache={}; rotRender();
+  setSyncStatus('saving');
+  await sbDelete('rotacion_overrides','?id=gt.0');
+  setSyncStatus('ok');
+}
+
+function rotExportPDF() {
+  const work=getWorkDays(rotYear,rotMonth).filter(d=>!isHoliday(d));
+  const mes=MESES[rotMonth];
+  const duplas=getDuplasForMonth(rotYear,rotMonth);
+  const semanas=[];let sem=[];
+  work.forEach(d=>{if(d.getDay()===1&&sem.length){semanas.push(sem);sem=[];}sem.push(d);});
+  if(sem.length)semanas.push(sem);
+
+  let tablaHTML='';
+  semanas.forEach((s,si)=>{
+    tablaHTML+=`<div class="st">Semana ${si+1} · ${s[0].getDate()} al ${s[s.length-1].getDate()} de ${mes}</div><table><thead><tr><th class="cs">Supervisor</th>${s.map(d=>`<th>${DIAS_CORTO[d.getDay()]}<br><b>${d.getDate()}</b></th>`).join('')}</tr></thead><tbody>`;
+    SUPERVISORS.forEach((sup,si2)=>{
+      const ini=sup.split(' ').map(p=>p[0]).slice(0,2).join('');
+      tablaHTML+=`<tr class="${si2%2===0?'ev':'od'}"><td class="cs"><span class="av">${ini}</span>${sup}</td>`;
+      s.forEach(d=>{const r=getRotRole(sup,d);if(!r){tablaHTML+=`<td><span class="dash">—</span></td>`;}else{tablaHTML+=`<td><span class="ch" style="background:${r.bg};color:${r.fg}">${r.label}</span></td>`;}});
+      tablaHTML+=`</tr>`;
     });
-  });
-  // Verificar equidad de des7076/r7076des (deben ser iguales para los 12)
-  ['des7076','r7076des'].forEach(rid => {
-    const counts = SUPERVISORS.map(s => ({
-      s,
-      count: work.filter(d => !isHoliday(d)).filter(d => { const r=getRole(s,d); return r && r.id===rid; }).length
-    }));
-    const vals = counts.map(x => x.count);
-    const mn = Math.min(...vals), mx = Math.max(...vals);
-    const label = ROLES.find(x=>x.id===rid).label;
-    if (mx - mn > 1) {
-      issues.push(`<b>${label}</b>: desequilibrio — mín ${mn} / máx ${mx} entre supervisores (debe ser igual para los 12)`);
-    }
+    tablaHTML+=`</tbody></table>`;
   });
 
-  // Verificar equidad de variantes 7076 por supervisor
-  const varCounts = {};
-  SUPERVISORS.forEach(s => varCounts[s] = { r7076: 0, solo7076: 0, des7076: 0, r7076des: 0 });
-  work.filter(d => !isHoliday(d)).forEach(d => {
-    SUPERVISORS.forEach(s => {
-      const r = getRole(s, d);
-      if (r && varCounts[s].hasOwnProperty(r.id)) varCounts[s][r.id]++;
-    });
-  });
-  // Solo alertar si la diferencia entre supervisores es > 3 en alguna variante
-  ['r7076','solo7076','des7076','r7076des'].forEach(rid => {
-    const vals = SUPERVISORS.map(s => varCounts[s][rid]);
-    const diff = Math.max(...vals) - Math.min(...vals);
-    if (diff > 3) {
-      const label = ROLES.find(r => r.id === rid).label;
-      issues.push(`Variante <b>${label}</b>: desequilibrio de ${diff} días entre supervisores`);
-    }
-  });
+  const dupHTML=[{l:'07-15',s:duplas['0715']},{l:'Lun',s:duplas[1]},{l:'Mar',s:duplas[2]},{l:'Mié',s:duplas[3]},{l:'Jue',s:duplas[4]},{l:'Vie',s:duplas[5]}]
+    .map(d=>`<div class="dup"><b>${d.l}:</b> ${d.s.map(x=>x.split(' ')[0]).join(' + ')}</div>`).join('');
+  const legHTML=ROLES.filter(r=>r.id!=='licencia').map(r=>`<span class="leg" style="background:${r.bg};color:${r.fg}">${r.label}</span>`).join('');
 
-  if (!issues.length) {
-    return `<div class="ok-bar">✓ Rotación correcta — 1 KH+WSP · 1 Entrena2 · 1 Bandejas · 2×Des+7076 · 2×Deslogueo+7076 · 2×7076 · 1×7076+Sub por día. Anti-consecutivos OK. Des+7076 y Deslogueo+7076 equitativos para los 12. ✓</div>`;
-  }
-  return `<div class="alert-bar">⚠ <strong>Alertas:</strong><ul style="margin-top:5px;padding-left:1.2rem">${issues.slice(0,8).map(i=>`<li>${i}</li>`).join('')}${issues.length>8?`<li style="opacity:.7">…y ${issues.length-8} más</li>`:''}</ul></div>`;
-}
-
-// ═══════════════════════════════════════════
-// MODAL
-// ═══════════════════════════════════════════
-let _modalSup = null, _modalDate = null, _selectedRole = null;
-
-function esc(s) { return s.replace(/'/g, "\\'"); }
-
-function openModal(sup, date) {
-  _modalSup  = sup;
-  _modalDate = date;
-  const d = new Date(date + 'T12:00:00');
-  const currentRole = getRole(sup, d);
-  _selectedRole = currentRole ? currentRole.id : null;
-  const isOv = overrides.hasOwnProperty(okey(sup, date));
-
-  const baseRoles  = ROLES.filter(r=>r.group==='base');
-  const lineaRoles = ROLES.filter(r=>r.group==='linea');
-
-  let html = `<div class="modal-bg" onclick="if(event.target.classList.contains('modal-bg'))closeModal()">
-  <div class="modal">
-    <div class="modal-head">
-      <h3>${sup}</h3>
-      <p>${fmtDisp(d)}, ${MESES[d.getMonth()]} ${d.getFullYear()}${isOv?' · Ajuste manual activo':''}</p>
-    </div>
-    <div class="modal-body">
-      <div class="modal-section">
-        <div class="modal-section-label">Roles base</div>
-        <div class="role-picker">`;
-  baseRoles.forEach(r => {
-    html += `<div class="role-option ${r.cls}${_selectedRole===r.id?' sel':''}" style="background:${r.bg};color:${r.fg}" onclick="selectRole('${r.id}')">${r.label}</div>`;
-  });
-  html += `</div></div>
-      <div class="modal-section">
-        <div class="modal-section-label">Línea de asistencia (7076)</div>
-        <div class="role-picker">`;
-  lineaRoles.forEach(r => {
-    html += `<div class="role-option ${r.cls}${_selectedRole===r.id?' sel':''}" style="background:${r.bg};color:${r.fg}" onclick="selectRole('${r.id}')">${r.label}</div>`;
-  });
-  html += `</div></div>
-      <div class="modal-section">
-        <div class="modal-section-label">Ausencia</div>
-        <div class="role-option licencia${_selectedRole==='licencia'?' sel':''}" style="display:inline-block;padding:7px 18px" onclick="selectRole('licencia')">Licencia</div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal()">Cancelar</button>
-      ${isOv?`<button class="btn" onclick="clearOverride()">↺ Restaurar automático</button>`:''}
-      <button class="btn btn-primary" onclick="saveOverride()">Guardar</button>
-    </div>
-  </div></div>`;
-
-  document.getElementById('modal-root').innerHTML = html;
-}
-
-function selectRole(id) {
-  _selectedRole = id;
-  document.querySelectorAll('.role-option').forEach(el => {
-    const matchClass = ROLES.find(r=>r.id===id)?.cls;
-    el.classList.toggle('sel', el.classList.contains(id) || el.classList.contains(matchClass) && ROLES.find(r=>r.cls===el.classList[1])?.id===id);
-  });
-  // Simpler: rebuild selection
-  document.querySelectorAll('.role-option').forEach(el => {
-    el.classList.remove('sel');
-    const role = ROLES.find(r => r.cls === [...el.classList].find(c => ROLES.some(r=>r.cls===c)));
-    if (role && role.id === id) el.classList.add('sel');
-    if (id === 'licencia' && el.classList.contains('licencia')) el.classList.add('sel');
-  });
-}
-
-function closeModal() { document.getElementById('modal-root').innerHTML = ''; }
-
-async function saveOverride() {
-  if (_selectedRole) {
-    const k = okey(_modalSup, _modalDate);
-    overrides[k] = _selectedRole;
-    closeModal();
-    render();
-    await sbSaveOverride(k, _selectedRole);
-  }
-}
-
-async function clearOverride() {
-  const k = okey(_modalSup, _modalDate);
-  delete overrides[k];
-  closeModal();
-  render();
-  await sbDeleteOverride(k);
-}
-
-// ═══════════════════════════════════════════
-// EXPORT CSV
-// ═══════════════════════════════════════════
-function exportCSV() {
-  const work = getWorkDays(currentYear, currentMonth).filter(d => !isHoliday(d));
-  const mes  = MESES[currentMonth];
-
-  const ROLE_COLORS = {
-    'guardia-a': { bg:'#dbeafe', fg:'#1e3a8a' },
-    'guardia-b': { bg:'#bfdbfe', fg:'#1e3a8a' },
-    'bandeja':   { bg:'#d1fae5', fg:'#064e3b' },
-    'kh':        { bg:'#ede9fe', fg:'#3b0764' },
-    'entrena':   { bg:'#fce7f3', fg:'#831843' },
-    'r7076':     { bg:'#e0f2fe', fg:'#075985' },
-    'solo7076':  { bg:'#bae6fd', fg:'#0c4a6e' },
-    'des7076':   { bg:'#fef9c3', fg:'#713f12' },
-    'r7076des':  { bg:'#fde68a', fg:'#92400e' },
-    'licencia':  { bg:'#f1f5f9', fg:'#64748b' },
-  };
-  const diasNombre = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-
-  // Agrupar por semana
-  const semanas = [];
-  let semActual = [];
-  work.forEach(d => {
-    if (d.getDay() === 1 && semActual.length > 0) { semanas.push(semActual); semActual = []; }
-    semActual.push(d);
-  });
-  if (semActual.length) semanas.push(semActual);
-
-  // Tabla por semana
-  let tablaHTML = '';
-  semanas.forEach((sem, si) => {
-    tablaHTML += `
-      <div class="sem-titulo">Semana ${si+1} &nbsp;·&nbsp; ${sem[0].getDate()} al ${sem[sem.length-1].getDate()} de ${mes}</div>
-      <table>
-        <thead><tr>
-          <th class="col-sup">Supervisor</th>
-          ${sem.map(d=>`<th>${diasNombre[d.getDay()]}<br><b>${d.getDate()}</b></th>`).join('')}
-        </tr></thead>
-        <tbody>
-          ${SUPERVISORS.map((sup,si2)=>{
-            const ini = sup.split(' ').map(p=>p[0]).slice(0,2).join('');
-            return `<tr class="${si2%2===0?'ev':'od'}">
-              <td class="col-sup"><span class="av">${ini}</span>${sup}</td>
-              ${sem.map(d=>{
-                const r = getRole(sup,d);
-                if (!r) return '<td><span class="dash">—</span></td>';
-                const c = ROLE_COLORS[r.id]||{bg:'#f1f5f9',fg:'#334155'};
-                return `<td><span class="chip" style="background:${c.bg};color:${c.fg}">${r.label}</span></td>`;
-              }).join('')}
-            </tr>`;
-          }).join('')}
-        </tbody>
-      </table>`;
-  });
-
-  // Leyenda
-  const legHTML = ROLES.filter(r=>r.id!=='licencia').map(r=>{
-    const c = ROLE_COLORS[r.id]||{bg:'#f1f5f9',fg:'#334155'};
-    return `<span class="leg" style="background:${c.bg};color:${c.fg}">${r.label}</span>`;
-  }).join('');
-
-  // Duplas
-  const duplas = getDuplasForMonth(currentYear, currentMonth);
-  const dupHTML = [
-    {l:'07-15 hs', s:duplas['0715']},
-    {l:'Lunes',    s:duplas[1]},
-    {l:'Martes',   s:duplas[2]},
-    {l:'Miércoles',s:duplas[3]},
-    {l:'Jueves',   s:duplas[4]},
-    {l:'Viernes',  s:duplas[5]},
-  ].map(d=>`<div class="dup"><b>${d.l}:</b> ${d.s.map(x=>x.split(' ')[0]).join(' + ')}</div>`).join('');
-
-  const html = `<!DOCTYPE html><html><head>
-<meta charset="UTF-8">
-<title>Rotacion ${mes} ${currentYear}</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter','Segoe UI',sans-serif;background:#f8fafc;color:#1e293b;padding:20px;font-size:11px;}
-.page{max-width:1050px;margin:0 auto;}
-.hdr{background:linear-gradient(135deg,#1e3a8a,#3b5bdb);border-radius:14px;padding:18px 24px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
-.hdr h1{color:white;font-size:17px;font-weight:800;margin-bottom:2px;}
-.hdr p{color:rgba(255,255,255,.7);font-size:10px;}
-.hdr-r{text-align:right;color:white;font-weight:700;font-size:12px;}
-.hdr-r small{display:block;color:rgba(255,255,255,.6);font-size:9px;font-weight:400;margin-top:2px;}
-.dup-card{background:white;border-radius:10px;padding:10px 16px;margin-bottom:14px;border:1px solid #e2e8f0;display:flex;flex-wrap:wrap;gap:6px 18px;}
-.dup-title{font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;width:100%;margin-bottom:2px;}
-.dup{font-size:10px;color:#334155;}
-.dup b{color:#1e3a8a;margin-right:3px;}
-.sem-titulo{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin:14px 0 6px;border-left:3px solid #3b5bdb;padding-left:8px;}
-table{width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:6px;border:1px solid #e2e8f0;}
-thead th{background:#f1f5f9;color:#64748b;font-size:9px;font-weight:700;text-transform:uppercase;padding:7px 5px;text-align:center;border-bottom:2px solid #e2e8f0;line-height:1.5;}
-thead th.col-sup{text-align:left;padding-left:12px;min-width:140px;}
-thead th b{font-size:12px;color:#1e293b;display:block;}
-tbody td{padding:5px 4px;text-align:center;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
-tbody td.col-sup{text-align:left;padding:6px 12px;font-weight:600;font-size:10px;white-space:nowrap;}
-tr.ev td{background:white;}
-tr.od td{background:#fafbfc;}
-.av{display:inline-flex;width:20px;height:20px;border-radius:50%;background:#dbeafe;color:#1e3a8a;font-size:7px;font-weight:800;align-items:center;justify-content:center;margin-right:5px;vertical-align:middle;flex-shrink:0;}
-.chip{display:inline-block;padding:3px 6px;border-radius:5px;font-size:9px;font-weight:600;white-space:nowrap;line-height:1.3;}
-.dash{color:#cbd5e1;font-size:13px;}
-.leg-card{background:white;border-radius:10px;padding:10px 14px;margin-top:14px;border:1px solid #e2e8f0;}
-.leg-title{font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
-.leg-wrap{display:flex;flex-wrap:wrap;gap:4px;}
-.leg{padding:3px 9px;border-radius:20px;font-size:9px;font-weight:600;}
-.footer{text-align:center;color:#94a3b8;font-size:9px;margin-top:12px;padding-top:10px;border-top:1px solid #e2e8f0;}
-.print-btn{text-align:center;margin:16px 0 4px;}
-.print-btn button{background:#1e3a8a;color:white;border:none;border-radius:8px;padding:9px 24px;font-size:12px;font-weight:700;cursor:pointer;}
-@media print{
-  body{background:white;padding:10px;}
-  .print-btn{display:none;}
-  .chip{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .av{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  .hdr{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  table{page-break-inside:avoid;}
-  @page{size:A4 landscape;margin:10mm;}
-}
-</style></head><body>
-<div class="page">
-  <div class="hdr">
-    <div><h1>Rotación de Tareas Mensuales</h1><p>Jerárquicos Salud · Supervisores</p></div>
-    <div class="hdr-r">${mes} ${currentYear}<small>Generado el ${new Date().toLocaleDateString('es-AR')}</small></div>
-  </div>
-  <div class="dup-card">
-    <div class="dup-title">Duplas del mes</div>
-    ${dupHTML}
-  </div>
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rotación ${mes} ${rotYear}</title><style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}body{font-family:'Inter',sans-serif;background:#f8fafc;color:#1e293b;padding:20px;font-size:11px;}
+  .page{max-width:1050px;margin:0 auto;}
+  .hdr{background:linear-gradient(135deg,#00554e,#007a72);border-radius:14px;padding:18px 24px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+  .hdr h1{color:white;font-size:16px;font-weight:800;margin-bottom:2px;}.hdr p{color:rgba(255,255,255,.7);font-size:10px;}
+  .hdr-r{text-align:right;color:white;font-weight:700;font-size:12px;}.hdr-r small{display:block;color:rgba(255,255,255,.6);font-size:9px;font-weight:400;margin-top:2px;}
+  .dc{background:white;border-radius:10px;padding:10px 16px;margin-bottom:12px;border:1px solid #e2e8f0;display:flex;flex-wrap:wrap;gap:6px 16px;}
+  .dt{font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;width:100%;margin-bottom:2px;}
+  .dup{font-size:10px;color:#334155;}.dup b{color:#00554e;margin-right:3px;}
+  .st{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin:12px 0 5px;border-left:3px solid #00554e;padding-left:7px;}
+  table{width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:6px;border:1px solid #e2e8f0;}
+  thead th{background:#f1f5f9;color:#64748b;font-size:9px;font-weight:700;text-transform:uppercase;padding:7px 5px;text-align:center;border-bottom:2px solid #e2e8f0;line-height:1.5;}
+  th.cs{text-align:left;padding-left:12px;min-width:145px;}thead th b{font-size:12px;color:#1e293b;display:block;}
+  tbody td{padding:5px 4px;text-align:center;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
+  tbody td.cs{text-align:left;padding:6px 12px;font-weight:600;font-size:10px;white-space:nowrap;}
+  tr.ev td{background:white;}tr.od td{background:#fafbfc;}
+  .av{display:inline-flex;width:20px;height:20px;border-radius:50%;background:#dbeafe;color:#1e3a8a;font-size:7px;font-weight:800;align-items:center;justify-content:center;margin-right:5px;vertical-align:middle;}
+  .ch{display:inline-block;padding:3px 6px;border-radius:5px;font-size:9px;font-weight:600;white-space:nowrap;line-height:1.3;}
+  .dash{color:#cbd5e1;font-size:13px;}
+  .lc{background:white;border-radius:10px;padding:10px 14px;margin-top:12px;border:1px solid #e2e8f0;}
+  .lt{font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+  .lw{display:flex;flex-wrap:wrap;gap:4px;}.leg{padding:3px 9px;border-radius:20px;font-size:9px;font-weight:600;}
+  .pb{text-align:center;margin:14px 0 4px;}.pb button{background:#00554e;color:white;border:none;border-radius:8px;padding:9px 24px;font-size:12px;font-weight:700;cursor:pointer;}
+  .ft{text-align:center;color:#94a3b8;font-size:9px;margin-top:10px;padding-top:8px;border-top:1px solid #e2e8f0;}
+  @media print{body{background:white;padding:10px;}.pb{display:none;}.ch,.av,.hdr{-webkit-print-color-adjust:exact;print-color-adjust:exact;}@page{size:A4 landscape;margin:10mm;}}
+  </style></head><body><div class="page">
+  <div class="hdr"><div><h1>Rotación de Tareas Mensuales</h1><p>Jerárquicos Salud · Supervisores</p></div><div class="hdr-r">${mes} ${rotYear}<small>Generado el ${new Date().toLocaleDateString('es-AR')}</small></div></div>
+  <div class="dc"><div class="dt">Duplas del mes</div>${dupHTML}</div>
   ${tablaHTML}
-  <div class="leg-card">
-    <div class="leg-title">Referencias</div>
-    <div class="leg-wrap">${legHTML}</div>
-  </div>
-  <div class="print-btn"><button onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button></div>
-  <div class="footer">Jerárquicos Salud · Rotación de Supervisores · ${mes} ${currentYear}</div>
-</div>
-</body></html>`;
-
-  // Abrir como blob — evita popup blocker y funciona siempre
-  const blob = new Blob([html], {type: 'text/html;charset=utf-8'});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener';
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  <div class="lc"><div class="lt">Referencias</div><div class="lw">${legHTML}</div></div>
+  <div class="pb"><button onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button></div>
+  <div class="ft">Jerárquicos Salud · Rotación de Supervisores · ${mes} ${rotYear}</div>
+  </div></body></html>`;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.target='_blank';a.rel='noopener';a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
 }
 
-// ═══════════════════════════════════════════
-// START
-// ═══════════════════════════════════════════
-init();
+// ═══════════════════════════════════════════════════════════════
+// ══ MÓDULO 2: DISTRIBUCIÓN ANUAL ══
+// ═══════════════════════════════════════════════════════════════
+const DA_SUPS=['Fabricio Figueroa','Gisela Spies','Martin Paravan','Jesica Carrasco','Lumila Perri','Alejandra Sosa','David Leiva','Victoria Palombizio','Sol Celli','Ximena Epelbaum','Yanina Pacheco','Marcos Cortella'];
+const DA_N=DA_SUPS.length;
+
+function daGetCascada(mesIndex, year) {
+  const yOff=year-2026, base=(yOff*5)+mesIndex;
+  const patrones=[[0,1,4,7],[0,2,5,8],[0,3,6,9],[0,1,7,10]];
+  const p=patrones[Math.abs(yOff)%patrones.length];
+  return {h:DA_SUPS[(base+p[0])%DA_N],tc1:DA_SUPS[(base+p[1])%DA_N],tc2:DA_SUPS[(base+p[2])%DA_N],ts:DA_SUPS[(base+p[3])%DA_N]};
+}
+
+let daEditMode=false;
+document.getElementById('da-edit-mode').onchange=function(){daEditMode=this.checked;daRender();};
+
+function daMakeSel(id, value, cls) {
+  return `<select class="sel-da ${cls}" id="${id}" onchange="daUpdateResumen()">
+    ${DA_SUPS.map(s=>`<option value="${s}" ${s===value?'selected':''}>${s}</option>`).join('')}
+  </select>`;
+}
+
+let daSavedData={};
+
+async function daRender() {
+  const year=parseInt(document.getElementById('da-year').value);
+  const saved=daSavedData[year]||{};
+  const tbody=document.getElementById('da-tbody'); tbody.innerHTML='';
+  MESES.forEach((mes,i)=>{
+    const auto=daGetCascada(i,year);
+    const rid=`r${year}_${i}`;
+    const h=saved[`${rid}_h`]??auto.h, tc1=saved[`${rid}_tc1`]??auto.tc1, tc2=saved[`${rid}_tc2`]??auto.tc2, ts=saved[`${rid}_ts`]??auto.ts;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><span class="mes-num">${String(i+1).padStart(2,'0')}</span><span class="mes-name">${mes}</span></td>
+      <td>${daEditMode?daMakeSel(`${rid}_h`,h,'sel-h'):`<span class="chip-da chip-h">${h}</span>`}</td>
+      <td><div style="display:flex;gap:6px;flex-wrap:wrap;">${daEditMode?daMakeSel(`${rid}_tc1`,tc1,'sel-tc')+daMakeSel(`${rid}_tc2`,tc2,'sel-tc'):`<span class="chip-da chip-tc">${tc1}</span><span class="chip-da chip-tc">${tc2}</span>`}</div></td>
+      <td>${daEditMode?daMakeSel(`${rid}_ts`,ts,'sel-ts'):`<span class="chip-da chip-ts">${ts}</span>`}</td>`;
+    tbody.appendChild(tr);
+  });
+  daUpdateResumen();
+}
+
+function daGetValues() {
+  const year=parseInt(document.getElementById('da-year').value);
+  const saved=daSavedData[year]||{};
+  return MESES.map((_,i)=>{
+    const rid=`r${year}_${i}`, auto=daGetCascada(i,year);
+    return {mes:i,
+      h:  (daEditMode?document.getElementById(`${rid}_h`)?.value:null)??saved[`${rid}_h`]??auto.h,
+      tc1:(daEditMode?document.getElementById(`${rid}_tc1`)?.value:null)??saved[`${rid}_tc1`]??auto.tc1,
+      tc2:(daEditMode?document.getElementById(`${rid}_tc2`)?.value:null)??saved[`${rid}_tc2`]??auto.tc2,
+      ts: (daEditMode?document.getElementById(`${rid}_ts`)?.value:null)??saved[`${rid}_ts`]??auto.ts,
+    };
+  });
+}
+
+function daUpdateResumen() {
+  const year=parseInt(document.getElementById('da-year').value);
+  const rows=daGetValues(), cnt={};
+  DA_SUPS.forEach(s=>cnt[s]={total:0,tags:[]});
+  rows.forEach(r=>{
+    const nm=MESES[r.mes].substring(0,3);
+    const add=(name,tcls,lbl)=>{if(cnt[name]){cnt[name].total++;cnt[name].tags.push(`<span class="tag ${tcls}">${lbl}·${nm}</span>`);}};
+    add(r.h,'tag-h','H');add(r.tc1,'tag-tc','TC');add(r.tc2,'tag-tc','TC');add(r.ts,'tag-ts','TS');
+  });
+  const grid=document.getElementById('da-res-grid'); grid.innerHTML='';
+  DA_SUPS.forEach(s=>{
+    grid.innerHTML+=`<div class="da-res-card"><div class="da-res-head"><span class="da-res-name">${s}</span><span class="da-res-total">${cnt[s].total}</span></div><div class="da-res-tags">${cnt[s].tags.join('')}</div></div>`;
+  });
+}
+
+async function daSave() {
+  const year=parseInt(document.getElementById('da-year').value);
+  if(!daEditMode){alert('Activá Modo Edición primero.');return;}
+  const data={};
+  MESES.forEach((_,i)=>{
+    const rid=`r${year}_${i}`;
+    data[`${rid}_h`]=document.getElementById(`${rid}_h`).value;
+    data[`${rid}_tc1`]=document.getElementById(`${rid}_tc1`).value;
+    data[`${rid}_tc2`]=document.getElementById(`${rid}_tc2`).value;
+    data[`${rid}_ts`]=document.getElementById(`${rid}_ts`).value;
+  });
+  daSavedData[year]=data;
+  setSyncStatus('saving');
+  const ok=await sbUpsert('js_dist_anual',{key:'tareas_'+year,data:JSON.stringify(data),updated_at:new Date().toISOString()});
+  setSyncStatus(ok?'ok':'error');
+  if(ok)alert('✅ Guardado en Supabase');
+  daRender();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ══ MÓDULO 3: GUARDIAS SÁBADOS ══
+// ═══════════════════════════════════════════════════════════════
+const SAB_SUPS=['Martin Paravan','Yanina Pacheco','Fabricio Figueroa','Gisela Spies','Ximena Epelbaum','Sol Celli','Jesica Carrasco','Victoria Palombizio','Alejandra Sosa','Marcos Cortella','Lumila Perri','David Leiva'];
+const SAB_SEED=new Date(2026,0,3);
+
+function sabGetSup(targetDate) {
+  const diff=Math.round((targetDate.getTime()-SAB_SEED.getTime())/(7*24*60*60*1000));
+  return SAB_SUPS[((diff%SAB_SUPS.length)+SAB_SUPS.length)%SAB_SUPS.length];
+}
+
+let sabSavedData={};
+
+async function sabRender() {
+  const year=parseInt(document.getElementById('sab-year').value);
+  const saved=sabSavedData[year]||{sab:{},fer:[]};
+  const grid=document.getElementById('sab-grid'); grid.innerHTML='';
+  MESES.forEach((mes,mi)=>{
+    const card=document.createElement('div'); card.className='sab-card';
+    card.innerHTML=`<h3>${mes}</h3>`;
+    let d=new Date(year,mi,1);
+    while(d.getMonth()===mi){
+      if(d.getDay()===6){
+        const fd=`sab-${year}-${mi}-${d.getDate()}`;
+        const fechaStr=`${String(d.getDate()).padStart(2,'0')}/${String(mi+1).padStart(2,'0')}`;
+        const auto=sabGetSup(d);
+        const val=saved.sab[fd]||auto;
+        const item=document.createElement('div'); item.className='guardia-item';
+        item.innerHTML=`<div class="fecha-lbl">Sáb ${fechaStr}</div>
+          <select class="sel-sup sab-sel" id="${fd}" onchange="sabUpdateResumen()">
+            ${SAB_SUPS.map(s=>`<option value="${s}" ${s===val?'selected':''}>${s}</option>`).join('')}
+          </select>`;
+        card.appendChild(item);
+      }
+      d.setDate(d.getDate()+1);
+    }
+    grid.appendChild(card);
+  });
+  // Feriados
+  document.getElementById('sab-fer-body').innerHTML='';
+  (saved.fer||[]).forEach(f=>sabAddFeriadoRow(f.fd,f.fs,f.desc,f.resp));
+  sabUpdateResumen();
+}
+
+function sabAddFeriado(){sabAddFeriadoRow('','','','');}
+function sabAddFeriadoRow(fd='',fs='',desc='',resp=''){
+  const tbody=document.getElementById('sab-fer-body');
+  const tr=document.createElement('tr'); tr.className='fer-row';
+  tr.innerHTML=`<td><input type="text" class="fer-input f-dia" placeholder="Lun 16/02" value="${fd}"></td>
+    <td><input type="text" class="fer-input f-sab" placeholder="Sáb 14/02" value="${fs}"></td>
+    <td><input type="text" class="fer-input f-desc" placeholder="Motivo" value="${desc}"></td>
+    <td><select class="sel-sup f-resp" onchange="sabUpdateResumen()">
+      <option value="">- Seleccionar -</option>
+      ${SAB_SUPS.map(s=>`<option value="${s}" ${s===resp?'selected':''}>${s}</option>`).join('')}
+    </select></td>
+    <td><button class="btn-del" onclick="this.parentElement.parentElement.remove();sabUpdateResumen();">✖</button></td>`;
+  tbody.appendChild(tr); sabUpdateResumen();
+}
+
+function sabUpdateResumen(){
+  const body=document.getElementById('sab-res-body'); body.innerHTML='';
+  const cnt={}; SAB_SUPS.forEach(s=>cnt[s]={total:0,fechas:[]});
+  document.querySelectorAll('.sab-sel').forEach(sel=>{
+    const v=sel.value;if(cnt[v]){cnt[v].total++;cnt[v].fechas.push(sel.parentElement.querySelector('.fecha-lbl')?.innerText.replace('Sáb ',''));}
+  });
+  document.querySelectorAll('.fer-row').forEach(row=>{
+    const resp=row.querySelector('.f-resp').value, fSab=row.querySelector('.f-sab').value;
+    if(cnt[resp]){cnt[resp].total++;cnt[resp].fechas.push(`${fSab}*`);}
+  });
+  SAB_SUPS.forEach(s=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><b>${s}</b></td><td class="cnt">${cnt[s].total}</td><td class="dates">${cnt[s].fechas.join(' · ')}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+async function sabSave(){
+  const year=parseInt(document.getElementById('sab-year').value);
+  const sab={};
+  document.querySelectorAll('.sab-sel').forEach(s=>sab[s.id]=s.value);
+  const fer=[];
+  document.querySelectorAll('.fer-row').forEach(row=>{
+    fer.push({fd:row.querySelector('.f-dia').value,fs:row.querySelector('.f-sab').value,desc:row.querySelector('.f-desc').value,resp:row.querySelector('.f-resp').value});
+  });
+  sabSavedData[year]={sab,fer};
+  setSyncStatus('saving');
+  const ok=await sbUpsert('js_dist_anual',{key:'sabados_'+year,data:JSON.stringify({sab,fer}),updated_at:new Date().toISOString()});
+  setSyncStatus(ok?'ok':'error');
+  if(ok)alert('✅ Guardado en Supabase');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ══ MÓDULO 4: PLANILLA HORARIOS ══
+// ═══════════════════════════════════════════════════════════════
+let phSupervisores=[
+  {n:'Martin Paravan',   d:'Marcos Cortella',      g:'A',h:'08 a 16'},
+  {n:'Marcos Cortella',  d:'Martin Paravan',        g:'B',h:'08 a 16'},
+  {n:'Alejandra Sosa',   d:'Ximena Epelbaum',       g:'A',h:'08 a 16'},
+  {n:'Ximena Epelbaum',  d:'Alejandra Sosa',        g:'B',h:'11 a 19'},
+  {n:'Gisela Spies',     d:'Victoria Palombizio',   g:'A',h:'08 a 16'},
+  {n:'Victoria Palombizio',d:'Gisela Spies',        g:'B',h:'08 a 16'},
+  {n:'Fabricio Figueroa',d:'Jesica Carrasco',       g:'A',h:'11 a 19'},
+  {n:'Jesica Carrasco',  d:'Fabricio Figueroa',     g:'B',h:'08 a 16'},
+  {n:'Lumila Perri',     d:'David Leiva',           g:'A',h:'07 a 15'},
+  {n:'David Leiva',      d:'Lumila Perri',          g:'B',h:'07 a 15'},
+  {n:'Yanina Pacheco',   d:'Sol Celli',             g:'A',h:'08 a 16'},
+  {n:'Sol Celli',        d:'Yanina Pacheco',        g:'B',h:'08 a 16'},
+];
+const phHorarios=['07 a 15','08 a 16','11 a 19'];
+let phSavedData={};
+
+function phRender(){
+  const [y,m]=document.getElementById('ph-month').value.split('-');
+  let d=new Date(y,m-1,1);
+  while(d.getDay()!==1)d.setDate(d.getDate()+1);
+  let days=[];let startM=d.getMonth();
+  while(d.getMonth()===startM||days.length<20){
+    if(d.getDay()!==0&&d.getDay()!==6)days.push(new Date(d));
+    d.setDate(d.getDate()+1);if(days.length>=25)break;
+  }
+  const header=document.getElementById('ph-header');
+  const body=document.getElementById('ph-body');
+  const foot=document.getElementById('ph-foot');
+  header.innerHTML='<th class="ph-sticky">Supervisor / Dupla</th>';
+  foot.innerHTML='<td class="ph-sticky" style="text-align:left;padding-left:16px;"><b>Meta: 6</b></td>';
+  days.forEach((wd,i)=>{
+    header.innerHTML+=`<th>${['L','M','M','J','V'][wd.getDay()-1]}<br>${wd.getDate()}</th>`;
+    foot.innerHTML+=`<td id="ph-cnt-${i}"><span class="ph-cnt-invalid">0</span></td>`;
+  });
+  body.innerHTML='';
+  phSupervisores.forEach((s,sIdx)=>{
+    let row=`<tr><td class="ph-sticky">
+      <span class="ph-sup-name">${s.n}</span>
+      <div style="display:flex;align-items:center;gap:4px;margin-top:2px;">
+        <input class="ph-dupla-input" id="ph-dup-${sIdx}" value="${s.d}" onchange="phUpdateDupla(${sIdx},this.value)" onfocus="this.select()">
+        <span style="font-size:9px;color:#ccc;cursor:pointer;" onclick="document.getElementById('ph-dup-${sIdx}').focus()">✏️</span>
+      </div>
+      <div class="ph-week-btns">
+        <span class="ph-wlbl">Estado semana:</span>
+        ${[1,2,3,4,5].map(w=>`<button class="ph-wbtn" onclick="phSetWeekState(${sIdx},${w})">${w}</button>`).join('')}
+        <span class="ph-wlbl">Horario semana:</span>
+        ${[1,2,3,4,5].map(w=>`<button class="ph-wbtn-h" onclick="phSetWeekHorario(${sIdx},${w})">${w}</button>`).join('')}
+      </div>
+    </td>`;
+    days.forEach((_,dIdx)=>{
+      row+=`<td><div style="padding:3px;text-align:center;">
+        <div class="ph-badge bg-home" id="ph-st-${sIdx}-${dIdx}" onclick="phToggleSt(this)">HOME</div>
+        <div class="ph-time" id="ph-tm-${sIdx}-${dIdx}" onclick="phToggleTm(this)">${s.h}</div>
+      </div></td>`;
+    });
+    body.innerHTML+=row+'</tr>';
+  });
+  phRenderSabados(parseInt(y),parseInt(m),days[0].getDate());
+  phLoadSaved(document.getElementById('ph-month').value);
+  phUpdateCounters();
+}
+
+function phToggleSt(el){
+  const s=[{c:'bg-home',t:'HOME'},{c:'bg-pres',t:'PRES'},{c:'bg-lic',t:'LIC'}];
+  let cur=s.findIndex(x=>el.classList.contains(x.c));
+  const nxt=s[(cur+1)%3];
+  el.className=`ph-badge ${nxt.c}`;el.innerText=nxt.t;phUpdateCounters();
+}
+function phToggleTm(el){el.innerText=phHorarios[(phHorarios.indexOf(el.innerText)+1)%3];}
+function phUpdateDupla(sIdx,v){phSupervisores[sIdx].d=v.trim();}
+function phSetWeekState(sIdx,week){
+  const n=document.querySelectorAll('#ph-header th').length-1;
+  for(let d=0;d<n;d++){if(Math.floor(d/5)+1===week)phToggleSt(document.getElementById(`ph-st-${sIdx}-${d}`));}
+}
+function phSetWeekHorario(sIdx,week){
+  const n=document.querySelectorAll('#ph-header th').length-1;
+  for(let d=0;d<n;d++){if(Math.floor(d/5)+1===week)phToggleTm(document.getElementById(`ph-tm-${sIdx}-${d}`));}
+}
+function phUpdateCounters(){
+  const n=document.querySelectorAll('#ph-header th').length-1;
+  for(let j=0;j<n;j++){
+    let p=0;phSupervisores.forEach((_,i)=>{const el=document.getElementById(`ph-st-${i}-${j}`);if(el&&el.innerText==='PRES')p++;});
+    const td=document.getElementById(`ph-cnt-${j}`);if(td){td.innerHTML=`<span class="${p===6?'ph-cnt-valid':'ph-cnt-invalid'}">${p}</span>`;}
+  }
+}
+function phAutoAB(){
+  const n=document.querySelectorAll('#ph-header th').length-1;
+  phSupervisores.forEach((s,sIdx)=>{
+    for(let d=0;d<n;d++){
+      const wk=Math.floor(d/5),isP=(wk%2===0)?(s.g==='A'):(s.g==='B');
+      const el=document.getElementById(`ph-st-${sIdx}-${d}`);
+      el.className=isP?'ph-badge bg-pres':'ph-badge bg-home';el.innerText=isP?'PRES':'HOME';
+    }
+  });
+  phSupervisores.forEach((s,sIdx)=>{
+    const duplaIdx=phSupervisores.findIndex(x=>x.n===s.d);
+    if(duplaIdx!==-1){
+      for(let d=0;d<n;d++){
+        const me=document.getElementById(`ph-st-${sIdx}-${d}`),dup=document.getElementById(`ph-st-${duplaIdx}-${d}`);
+        if(!me||!dup)continue;
+        if(me.innerText===dup.innerText&&me.innerText!=='LIC'){
+          const opp=me.innerText==='PRES'?{c:'bg-home',t:'HOME'}:{c:'bg-pres',t:'PRES'};
+          dup.className=`ph-badge ${opp.c}`;dup.innerText=opp.t;
+        }
+      }
+    }
+  });
+  phUpdateCounters();
+}
+
+function phRenderSabados(y,m,startDay){
+  const sb=document.getElementById('ph-sab-body');sb.innerHTML='';
+  let d=new Date(y,m-1,startDay),i=0,cnt=0;
+  while(cnt<5){if(d.getDay()===6){sb.innerHTML+=`<tr><td style="padding:8px 12px;border-bottom:1px solid var(--border)">${d.getDate()}/${d.getMonth()+1}</td><td style="padding:8px 12px;border-bottom:1px solid var(--border)" contenteditable="true">${phSupervisores[i%12].n}</td></tr>`;i++;cnt++;}d.setDate(d.getDate()+1);}
+}
+
+async function phSave(){
+  const month=document.getElementById('ph-month').value;
+  const n=document.querySelectorAll('#ph-header th').length-1;
+  const states=[];
+  phSupervisores.forEach((_,sIdx)=>{
+    for(let dIdx=0;dIdx<n;dIdx++){
+      const st=document.getElementById(`ph-st-${sIdx}-${dIdx}`),tm=document.getElementById(`ph-tm-${sIdx}-${dIdx}`);
+      if(st)states.push({sIdx,dIdx,stClass:st.className,stText:st.innerText,tmText:tm?tm.innerText:''});
+    }
+  });
+  const data={states,guards:document.getElementById('ph-guards-body').innerHTML,saturdays:document.getElementById('ph-sab-body').innerHTML,duplas:phSupervisores.map(s=>s.d)};
+  phSavedData[month]=data;
+  setSyncStatus('saving');
+  const ok=await sbUpsert('js_dist_anual',{key:'horarios_'+month,data:JSON.stringify(data),updated_at:new Date().toISOString()});
+  setSyncStatus(ok?'ok':'error');
+  if(ok)alert('✅ Guardado en Supabase');
+}
+
+function phLoadSaved(month){
+  const saved=phSavedData[month];if(!saved)return;
+  if(saved.duplas)saved.duplas.forEach((d,i)=>{if(phSupervisores[i])phSupervisores[i].d=d;const inp=document.getElementById(`ph-dup-${i}`);if(inp)inp.value=d;});
+  saved.states.forEach(item=>{
+    const st=document.getElementById(`ph-st-${item.sIdx}-${item.dIdx}`),tm=document.getElementById(`ph-tm-${item.sIdx}-${item.dIdx}`);
+    if(st){st.className=item.stClass;st.innerText=item.stText;}
+    if(tm)tm.innerText=item.tmText;
+  });
+  if(saved.guards)document.getElementById('ph-guards-body').innerHTML=saved.guards;
+  if(saved.saturdays)document.getElementById('ph-sab-body').innerHTML=saved.saturdays;
+  phUpdateCounters();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT — cargar todo desde Supabase
+// ═══════════════════════════════════════════════════════════════
+async function init() {
+  setSyncStatus('loading');
+
+  // 1. Crear tabla js_dist_anual si no existe (via upsert vacío la inicializa)
+  // 2. Cargar overrides de rotación
+  const ovRows = await sbGet('rotacion_overrides','?select=key,role_id');
+  if (Array.isArray(ovRows)) {
+    ovRows.forEach(row => { rotOverrides[row.key] = row.role_id; });
+  }
+
+  // 3. Cargar datos de distribución anual + sábados + horarios
+  const rows = await sbGet('js_dist_anual','?select=key,data');
+  if (Array.isArray(rows)) {
+    rows.forEach(row => {
+      try {
+        const data = JSON.parse(row.data);
+        if (row.key.startsWith('tareas_')) {
+          const year = parseInt(row.key.replace('tareas_',''));
+          daSavedData[year] = data;
+        } else if (row.key.startsWith('sabados_')) {
+          const year = parseInt(row.key.replace('sabados_',''));
+          sabSavedData[year] = data;
+        } else if (row.key.startsWith('horarios_')) {
+          const month = row.key.replace('horarios_','');
+          phSavedData[month] = data;
+        }
+      } catch(e) {}
+    });
+  }
+
+  setSyncStatus('ok');
+  rotRender();
+}
+
+// Iniciar
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
