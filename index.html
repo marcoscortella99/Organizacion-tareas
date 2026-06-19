@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rotación Mensual — Supervisores JS · Jerárquicos Salud</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue:    #003087;
+  --blue-md: #0047b3;
+  --blue-lt: #e8eef8;
+  --blue-xs: #f0f4fb;
+  --green:   #00a651;
+  --green-lt:#e6f7ee;
+  --gray-90: #1a1d23;
+  --gray-70: #4a4f5c;
+  --gray-50: #8a909e;
+  --gray-20: #d8dce6;
+  --gray-10: #f2f4f8;
+  --white:   #ffffff;
+
+  /* rol colors */
+  --c-guardia-a:  #dbeafe; --t-guardia-a:  #1e3a8a;
+  --c-guardia-b:  #bfdbfe; --t-guardia-b:  #1e3a8a;
+  --c-bandeja:    #d1fae5; --t-bandeja:    #064e3b;
+  --c-kh:         #ede9fe; --t-kh:         #3b0764;
+  --c-entrena:    #fce7f3; --t-entrena:    #831843;
+  --c-deslogueo-a:#fef9c3; --t-deslogueo-a:#713f12;
+  --c-deslogueo-b:#fef08a; --t-deslogueo-b:#713f12;
+  --c-7076:       #e0f2fe; --t-7076:       #075985;
+  --c-solo7076:   #bae6fd; --t-solo7076:   #0c4a6e;
+  --c-subtareas:  #ccfbf1; --t-subtareas:  #134e4a;
+  --c-des7076:    #fef9c3; --t-des7076:    #713f12;
+  --c-7076des:    #fde68a; --t-7076des:    #92400e;
+  --c-licencia:   #f8fafc; --t-licencia:   #64748b;
+  --c-feriado:    #fef3c7; --t-feriado:    #92400e;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow:    0 1px 3px rgba(0,48,135,.08), 0 4px 16px rgba(0,48,135,.06);
+  --shadow-md: 0 2px 8px rgba(0,48,135,.12), 0 8px 32px rgba(0,48,135,.08);
+}
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--gray-10);
+  color: var(--gray-90);
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* ── Header ── */
+.header {
+  background: var(--blue);
+  color: var(--white);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 2px 12px rgba(0,0,0,.18);
+}
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-logo {
+  width: 32px;
+  height: 32px;
+  background: var(--green);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  flex-shrink: 0;
+}
+.header-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+.header-sub {
+  font-size: 12px;
+  opacity: .65;
+  margin-top: 1px;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Page wrap ── */
+.page { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1.5rem 3rem; }
+
+/* ── Control bar ── */
+.controls {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nav-btn {
+  width: 32px; height: 32px;
+  border: 1px solid var(--gray-20);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gray-70);
+  font-size: 16px;
+  transition: all .15s;
+}
+.nav-btn:hover { background: var(--blue-lt); color: var(--blue); border-color: var(--blue); }
+.month-display {
+  font-size: 16px;
+  font-weight: 600;
+  min-width: 160px;
+  text-align: center;
+  color: var(--blue);
+}
+.divider { width: 1px; height: 28px; background: var(--gray-20); }
+
+.offset-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--gray-70);
+}
+.offset-control label { font-weight: 500; white-space: nowrap; }
+.offset-control select {
+  border: 1px solid var(--gray-20);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--gray-90);
+  background: var(--white);
+  cursor: pointer;
+}
+
+.view-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--gray-10);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+.view-tab {
+  padding: 4px 12px;
+  border-radius: 5px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-50);
+  cursor: pointer;
+  transition: all .15s;
+}
+.view-tab.active {
+  background: var(--white);
+  color: var(--blue);
+  box-shadow: 0 1px 4px rgba(0,48,135,.12);
+}
+
+.spacer { flex: 1; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-20);
+  background: var(--white);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-70);
+  cursor: pointer;
+  transition: all .15s;
+  text-decoration: none;
+}
+.btn:hover { background: var(--gray-10); border-color: var(--gray-50); }
+.btn-primary {
+  background: var(--blue);
+  color: var(--white);
+  border-color: var(--blue);
+}
+.btn-primary:hover { background: var(--blue-md); }
+.btn-green {
+  background: var(--green);
+  color: var(--white);
+  border-color: var(--green);
+}
+.btn-green:hover { background: #008a44; }
+
+/* ── Info banner ── */
+.info-banner {
+  background: var(--blue-xs);
+  border: 1px solid var(--blue-lt);
+  border-radius: var(--radius-md);
+  padding: .75rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--blue);
+  line-height: 1.5;
+}
+.info-banner .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.info-banner strong { font-weight: 600; }
+
+/* ── Legend ── */
+.legend-bar {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  padding: .75rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1.25rem;
+  align-items: center;
+}
+.legend-title { font-size: 11px; font-weight: 600; color: var(--gray-50); text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
+.leg { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--gray-70); }
+.leg-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* ── Table view ── */
+.table-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Mostrar scrollbar siempre visible en desktop como pista visual */
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-20) transparent;
+}
+.table-wrap::-webkit-scrollbar { height: 6px; }
+.table-wrap::-webkit-scrollbar-track { background: transparent; }
+.table-wrap::-webkit-scrollbar-thumb { background: var(--gray-20); border-radius: 10px; }
+table { width: 100%; border-collapse: collapse; min-width: 900px; }
+thead th {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-50);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: 10px 6px;
+  background: var(--gray-10);
+  border-bottom: 2px solid var(--gray-20);
+  text-align: center;
+  white-space: nowrap;
+}
+thead th.col-sup {
+  text-align: left;
+  padding-left: 1.25rem;
+  min-width: 150px;
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: var(--gray-10);
+  box-shadow: 2px 0 6px rgba(0,48,135,.08);
+}
+thead th.col-day { min-width: 68px; }
+thead th.feriado-head { background: var(--c-feriado); color: var(--t-feriado); }
+thead th.licencia-head { background: var(--gray-10); color: var(--gray-50); opacity: .6; }
+
+tbody tr { border-bottom: 1px solid var(--gray-10); }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover td { background: #fafbff; }
+tbody td { padding: 5px 4px; text-align: center; vertical-align: middle; }
+tbody td.col-sup {
+  text-align: left;
+  padding: 8px 1.25rem;
+  font-weight: 500;
+  font-size: 13px;
+  white-space: nowrap;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--white);
+  box-shadow: 2px 0 6px rgba(0,48,135,.06);
+}
+tbody tr:hover td.col-sup { background: #fafbff; }
+tbody td.col-sup .initials {
+  display: inline-flex;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--blue-lt);
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 700;
+  align-items: center;
+  justify-content: center;
+  margin-right: 7px;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.role-chip {
+  display: inline-block;
+  width: calc(100% - 4px);
+  padding: 6px 4px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+  border: none;
+  transition: opacity .12s, transform .08s;
+  text-align: center;
+}
+.role-chip:hover { opacity: .82; transform: scale(.97); }
+
+.role-chip.guardia-a   { background: var(--c-guardia-a); color: var(--t-guardia-a); }
+.role-chip.guardia-b   { background: var(--c-guardia-b); color: var(--t-guardia-b); }
+.role-chip.bandeja     { background: var(--c-bandeja);   color: var(--t-bandeja); }
+.role-chip.kh          { background: var(--c-kh);        color: var(--t-kh); }
+.role-chip.entrena     { background: var(--c-entrena);   color: var(--t-entrena); }
+.role-chip.deslogueo-a { background: var(--c-deslogueo-a); color: var(--t-deslogueo-a); }
+.role-chip.deslogueo-b { background: var(--c-deslogueo-b); color: var(--t-deslogueo-b); }
+.role-chip.r7076       { background: var(--c-7076);      color: var(--t-7076); }
+.role-chip.solo7076    { background: var(--c-solo7076);  color: var(--t-solo7076); }
+.role-chip.subtareas   { background: var(--c-subtareas);  color: var(--t-subtareas); }
+.role-chip.des7076     { background: var(--c-des7076);    color: var(--t-des7076); }
+.role-chip.r7076des    { background: var(--c-7076des);    color: var(--t-7076des); }
+.role-chip.licencia    { background: var(--c-licencia);  color: var(--t-licencia); border: 1px dashed var(--gray-20); }
+.role-chip.feriado-cell { background: var(--c-feriado);  color: var(--t-feriado); opacity: .5; cursor: default; }
+td.feriado-col { background: #fffbeb; }
+
+.summary-row td { 
+  background: var(--gray-10) !important; 
+  font-size: 10px; 
+  font-weight: 600; 
+  color: var(--gray-50);
+  padding: 5px 3px;
+  border-top: 1px solid var(--gray-20);
+}
+.summary-row td.col-sup {
+  padding-left: 1.25rem;
+  color: var(--gray-70);
+  font-size: 11px;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--gray-10) !important;
+  box-shadow: 2px 0 6px rgba(0,48,135,.06);
+}
+
+/* ── Summary cards view ── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.sup-card {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sup-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--gray-10);
+}
+.sup-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--blue-lt);
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sup-name { font-size: 13px; font-weight: 600; color: var(--gray-90); line-height: 1.2; }
+.sup-days { font-size: 11px; color: var(--gray-50); }
+.role-bars { display: flex; flex-direction: column; gap: 5px; }
+.role-bar-row { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+.role-bar-label { width: 90px; color: var(--gray-70); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+.role-bar-track { flex: 1; height: 6px; background: var(--gray-10); border-radius: 3px; overflow: hidden; }
+.role-bar-fill { height: 100%; border-radius: 3px; }
+.role-bar-count { width: 16px; text-align: right; color: var(--gray-50); font-weight: 600; flex-shrink: 0; }
+
+/* ── Weekly summary ── */
+.week-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.week-block {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.week-header {
+  background: var(--blue);
+  color: var(--white);
+  padding: .6rem 1.25rem;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.week-header .badge {
+  background: rgba(255,255,255,.2);
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* ── Modal ── */
+.modal-bg {
+  position: fixed; inset: 0;
+  background: rgba(0,10,40,.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 500;
+  animation: fadein .15s ease;
+}
+@keyframes fadein { from { opacity: 0 } to { opacity: 1 } }
+.modal {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  width: 340px;
+  max-width: 94vw;
+  overflow: hidden;
+  animation: slidein .18s ease;
+}
+@keyframes slidein { from { transform: translateY(10px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+.modal-head {
+  background: var(--blue);
+  color: var(--white);
+  padding: 1rem 1.25rem;
+}
+.modal-head h3 { font-size: 15px; font-weight: 600; }
+.modal-head p { font-size: 12px; opacity: .7; margin-top: 2px; }
+.modal-body { padding: 1rem 1.25rem; }
+.modal-section { margin-bottom: .9rem; }
+.modal-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--gray-50);
+  margin-bottom: 6px;
+}
+.role-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+.role-option {
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid transparent;
+  text-align: center;
+  transition: all .12s;
+}
+.role-option:hover { filter: brightness(.93); }
+.role-option.sel { outline: 2.5px solid var(--blue); outline-offset: 1px; }
+.modal-footer {
+  padding: .9rem 1.25rem;
+  border-top: 1px solid var(--gray-10);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ── Alert bar ── */
+.alert-bar {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: var(--radius-md);
+  padding: .7rem 1rem;
+  margin-top: 1rem;
+  font-size: 12px;
+  color: #92400e;
+  line-height: 1.5;
+}
+.alert-bar strong { font-weight: 600; }
+.ok-bar {
+  background: var(--green-lt);
+  border: 1px solid #6ee7b7;
+  border-radius: var(--radius-md);
+  padding: .6rem 1rem;
+  margin-top: 1rem;
+  font-size: 12px;
+  color: #065f46;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Print ── */
+@media print {
+  .header, .controls, .info-banner, .legend-bar, .modal-bg { display: none !important; }
+  .page { padding: 0; }
+  .table-card { box-shadow: none; border: 1px solid #ddd; }
+  body { background: white; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .page { padding: 1rem 1rem 2rem; max-width: 100%; }
+  .header { padding: 0 1rem; }
+  .header-title { font-size: 13px; }
+  .header-sub { font-size: 10px; }
+  .header-right { gap: 6px; }
+  .btn { padding: 5px 10px; font-size: 12px; }
+  .controls { gap: .6rem; padding: .75rem 1rem; flex-wrap: wrap; }
+  .divider { display: none; }
+  .spacer { display: none; }
+  .month-display { min-width: 110px; font-size: 14px; }
+  .info-banner { font-size: 11px; }
+  .legend-bar { gap: .4rem .75rem; }
+  .leg-pill { font-size: 10px; padding: 2px 6px; }
+  .summary-grid { grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 8px; }
+}
+
+@media (max-width: 600px) {
+  .page { padding: .75rem .5rem 2rem; }
+  .header { height: auto; padding: .6rem 1rem; flex-wrap: wrap; gap: 8px; }
+  .header-brand { gap: 8px; }
+  .header-logo { width: 28px; height: 28px; font-size: 12px; }
+  .header-title { font-size: 12px; }
+  .header-right { width: 100%; justify-content: flex-end; }
+  .controls { padding: .6rem .75rem; }
+  .offset-control { display: none; }  /* en mobile, offset se oculta */
+  .view-tabs { flex: 1; justify-content: center; }
+  .month-display { min-width: 90px; font-size: 13px; }
+  /* Tabla: chips más pequeños en móvil */
+  .role-chip { font-size: 9px; padding: 4px 2px; }
+  thead th.col-day { min-width: 54px; }
+  thead th.col-sup { min-width: 120px; }
+  tbody td.col-sup { padding: 6px .75rem; font-size: 11px; }
+  tbody td.col-sup .initials { width: 22px; height: 22px; font-size: 9px; margin-right: 5px; }
+  /* Summary cards */
+  .summary-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .sup-card { padding: .75rem; }
+  .sup-name { font-size: 11px; }
+  .role-bar-label { width: 70px; font-size: 10px; }
+  /* Duplas banner */
+  #duplas-banner { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-brand">
+    <div class="header-logo">JS</div>
+    <div>
+      <div class="header-title">Rotación de Tareas Mensuales</div>
+      <div class="header-sub">Supervisores · Jerárquicos Salud</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span id="sync-indicator" style="font-size:11px;color:rgba(255,255,255,.65);display:flex;align-items:center;gap:5px;">
+      <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:#6ee7b7;display:inline-block;"></span>
+      <span id="sync-text">Sincronizado</span>
+    </span>
+    <button class="btn btn-green" onclick="exportCSV()">↓ Exportar CSV</button>
+    <button class="btn btn-primary" onclick="window.print()">⎙ Imprimir</button>
+  </div>
+</header>
+
+<!-- PAGE -->
+<main class="page">
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="month-nav">
+      <button class="nav-btn" onclick="changeMonth(-1)" title="Mes anterior">‹</button>
+      <div class="month-display" id="month-display"></div>
+      <button class="nav-btn" onclick="changeMonth(1)" title="Mes siguiente">›</button>
+    </div>
+    <div class="divider"></div>
+    <div class="offset-control">
+      <label>Ajuste fino (posición +):</label>
+      <select id="offset-sel" onchange="render()">
+        <!-- populated by JS -->
+      </select>
+    </div>
+    <div class="divider"></div>
+    <div class="view-tabs">
+      <button class="view-tab active" id="tab-tabla" onclick="switchView('tabla',this)">Tabla</button>
+      <button class="view-tab" id="tab-semanal" onclick="switchView('semanal',this)">Semanal</button>
+      <button class="view-tab" id="tab-resumen" onclick="switchView('resumen',this)">Resumen</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" onclick="resetOverrides()" title="Eliminar todos los ajustes manuales">↺ Resetear ajustes</button>
+  </div>
+
+  <!-- INFO BANNER -->
+  <div class="info-banner">
+    <span class="icon">ℹ</span>
+    <div>
+      <strong>Rotación en cascada · Fair-Share por Rol + Cuotas + Anti-Consecutivos.</strong>
+      <strong>Guardias por mes (Jul→Dic):</strong> Duplas rotan mensualmente según calendario. La dupla 07-15 tiene más tareas diarias.
+      <strong>Distribución diaria:</strong> 1 KH+WSP · 1 Entrena2+WSP · 1 Bandejas · 2×Des+7076 · 2×Deslogueo+7076 · 2×7076 · 1×7076+Sub.
+      <strong>Equidad:</strong> Des+7076 y Deslogueo+7076 son iguales para los 12 supervisores. Dupla 07-15 recibe más KH, Entrena2, Bandejas, 7076, 7076+Sub.
+      <strong>Anti-consecutivos:</strong> máx. 2 días seguidos de cualquier tarea. Clic en celda para ajuste manual.
+    </div>
+  </div>
+
+  <div class="legend-bar">
+    <span class="legend-title">Roles</span>
+    <div class="leg"><span class="leg-pill" style="background:var(--c-guardia-a);color:var(--t-guardia-a)">Guardia A</span></div>
+    <div class="leg"><span class="leg-pill" style="background:var(--c-guardia-b);color:var(--t-guardia-b)">Guardia B</span></div>
+    <div class="leg"><span class="leg-pill" style="background:var(--c-bandeja);color:var(--t-bandeja)">Bandejas</span> <small style="color:var(--gray-50);font-size:10px">1/día</small></div>
+    <div class="leg"><span class="leg-pill" style="background:var(--c-kh);color:var(--t-kh)">KH + WSP</span> <small style="color:var(--gray-50);font-size:10px">1/día · dupla 07-15</small></div>
+    <div class="leg"><span class="leg-pill" style="background:var(--c-entrena);color:var(--t-entrena)">Entrena2 + WSP</span> <small style="color:var(--gray-50);font-size:10px">1/día · dupla 07-15</small></div>
+    <div class="leg"><span class="leg-pill" style="background:var(--c-7076);color:var(--t-7076)">7076 + Subtareas</span> <small style="color:var(--gray-50);font-size:10px">1/día</small></div>
+    <div class="leg"><span class="leg-pill" style="background:var(--c-solo7076);color:var(--t-solo7076)">7076</span> <small style="color:var(--gray-50);font-size:10px">2/día</small></div>
+    <div class="leg"><span class="leg-pill" style="background:var(--c-des7076);color:var(--t-des7076)">Deslogueo + 7076</span></div>
+    <div class="leg"><span class="leg-pill" style="background:var(--c-7076des);color:var(--t-7076des)">7076 + Deslogueo</span></div>
+    <div class="leg"><span class="leg-pill" style="background:var(--c-licencia);color:var(--t-licencia);border:1px dashed var(--gray-20)">Licencia</span></div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="main-content"></div>
+
+</main>
+
+<!-- MODAL CONTAINER -->
+<div id="modal-root"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════
+const SUPERVISORS = [
+  'Sol Celli','Lumila Perri','Alejandra Sosa','Victoria Palombizio',
+  'David Leiva','Ximena Epelbaum','Fabricio Figueroa','Jesica Carrasco',
+  'Yanina Pacheco','Marcos Cortella','Gisela Spies','Martin Paravan'
+];
+
+const ROLES = [
+  { id:'guardia-a', label:'Guardia A',         cls:'guardia-a',  bg:'var(--c-guardia-a)',  fg:'var(--t-guardia-a)',  group:'base' },
+  { id:'guardia-b', label:'Guardia B',         cls:'guardia-b',  bg:'var(--c-guardia-b)',  fg:'var(--t-guardia-b)',  group:'base' },
+  { id:'bandeja',   label:'Bandejas',           cls:'bandeja',    bg:'var(--c-bandeja)',    fg:'var(--t-bandeja)',    group:'base' },
+  { id:'kh',        label:'KH + WSP',          cls:'kh',         bg:'var(--c-kh)',         fg:'var(--t-kh)',         group:'base' },
+  { id:'entrena',   label:'Entrena2 + WSP',    cls:'entrena',    bg:'var(--c-entrena)',    fg:'var(--t-entrena)',    group:'base' },
+  { id:'r7076',     label:'7076 + Subtareas',  cls:'r7076',      bg:'var(--c-7076)',       fg:'var(--t-7076)',       group:'linea' },
+  { id:'solo7076',  label:'7076',              cls:'solo7076',   bg:'var(--c-solo7076)',   fg:'var(--t-solo7076)',   group:'linea' },
+  { id:'des7076',   label:'Deslogueo + 7076',  cls:'des7076',    bg:'var(--c-des7076)',    fg:'var(--t-des7076)',    group:'linea' },
+  { id:'r7076des',  label:'7076 + Deslogueo',  cls:'r7076des',   bg:'var(--c-7076des)',    fg:'var(--t-7076des)',    group:'linea' },
+  { id:'licencia',  label:'Licencia',          cls:'licencia',   bg:'var(--c-licencia)',   fg:'var(--t-licencia)',   group:'extra' },
+];
+
+// Roles visibles en resumen y tabla de equidad
+const ROLE_IDS = ['guardia-a','guardia-b','bandeja','kh','entrena','r7076','solo7076','des7076','r7076des'];
+const MESES       = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIAS_CORTO  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+// ── Supabase ──────────────────────────────────────────────────────
+const SB_URL = 'https://vadqwxrbonrbohvbeqdo.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhZHF3eHJib25yYm9odmJlcWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MDc5ODUsImV4cCI6MjA5NzM4Mzk4NX0.Z9RATLBJ2UKY-TydxtTP1JWlvRgkSsIK9kEAOjrmyy0';
+const sbH = () => ({ 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' });
+
+function setSyncStatus(status) {
+  const dot  = document.getElementById('sync-dot');
+  const text = document.getElementById('sync-text');
+  if (!dot || !text) return;
+  if (status === 'saving') { dot.style.background = '#fcd34d'; text.textContent = 'Guardando...'; }
+  else if (status === 'ok') { dot.style.background = '#6ee7b7'; text.textContent = 'Sincronizado'; }
+  else { dot.style.background = '#f87171'; text.textContent = 'Sin conexión'; }
+}
+
+async function sbLoadOverrides() {
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/rotacion_overrides?select=key,role_id', { headers: sbH() });
+    const rows = await r.json();
+    if (Array.isArray(rows)) {
+      overrides = {};
+      rows.forEach(row => { overrides[row.key] = row.role_id; });
+    }
+  } catch(e) { console.warn('No se pudo cargar overrides de Supabase:', e); }
+}
+
+async function sbSaveOverride(key, roleId) {
+  setSyncStatus('saving');
+  try {
+    await fetch(SB_URL + '/rest/v1/rotacion_overrides', {
+      method: 'POST',
+      headers: { ...sbH(), 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ key, role_id: roleId, updated_at: new Date().toISOString() })
+    });
+    setSyncStatus('ok');
+  } catch(e) { setSyncStatus('error'); console.warn('Error guardando override:', e); }
+}
+
+async function sbDeleteOverride(key) {
+  try {
+    await fetch(SB_URL + '/rest/v1/rotacion_overrides?key=eq.' + encodeURIComponent(key), {
+      method: 'DELETE',
+      headers: sbH()
+    });
+  } catch(e) { console.warn('Error eliminando override:', e); }
+}
+
+async function sbClearAllOverrides() {
+  try {
+    await fetch(SB_URL + '/rest/v1/rotacion_overrides?id=gt.0', {
+      method: 'DELETE',
+      headers: sbH()
+    });
+  } catch(e) { console.warn('Error limpiando overrides:', e); }
+}
+
+// STATE
+let currentYear  = 2026;
+let currentMonth = 5; // 0-indexed
+let currentView  = 'tabla';
+let overrides    = {}; // key: "sup|YYYY-MM-DD" => roleId — sincronizado con Supabase
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function getWorkDays(y, m) {
+  const days = [];
+  const d = new Date(y, m, 1);
+  // Avanzar hasta el primer lunes del mes
+  while (d.getDay() !== 1) {
+    d.setDate(d.getDate() + 1);
+    // Si nos pasamos de mes (mes que empieza en sábado/domingo y el lunes es del mes siguiente)
+    if (d.getMonth() !== m) break;
+  }
+  while (d.getMonth() === m) {
+    if (d.getDay() !== 0 && d.getDay() !== 6) days.push(new Date(d));
+    d.setDate(d.getDate() + 1);
+  }
+  return days;
+}
+
+function isHoliday(d) {
+  // Argentina: feriados nacionales hardcoded para 2026 (ampliable)
+  const holidays = ['2026-06-15','2026-07-09','2026-08-17','2026-10-12','2026-11-23','2026-12-08','2026-12-25'];
+  return holidays.includes(fmtDate(d));
+}
+
+function fmtDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function fmtDisp(d) { return `${DIAS_CORTO[d.getDay()]} ${d.getDate()}`; }
+function initials(name) { return name.split(' ').slice(0,2).map(w=>w[0]).join(''); }
+function okey(sup, date) { return `${sup}|${date}`; }
+
+function getOffset() { return parseInt(document.getElementById('offset-sel').value) || 0; }
+
+// ─────────────────────────────────────────────────────────────────
+// SISTEMA DE DUPLAS MENSUALES ROTANTES (Jul 2026 → Dic 2026)
+// Rotación: cada mes, viernes→07-15, 07-15→lunes, lunes→martes...
+//
+// Julio base:
+//   07-15:  Lumi + David
+//   Lunes:  Martin + Marcos
+//   Martes: Ale + Xime
+//   Mierc:  Gise + Vico
+//   Jueves: Fabri + Jesi
+//   Viernes:Yani + Sol
+//
+// Orden de rotación de posiciones (0=07-15,1=Lun,2=Mar,3=Mié,4=Jue,5=Vie):
+//   Cada mes: posición[n] = posición base[(n + mes_offset) % 6]
+// ─────────────────────────────────────────────────────────────────
+
+// Duplas base (en orden): [07-15, Lun, Mar, Mié, Jue, Vie]
+const DUPLAS_BASE = [
+  ['Lumila Perri',      'David Leiva'],        // 0: 07-15 en Julio
+  ['Martin Paravan',    'Marcos Cortella'],     // 1: Lun en Julio
+  ['Alejandra Sosa',    'Ximena Epelbaum'],     // 2: Mar en Julio
+  ['Gisela Spies',      'Victoria Palombizio'], // 3: Mié en Julio
+  ['Fabricio Figueroa', 'Jesica Carrasco'],     // 4: Jue en Julio
+  ['Yanina Pacheco',    'Sol Celli'],           // 5: Vie en Julio
+];
+
+// Julio = mes 6 (0-indexed). Para cada mes, calcular offset respecto a Julio.
+// La rotación es: cada mes, el horario 07-15 pasa a Lunes, Lun→Mar...Vie→07-15
+// Es decir, las posiciones rotan: 07-15 <- Vie <- Jue <- Mié <- Mar <- Lun <- 07-15
+// En términos de duplas: cada mes, la dupla que estaba en posición P va a posición (P+1)%6
+// Así en Julio (offset 0): dupla 0 → pos 07-15, dupla 1 → Lun, etc.
+// En Agosto (offset 1): dupla 5 → pos 07-15, dupla 0 → Lun, dupla 1 → Mar, etc.
+// => posición_idx para una dupla D en mes_offset M: posición = (D - M + 6) % 6... 
+// Más simple: para mes offset M, la posición P tiene la dupla índice (P + M) % 6
+
+function getDuplasForMonth(year, month) {
+  // Offset respecto a Julio 2026 (mes 6)
+  const julioRef = (2026 - year) * 12 + 6; 
+  const offset   = ((month - 6) - (year - 2026) * 12); // meses desde Julio
+  // Normalizar offset (puede ser negativo si el mes es antes de Julio)
+  const off = ((offset % 6) + 6) % 6;
+
+  // Para cada posición (0=07-15, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie)
+  // La dupla asignada es DUPLAS_BASE[(posición + off) % 6]
+  // off=0 → Julio, off=1 → Agosto, etc.
+  
+  // Retorna: { '07-15': [sup1, sup2], 1: [sup1, sup2], 2: ..., 3:..., 4:..., 5:... }
+  const result = {};
+  // Posición 0 → 07-15 (sin guardia en sala, hace más tareas)
+  result['0715'] = DUPLAS_BASE[(0 + off) % 6];
+  // Posiciones 1-5 → Lun-Vie (guardia en sala)
+  for (let dow = 1; dow <= 5; dow++) {
+    result[dow] = DUPLAS_BASE[(dow + off) % 6];
+  }
+  return result;
+}
+
+function getGuardiaDupla(dow, year, month) {
+  const duplas = getDuplasForMonth(year, month);
+  return duplas[dow] || [];
+}
+
+function getDupla0715(year, month) {
+  return getDuplasForMonth(year, month)['0715'] || [];
+}
+
+// ═══════════════════════════════════════════
+// CALENDARIO DIARIO
+// Cada día hábil asigna a los 12 supervisores:
+//   2 → Guardia A/B  (fijas por dupla del día)
+//   1 → Bandeja      (1 por día, rotativo)
+//   1 → KH + WSP     (1 por día, rotativo)
+//   1 → Entrena2     (1 por día, rotativo)
+//   7 → 7076 (subtareas · des+7076 · 7076+des en cascada equitativa)
+// Sin deslogueo puro — eliminado.
+// ═══════════════════════════════════════════
+
+const _dailyCache = {};
+
+// Roles únicos: exactamente 1 por día, asignado en rotación entre los 10 no-guardia
+// ══════════════════════════════════════════════════════════════════
+// MOTOR DE ROTACIÓN — Cascada Fair-Share por Rol + Anti-Consecutivos
+//
+// Objetivo:
+//   • Todos los supervisores rotan por todos los roles (cascada real).
+//   • Deuda por rol: cada día en pool sin recibir el rol R → deuda[R]++.
+//     Cuando lo recibe → deuda[R] -= (nRoles-1). Así converge a equidad.
+//   • Distribución diaria garantizada:
+//       2 guardia · 1 bandeja · 1 kh · 1 entrena
+//       3 r7076 · 2 des7076 · 2 r7076des
+//   • Cuotas mensuales para Lumila y Yanina (sin guardia):
+//       des7076  ≤ 3    r7076des ≤ 3
+//     Para supervisores con guardia:
+//       des7076  ≤ 5    r7076des ≤ 5
+//   • Anti-consecutivos (best-effort): máx 2 días seguidos de
+//       r7076, bandeja, kh, entrena.
+//   • Los slots de cap se asignan PRIMERO (cuando hay más candidatos
+//     disponibles) para que las cuotas se respeten mejor.
+//   • La deuda acumula mes a mes → equidad continua todo el año.
+// ══════════════════════════════════════════════════════════════════
+
+const ANTI_CONSEC_ROLES = new Set(['r7076', 'solo7076', 'bandeja', 'kh', 'entrena', 'des7076', 'r7076des']);
+const ALL_TASK_ROLES    = ['bandeja','kh','entrena','r7076','solo7076','des7076','r7076des'];
+
+// ── Grupos anti-consecutivo ───────────────────────────────────
+// TAREAS: bandeja, kh, entrena  → máx 2 días seguidos en el grupo
+// LINEA:  r7076, solo7076, des7076, r7076des → máx 2 días seguidos en el grupo
+const GRUPO_TAREAS     = new Set(['bandeja','kh','entrena']);
+const GRUPO_LINEA      = new Set(['r7076','solo7076','des7076','r7076des']);
+const MAX_CONSEC_ROL   = 2;
+const MAX_CONSEC_GRUPO = 2;
+
+function getGrupo(roleId) {
+  if (GRUPO_TAREAS.has(roleId)) return 'tareas';
+  if (GRUPO_LINEA.has(roleId))  return 'linea';
+  return null;
+}
+
+// ORDEN DE ASIGNACIÓN:
+// Los slots "extras" (bandeja/kh/entrena/solo7076/r7076) van primero
+// con filtro que prioriza la dupla 07-15. Luego des7076/r7076des para el pool general.
+// Slots diarios: 10 asignaciones para los 10 supervisores disponibles (pool sin guardia hoy)
+// des7076/r7076des PRIMERO → cuando hay más candidatos → el cap actúa antes de agotar el pool
+// Luego los demás roles en orden de deuda fair-share
+const DAILY_SLOTS = [
+  'des7076','des7076','r7076des','r7076des',
+  'solo7076','solo7076','r7076',
+  'bandeja','kh','entrena',
+];
+
+function monthlyCap(sup, roleId, workdaysCount) {
+  if (roleId === 'des7076' || roleId === 'r7076des') {
+    // Equidad perfecta: floor/ceil de (dias*2)/12
+    return Math.ceil((workdaysCount * 2) / 12);
+  }
+  return 999;
+}
+
+function buildDailyCal(year, month) {
+  const key = `${year}-${month}`;
+  if (_dailyCache[key]) return _dailyCache[key];
+
+  const manualOff = getOffset();
+
+  // Cada mes arranca con deuda y consecutivos en cero.
+  // La equidad se logra dentro del mes, no acumulando entre meses.
+  const roleDeuda   = {};
+  const consec      = {};
+  const consecGrupo = {};
+  SUPERVISORS.forEach(s => {
+    roleDeuda[s]   = {};
+    consec[s]      = {};
+    consecGrupo[s] = { tareas: 0, linea: 0 };
+    ALL_TASK_ROLES.forEach(r => { roleDeuda[s][r] = 0; consec[s][r] = 0; });
+  });
+
+  const calendar = {};
+  _runMonth(year, month, roleDeuda, consec, consecGrupo, calendar, manualOff);
+
+  _dailyCache[key] = calendar;
+  return calendar;
+}
+
+function _runMonth(year, month, roleDeuda, consec, consecGrupo, calendar, manualOff) {
+  const workdays  = getWorkDays(year, month).filter(d => !isHoliday(d));
+  const nRoles    = ALL_TASK_ROLES.length;
+  const wdCount   = workdays.length;
+
+  // Cap mensual para des7076/r7076des — equidad exacta entre los 12
+  const capDes = Math.ceil((wdCount * 2) / 12);
+
+  // Contadores mensuales
+  const mc = {};
+  // Cooldown: días desde la última vez que se asignó des7076 o r7076des a cada supervisor
+  // Mínimo 3 días hábiles entre asignaciones del mismo rol (espaciado)
+  const lastDes = {};  // lastDes[sup][rid] = índice del día en workdays
+  const COOLDOWN_DES = 3; // días hábiles mínimos entre des7076/r7076des del mismo supervisor
+  SUPERVISORS.forEach(s => {
+    mc[s] = {};
+    lastDes[s] = {};
+    ALL_TASK_ROLES.forEach(r => { mc[s][r] = 0; lastDes[s][r] = -99; });
+  });
+
+  workdays.forEach((day, dayIdx) => {
+    const fd  = fmtDate(day);
+    const dow = day.getDay();
+
+    // Dupla con guardia en sala hoy (reciben guardia-a / guardia-b)
+    const duplaSala = getGuardiaDupla(dow, year, month);
+    const dayAssign = {};
+    duplaSala.forEach((s, gi) => { dayAssign[s] = gi === 0 ? 'guardia-a' : 'guardia-b'; });
+
+    // Pool disponible = todos menos los 2 de guardia en sala hoy
+    const pool = SUPERVISORS.filter(s => !duplaSala.includes(s));
+    const off  = ((manualOff % pool.length) + pool.length) % pool.length;
+    const poolOff = [...pool.slice(off), ...pool.slice(0, off)];
+
+    const assignedToday = new Set();
+
+    DAILY_SLOTS.forEach(rid => {
+      // Todos en el pool son candidatos — sin priorizar a nadie por horario
+      let cands = poolOff.filter(s => !assignedToday.has(s));
+
+      // ── Anti-consecutivos HARD por ROL: máx 2 días seguidos del mismo rol ──
+      if (ANTI_CONSEC_ROLES.has(rid)) {
+        const noConsec = cands.filter(s => (consec[s][rid] || 0) < MAX_CONSEC_ROL);
+        if (noConsec.length > 0) cands = noConsec;
+      }
+
+      // ── Anti-consecutivos HARD por GRUPO: máx 2 días seguidos en TAREAS o LINEA ──
+      const grupo = getGrupo(rid);
+      if (grupo) {
+        const noGrupo = cands.filter(s => (consecGrupo[s][grupo] || 0) < MAX_CONSEC_GRUPO);
+        if (noGrupo.length > 0) cands = noGrupo;
+      }
+
+      // ── Espaciado mínimo para des7076 y r7076des (cooldown entre asignaciones) ──
+      if (rid === 'des7076' || rid === 'r7076des') {
+        const spaced = cands.filter(s => (dayIdx - lastDes[s][rid]) >= COOLDOWN_DES);
+        if (spaced.length > 0) cands = spaced;
+      }
+
+      // ── Cuota mensual para des7076/r7076des (equidad exacta entre 12) ──
+      if (rid === 'des7076' || rid === 'r7076des') {
+        const underCap = cands.filter(s => mc[s][rid] < capDes);
+        if (underCap.length > 0) cands = underCap;
+      }
+
+      // ── Fair-share: mayor deuda acumulada para este rol ──
+      cands.sort((a, b) => {
+        const dr = roleDeuda[b][rid] - roleDeuda[a][rid];
+        if (dr !== 0) return dr;
+        // Desempate: deuda total
+        const dt = ALL_TASK_ROLES.reduce((acc, r) => acc + roleDeuda[b][r] - roleDeuda[a][r], 0);
+        if (dt !== 0) return dt;
+        // Desempate final: posición en pool
+        return poolOff.indexOf(a) - poolOff.indexOf(b);
+      });
+
+      const chosen = cands[0];
+      dayAssign[chosen] = rid;
+      assignedToday.add(chosen);
+      mc[chosen][rid]++;
+      // Registrar cooldown
+      if (rid === 'des7076' || rid === 'r7076des') {
+        lastDes[chosen][rid] = dayIdx;
+      }
+    });
+
+    // ── Actualizar deuda y contadores consecutivos ──
+    SUPERVISORS.forEach(s => {
+      const role    = dayAssign[s];
+      const isGuard = role === 'guardia-a' || role === 'guardia-b';
+
+      // Solo actualizamos deuda de tareas (no de guardia)
+      if (!isGuard && role) {
+        ALL_TASK_ROLES.forEach(r => {
+          roleDeuda[s][r] = (role === r)
+            ? roleDeuda[s][r] - (nRoles - 1)
+            : roleDeuda[s][r] + 1;
+        });
+      }
+
+      // Consecutivos por rol
+      ALL_TASK_ROLES.forEach(r => {
+        consec[s][r] = (role === r) ? (consec[s][r] || 0) + 1 : 0;
+      });
+
+      // Consecutivos por grupo
+      const grupoHoy = getGrupo(role);
+      consecGrupo[s].tareas = (grupoHoy === 'tareas') ? (consecGrupo[s].tareas || 0) + 1 : 0;
+      consecGrupo[s].linea  = (grupoHoy === 'linea')  ? (consecGrupo[s].linea  || 0) + 1 : 0;
+    });
+
+    if (calendar) calendar[fd] = dayAssign;
+  });
+}
+
+
+function getRole(sup, day) {
+  const fd = fmtDate(day);
+  const k  = okey(sup, fd);
+  if (overrides.hasOwnProperty(k)) return ROLES.find(r => r.id === overrides[k]) || ROLES.find(r => r.id === 'licencia');
+  if (isHoliday(day)) return null;
+  const cal       = buildDailyCal(currentYear, currentMonth);
+  const dayAssign = cal[fd];
+  if (dayAssign && dayAssign[sup]) return ROLES.find(r => r.id === dayAssign[sup]);
+  return null;
+}
+
+function getWeeks(days) {
+  const weeks = [];
+  let week = [];
+  days.forEach(d => {
+    week.push(d);
+    if (d.getDay() === 5 || d === days[days.length-1]) { weeks.push(week); week = []; }
+  });
+  if (week.length) weeks.push(week);
+  return weeks;
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+async function init() {
+  // Poblar selector de offset fino
+  const sel = document.getElementById('offset-sel');
+  for (let i = 0; i < 8; i++) {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = i === 0 ? `Sin ajuste (auto)` : `+${i} posición${i > 1 ? 'es' : ''}`;
+    sel.appendChild(opt);
+  }
+  // Cargar ajustes manuales desde Supabase antes de renderizar
+  document.getElementById('main-content').innerHTML =
+    '<div style="text-align:center;padding:3rem;color:var(--gray-50);font-size:14px;">⏳ Cargando ajustes...</div>';
+  await sbLoadOverrides();
+  render();
+}
+
+// ═══════════════════════════════════════════
+// RENDER ROUTER
+// ═══════════════════════════════════════════
+function changeMonth(dir) {
+  currentMonth += dir;
+  if (currentMonth < 0)  { currentMonth = 11; currentYear--; }
+  if (currentMonth > 11) { currentMonth = 0;  currentYear++; }
+  render();
+}
+
+function switchView(v, btn) {
+  currentView = v;
+  document.querySelectorAll('.view-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+async function resetOverrides() {
+  if (!Object.keys(overrides).length) return;
+  if (!confirm('¿Eliminar todos los ajustes manuales y volver a la rotación automática?')) return;
+  overrides = {};
+  render();
+  await sbClearAllOverrides();
+}
+
+function render() {
+  // Limpiar cache diario al re-renderizar (puede haber cambiado offset)
+  Object.keys(_dailyCache).forEach(k => delete _dailyCache[k]);
+  document.getElementById('month-display').textContent = `${MESES[currentMonth]} ${currentYear}`;
+  const work = getWorkDays(currentYear, currentMonth);
+  if      (currentView === 'tabla')   renderTabla(work);
+  else if (currentView === 'semanal') renderSemanal(work);
+  else                                renderResumen(work);
+  renderDuplasBanner();
+}
+
+function renderDuplasBanner() {
+  const duplas = getDuplasForMonth(currentYear, currentMonth);
+  const pill = (sups, label, color) =>
+    `<span style="background:${color};padding:3px 10px;border-radius:20px;font-weight:600;font-size:11px;white-space:nowrap">
+      <span style="opacity:.65">${label}:</span> ${sups.map(s=>s.split(' ')[0]).join(' + ')}
+    </span>`;
+  const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+  set('dupla-0715-badge', pill(duplas['0715'], '07-15 hs', '#bfdbfe'));
+  set('dupla-lun-badge',  pill(duplas[1], 'Lun', '#d1fae5'));
+  set('dupla-mar-badge',  pill(duplas[2], 'Mar', '#d1fae5'));
+  set('dupla-mie-badge',  pill(duplas[3], 'Mié', '#d1fae5'));
+  set('dupla-jue-badge',  pill(duplas[4], 'Jue', '#d1fae5'));
+  set('dupla-vie-badge',  pill(duplas[5], 'Vie', '#d1fae5'));
+}
+
+// ═══════════════════════════════════════════
+// TABLA COMPLETA
+// ═══════════════════════════════════════════
+function renderTabla(work) {
+  let html = `<div class="table-card"><div class="table-wrap"><table>`;
+
+  // thead
+  html += `<thead><tr><th class="col-sup">Supervisor</th>`;
+  work.forEach(d => {
+    const hol = isHoliday(d);
+    html += `<th class="col-day ${hol?'feriado-head':''}" title="${hol?'Feriado Nacional':''}">${fmtDisp(d)}${hol?' ✶':''}</th>`;
+  });
+  html += `</tr></thead><tbody>`;
+
+  // rows
+  SUPERVISORS.forEach(sup => {
+    html += `<tr><td class="col-sup"><span class="initials">${initials(sup)}</span>${sup}</td>`;
+    work.forEach(d => {
+      const role = getRole(sup, d);
+      const hol  = isHoliday(d);
+      const isOv = overrides.hasOwnProperty(okey(sup, fmtDate(d)));
+      if (hol && !isOv) {
+        html += `<td class="feriado-col"><button class="role-chip feriado-cell" onclick="openModal('${sup}','${fmtDate(d)}')" title="Feriado — click para ajustar">—</button></td>`;
+      } else if (!role) {
+        html += `<td><button class="role-chip licencia" onclick="openModal('${sup}','${fmtDate(d)}')">—</button></td>`;
+      } else {
+        const chip = `<button class="role-chip ${role.cls}${isOv?' ov':''}" onclick="openModal('${esc(sup)}','${fmtDate(d)}')" title="${role.label}${isOv?' · Ajuste manual':''}">${role.label.replace('7076 + ','7076\n+').replace('Deslogueo + ','Des\n+')}</button>`;
+        html += `<td>${chip}</td>`;
+      }
+    });
+    html += `</tr>`;
+  });
+
+  // summary row
+  html += `<tr class="summary-row"><td class="col-sup">Asignados</td>`;
+  work.forEach(d => {
+    const total = SUPERVISORS.filter(s => {
+      const r = getRole(s, d);
+      return r && r.id !== 'licencia';
+    }).length;
+    const color = total < 12 ? '#b45309' : 'var(--gray-50)';
+    html += `<td style="color:${color}">${total}/12</td>`;
+  });
+  html += `</tr></tbody></table></div>`;
+  html += buildAlerts(work);
+  html += buildTablaResumenMensual(work);
+  html += `</div>`;
+
+  document.getElementById('main-content').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+// VISTA SEMANAL
+// ═══════════════════════════════════════════
+function renderSemanal(work) {
+  const weeks = getWeeks(work);
+  const DIAS_FULL = ['Lunes','Martes','Miércoles','Jueves','Viernes'];
+  let html = `<div class="week-cards">`;
+  weeks.forEach((wDays, wi) => {
+    const label = `${wDays[0].getDate()} al ${wDays[wDays.length-1].getDate()} de ${MESES[currentMonth]}`;
+    html += `<div class="week-block">
+      <div class="week-header">
+        Semana ${wi+1}
+        <span class="badge">${label}</span>
+      </div>
+      <div class="table-wrap">
+      <table><thead><tr><th class="col-sup" style="font-size:11px;color:var(--gray-50)">Supervisor</th>`;
+    wDays.forEach(d => {
+      const hol = isHoliday(d);
+      const diaCompleto = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      const diasNombre  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+      html += `<th class="col-day ${hol?'feriado-head':''}">${diasNombre[d.getDay()]}<br><span style="font-size:10px;font-weight:400;opacity:.75">${d.getDate()} ${MESES[currentMonth].slice(0,3)}</span>${hol?' ✶':''}</th>`;
+    });
+    html += `</tr></thead><tbody>`;
+    SUPERVISORS.forEach(sup => {
+      html += `<tr><td class="col-sup"><span class="initials">${initials(sup)}</span>${sup}</td>`;
+      wDays.forEach(d => {
+        const role = getRole(sup, d);
+        const hol  = isHoliday(d);
+        const isOv = overrides.hasOwnProperty(okey(sup, fmtDate(d)));
+        if (hol && !isOv) {
+          html += `<td class="feriado-col"><button class="role-chip feriado-cell" onclick="openModal('${esc(sup)}','${fmtDate(d)}')">—</button></td>`;
+        } else if (!role) {
+          html += `<td><button class="role-chip licencia" onclick="openModal('${esc(sup)}','${fmtDate(d)}')">—</button></td>`;
+        } else {
+          html += `<td><button class="role-chip ${role.cls}" onclick="openModal('${esc(sup)}','${fmtDate(d)}')" title="${role.label}">${role.label.replace('7076 + ','7076\n+').replace('Deslogueo + ','Des\n+')}</button></td>`;
+        }
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+  });
+  html += `</div>`;
+  html += buildAlerts(work);
+  document.getElementById('main-content').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+// RESUMEN POR SUPERVISOR
+// ═══════════════════════════════════════════
+function renderResumen(work) {
+  // Calcular conteos
+  const BAR_COLORS = {
+    'guardia-a':'#93c5fd','guardia-b':'#60a5fa','bandeja':'#6ee7b7',
+    'kh':'#c4b5fd','entrena':'#f9a8d4',
+    'r7076':'#7dd3fc','des7076':'#fef08a','r7076des':'#fed7aa'
+  };
+  const ALIAS_R = {};
+
+  let maxCount = 0;
+  const data = SUPERVISORS.map(sup => {
+    const counts = {};
+    ROLE_IDS.forEach(rid => counts[rid] = 0);
+    work.forEach(d => {
+      const role = getRole(sup, d);
+      if (!role || role.id === 'licencia') return;
+      const rid = ALIAS_R[role.id] || role.id;
+      if (counts.hasOwnProperty(rid)) {
+        counts[rid]++;
+        if (counts[rid] > maxCount) maxCount = counts[rid];
+      }
+    });
+    const totalDays = work.filter(d => { const r=getRole(sup,d); return r && r.id!=='licencia'; }).length;
+    return { sup, counts, totalDays };
+  });
+
+  let html = `<div class="summary-grid">`;
+  data.forEach(({ sup, counts, totalDays }) => {
+    html += `<div class="sup-card">
+      <div class="sup-card-header">
+        <div class="sup-avatar">${initials(sup)}</div>
+        <div>
+          <div class="sup-name">${sup}</div>
+          <div class="sup-days">${totalDays} días asignados</div>
+        </div>
+      </div>
+      <div class="role-bars">`;
+    ROLE_IDS.forEach(rid => {
+      const role  = ROLES.find(r=>r.id===rid);
+      const cnt   = counts[rid];
+      const pct   = maxCount ? Math.round(cnt/maxCount*100) : 0;
+      const color = BAR_COLORS[rid] || '#e2e8f0';
+      html += `<div class="role-bar-row">
+        <div class="role-bar-label" title="${role.label}">${role.label.replace('Deslogueo + ','Des+').replace('7076 + ','7076+').replace('Entrena2 + ','E2+')}</div>
+        <div class="role-bar-track"><div class="role-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <div class="role-bar-count">${cnt}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  html += `</div>`;
+
+  // Tabla de equidad
+  html += `<div class="table-card" style="margin-top:1.25rem">
+    <div style="padding:.9rem 1.25rem;border-bottom:1px solid var(--gray-10);font-size:14px;font-weight:600;color:var(--blue)">
+      Análisis de equidad — variación por rol
+    </div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th class="col-sup">Rol</th>`;
+  SUPERVISORS.forEach(s => { html += `<th style="min-width:40px">${s.split(' ')[0]}</th>`; });
+  html += `<th>Mín</th><th>Máx</th><th>Diff</th></tr></thead><tbody>`;
+  ROLE_IDS.forEach(rid => {
+    const role   = ROLES.find(r=>r.id===rid);
+    const counts = data.map(d=>d.counts[rid]);
+    const mn = Math.min(...counts), mx = Math.max(...counts), diff = mx-mn;
+    const diffColor = diff === 0 ? 'var(--green)' : diff === 1 ? 'var(--gray-70)' : '#b45309';
+    html += `<tr>
+      <td class="col-sup"><span class="leg-pill" style="background:${BAR_COLORS[rid]||'#eee'};color:#1a1d23;font-size:11px">${role.label}</span></td>`;
+    counts.forEach(c => { html += `<td style="font-size:12px;font-weight:600;color:var(--gray-70)">${c}</td>`; });
+    html += `<td style="font-weight:700;color:var(--green)">${mn}</td>
+      <td style="font-weight:700;color:var(--blue)">${mx}</td>
+      <td style="font-weight:700;color:${diffColor}">${diff}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+
+  document.getElementById('main-content').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════
+// TABLA RESUMEN MENSUAL (al pie de vista Tabla)
+// ═══════════════════════════════════════════
+function buildTablaResumenMensual(work) {
+  const BAR_COLORS = {
+    'guardia-a':'var(--c-guardia-a)','guardia-b':'var(--c-guardia-b)',
+    'bandeja':'var(--c-bandeja)','kh':'var(--c-kh)','entrena':'var(--c-entrena)',
+    'r7076':'var(--c-7076)','des7076':'var(--c-des7076)','r7076des':'var(--c-7076des)'
+  };
+
+  // Calcular conteos por supervisor y rol
+  const data = SUPERVISORS.map(sup => {
+    const counts = {};
+    ROLE_IDS.forEach(rid => counts[rid] = 0);
+    let total = 0;
+    work.forEach(d => {
+      const role = getRole(sup, d);
+      if (role && role.id !== 'licencia' && counts.hasOwnProperty(role.id)) {
+        counts[role.id]++;
+        total++;
+      }
+    });
+    return { sup, counts, total };
+  });
+
+  let html = `<div class="table-card" style="margin-top:1.25rem">
+    <div style="padding:.9rem 1.25rem;border-bottom:1px solid var(--gray-10);display:flex;align-items:center;gap:10px">
+      <span style="font-size:15px">📊</span>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:var(--blue)">Resumen mensual de tareas</div>
+        <div style="font-size:11px;color:var(--gray-50);margin-top:1px">${MESES[currentMonth]} ${currentYear} — cantidad de días asignados por rol</div>
+      </div>
+    </div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th class="col-sup" style="min-width:140px">Supervisor</th>`;
+
+  ROLE_IDS.forEach(rid => {
+    const role = ROLES.find(r => r.id === rid);
+    html += `<th class="col-day" style="min-width:52px;font-size:10px;line-height:1.3">
+      <span style="display:inline-block;padding:2px 6px;border-radius:20px;background:${BAR_COLORS[rid]||'#eee'};color:var(--gray-90)">${role.label.replace('Deslogueo + ','Des+').replace('7076 + ','7076+').replace('Entrena2 + ','E2+')}</span>
+    </th>`;
+  });
+  html += `<th class="col-day" style="min-width:44px;font-weight:700;color:var(--blue)">Total</th>`;
+  html += `</tr></thead><tbody>`;
+
+  data.forEach(({ sup, counts, total }) => {
+    html += `<tr><td class="col-sup"><span class="initials">${initials(sup)}</span>${sup.split(' ')[0]}</td>`;
+    ROLE_IDS.forEach(rid => {
+      const cnt = counts[rid];
+      const bg  = cnt > 0 ? BAR_COLORS[rid] || '#eee' : 'transparent';
+      html += `<td style="font-size:12px;font-weight:${cnt>0?'700':'400'};color:${cnt>0?'var(--gray-90)':'var(--gray-20)'};background:${bg}opacity:.3">${cnt > 0 ? cnt : '·'}</td>`;
+    });
+    html += `<td style="font-size:13px;font-weight:700;color:var(--blue)">${total}</td>`;
+    html += `</tr>`;
+  });
+
+  // Fila de totales por rol
+  html += `<tr class="summary-row" style="border-top:2px solid var(--gray-20)">
+    <td class="col-sup" style="font-weight:700;color:var(--gray-70)">Total columna</td>`;
+  ROLE_IDS.forEach(rid => {
+    const sum = data.reduce((acc, d) => acc + d.counts[rid], 0);
+    html += `<td style="font-size:11px;font-weight:700;color:var(--gray-50)">${sum}</td>`;
+  });
+  const grandTotal = data.reduce((acc, d) => acc + d.total, 0);
+  html += `<td style="font-size:12px;font-weight:700;color:var(--blue)">${grandTotal}</td></tr>`;
+
+  html += `</tbody></table></div></div>`;
+  return html;
+}
+
+// ═══════════════════════════════════════════
+// ALERTAS
+// ═══════════════════════════════════════════
+function buildAlerts(work) {
+  const issues = [];
+
+  // Verificar que cada día tenga exactamente 1 Bandeja, 1 KH, 1 Entrena2
+  work.forEach(d => {
+    if (isHoliday(d) && !SUPERVISORS.some(s => overrides.hasOwnProperty(okey(s, fmtDate(d))))) return;
+    const roles = SUPERVISORS.map(s => getRole(s, d)).filter(Boolean);
+    ['bandeja','kh','entrena'].forEach(rid => {
+      const count = roles.filter(r => r.id === rid).length;
+      const label = ROLES.find(r => r.id === rid).label;
+      if (count !== 1) issues.push(`<b>${fmtDisp(d)}</b>: ${count} persona(s) en ${label} (se esperaba 1)`);
+    });
+    // Verificar distribución 7076: 1 r7076 + 2 solo7076 + 2 des7076 + 2 r7076des por día
+    const exp7076 = { r7076: 1, solo7076: 2, des7076: 2, r7076des: 2 };
+    Object.entries(exp7076).forEach(([rid, exp]) => {
+      const count = roles.filter(r => r.id === rid).length;
+      const label = ROLES.find(r => r.id === rid).label;
+      if (count !== exp) issues.push(`<b>${fmtDisp(d)}</b>: ${count} en ${label} (se esperaban ${exp})`);
+    });
+    // Verificar que nadie quede sin rol
+    SUPERVISORS.forEach(s => {
+      const r = getRole(s, d);
+      if (!r || r.id === 'licencia') issues.push(`<b>${fmtDisp(d)}</b>: ${s.split(' ')[0]} sin rol asignado`);
+    });
+  });
+
+  // Verificar anti-consecutivos (máx 2 días seguidos) para todas las tareas rotativas
+  const consecVal2 = {};
+  const acroles = ['r7076','solo7076','bandeja','kh','entrena','des7076','r7076des'];
+  SUPERVISORS.forEach(s => { consecVal2[s] = {}; acroles.forEach(r => consecVal2[s][r] = 0); });
+  work.filter(d => !isHoliday(d)).forEach(d => {
+    SUPERVISORS.forEach(s => {
+      const r = getRole(s, d);
+      acroles.forEach(rid => {
+        if (r && r.id === rid) {
+          consecVal2[s][rid]++;
+          if (consecVal2[s][rid] > 2)
+            issues.push(`<b>${s.split(' ')[0]}</b>: ${consecVal2[s][rid]} días seguidos de ${ROLES.find(x=>x.id===rid).label}`);
+        } else {
+          consecVal2[s][rid] = 0;
+        }
+      });
+    });
+  });
+
+  // Verificar anti-consecutivos de GRUPO (máx 3 días seguidos en TAREAS o LÍNEA)
+  const consecGrupoV = {};
+  SUPERVISORS.forEach(s => { consecGrupoV[s] = { tareas: 0, linea: 0 }; });
+  work.filter(d => !isHoliday(d)).forEach(d => {
+    SUPERVISORS.forEach(s => {
+      const r = getRole(s, d);
+      const g = r ? getGrupo(r.id) : null;
+      ['tareas','linea'].forEach(grp => {
+        if (g === grp) {
+          consecGrupoV[s][grp]++;
+          if (consecGrupoV[s][grp] > MAX_CONSEC_GRUPO)
+            issues.push(`<b>${s.split(' ')[0]}</b>: ${consecGrupoV[s][grp]} días seguidos en grupo ${grp === 'tareas' ? 'TAREAS' : 'ATENCIÓN LÍNEA'}`);
+        } else {
+          consecGrupoV[s][grp] = 0;
+        }
+      });
+    });
+  });
+  // Verificar equidad de des7076/r7076des (deben ser iguales para los 12)
+  ['des7076','r7076des'].forEach(rid => {
+    const counts = SUPERVISORS.map(s => ({
+      s,
+      count: work.filter(d => !isHoliday(d)).filter(d => { const r=getRole(s,d); return r && r.id===rid; }).length
+    }));
+    const vals = counts.map(x => x.count);
+    const mn = Math.min(...vals), mx = Math.max(...vals);
+    const label = ROLES.find(x=>x.id===rid).label;
+    if (mx - mn > 1) {
+      issues.push(`<b>${label}</b>: desequilibrio — mín ${mn} / máx ${mx} entre supervisores (debe ser igual para los 12)`);
+    }
+  });
+
+  // Verificar equidad de variantes 7076 por supervisor
+  const varCounts = {};
+  SUPERVISORS.forEach(s => varCounts[s] = { r7076: 0, solo7076: 0, des7076: 0, r7076des: 0 });
+  work.filter(d => !isHoliday(d)).forEach(d => {
+    SUPERVISORS.forEach(s => {
+      const r = getRole(s, d);
+      if (r && varCounts[s].hasOwnProperty(r.id)) varCounts[s][r.id]++;
+    });
+  });
+  // Solo alertar si la diferencia entre supervisores es > 3 en alguna variante
+  ['r7076','solo7076','des7076','r7076des'].forEach(rid => {
+    const vals = SUPERVISORS.map(s => varCounts[s][rid]);
+    const diff = Math.max(...vals) - Math.min(...vals);
+    if (diff > 3) {
+      const label = ROLES.find(r => r.id === rid).label;
+      issues.push(`Variante <b>${label}</b>: desequilibrio de ${diff} días entre supervisores`);
+    }
+  });
+
+  if (!issues.length) {
+    return `<div class="ok-bar">✓ Rotación correcta — 1 KH+WSP · 1 Entrena2 · 1 Bandejas · 2×Des+7076 · 2×Deslogueo+7076 · 2×7076 · 1×7076+Sub por día. Anti-consecutivos OK. Des+7076 y Deslogueo+7076 equitativos para los 12. ✓</div>`;
+  }
+  return `<div class="alert-bar">⚠ <strong>Alertas:</strong><ul style="margin-top:5px;padding-left:1.2rem">${issues.slice(0,8).map(i=>`<li>${i}</li>`).join('')}${issues.length>8?`<li style="opacity:.7">…y ${issues.length-8} más</li>`:''}</ul></div>`;
+}
+
+// ═══════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════
+let _modalSup = null, _modalDate = null, _selectedRole = null;
+
+function esc(s) { return s.replace(/'/g, "\\'"); }
+
+function openModal(sup, date) {
+  _modalSup  = sup;
+  _modalDate = date;
+  const d = new Date(date + 'T12:00:00');
+  const currentRole = getRole(sup, d);
+  _selectedRole = currentRole ? currentRole.id : null;
+  const isOv = overrides.hasOwnProperty(okey(sup, date));
+
+  const baseRoles  = ROLES.filter(r=>r.group==='base');
+  const lineaRoles = ROLES.filter(r=>r.group==='linea');
+
+  let html = `<div class="modal-bg" onclick="if(event.target.classList.contains('modal-bg'))closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>${sup}</h3>
+      <p>${fmtDisp(d)}, ${MESES[d.getMonth()]} ${d.getFullYear()}${isOv?' · Ajuste manual activo':''}</p>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-label">Roles base</div>
+        <div class="role-picker">`;
+  baseRoles.forEach(r => {
+    html += `<div class="role-option ${r.cls}${_selectedRole===r.id?' sel':''}" style="background:${r.bg};color:${r.fg}" onclick="selectRole('${r.id}')">${r.label}</div>`;
+  });
+  html += `</div></div>
+      <div class="modal-section">
+        <div class="modal-section-label">Línea de asistencia (7076)</div>
+        <div class="role-picker">`;
+  lineaRoles.forEach(r => {
+    html += `<div class="role-option ${r.cls}${_selectedRole===r.id?' sel':''}" style="background:${r.bg};color:${r.fg}" onclick="selectRole('${r.id}')">${r.label}</div>`;
+  });
+  html += `</div></div>
+      <div class="modal-section">
+        <div class="modal-section-label">Ausencia</div>
+        <div class="role-option licencia${_selectedRole==='licencia'?' sel':''}" style="display:inline-block;padding:7px 18px" onclick="selectRole('licencia')">Licencia</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      ${isOv?`<button class="btn" onclick="clearOverride()">↺ Restaurar automático</button>`:''}
+      <button class="btn btn-primary" onclick="saveOverride()">Guardar</button>
+    </div>
+  </div></div>`;
+
+  document.getElementById('modal-root').innerHTML = html;
+}
+
+function selectRole(id) {
+  _selectedRole = id;
+  document.querySelectorAll('.role-option').forEach(el => {
+    const matchClass = ROLES.find(r=>r.id===id)?.cls;
+    el.classList.toggle('sel', el.classList.contains(id) || el.classList.contains(matchClass) && ROLES.find(r=>r.cls===el.classList[1])?.id===id);
+  });
+  // Simpler: rebuild selection
+  document.querySelectorAll('.role-option').forEach(el => {
+    el.classList.remove('sel');
+    const role = ROLES.find(r => r.cls === [...el.classList].find(c => ROLES.some(r=>r.cls===c)));
+    if (role && role.id === id) el.classList.add('sel');
+    if (id === 'licencia' && el.classList.contains('licencia')) el.classList.add('sel');
+  });
+}
+
+function closeModal() { document.getElementById('modal-root').innerHTML = ''; }
+
+async function saveOverride() {
+  if (_selectedRole) {
+    const k = okey(_modalSup, _modalDate);
+    overrides[k] = _selectedRole;
+    closeModal();
+    render();
+    await sbSaveOverride(k, _selectedRole);
+  }
+}
+
+async function clearOverride() {
+  const k = okey(_modalSup, _modalDate);
+  delete overrides[k];
+  closeModal();
+  render();
+  await sbDeleteOverride(k);
+}
+
+// ═══════════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════════
+function exportCSV() {
+  const work = getWorkDays(currentYear, currentMonth);
+  const header = ['Supervisor', ...work.map(d => fmtDate(d))].join(',');
+  const rows = SUPERVISORS.map(sup => {
+    const cells = work.map(d => {
+      const r = getRole(sup, d);
+      return r ? `"${r.label}"` : '""';
+    });
+    return [`"${sup}"`, ...cells].join(',');
+  });
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `rotacion_supervisores_${MESES[currentMonth]}_${currentYear}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════
+// START
+// ═══════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
