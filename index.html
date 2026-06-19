@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JS Operaciones — Jerárquicos Salud</title>
+<title>Organización Supers — Jerárquicos Salud</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -253,6 +253,41 @@ thead th.ph-sticky{z-index:40;background:#f8fafc;}
   .chip{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   .ph-badge{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 }
+
+/* ── LANDING ── */
+.landing-overlay{
+  position:fixed;inset:0;z-index:999;
+  background:linear-gradient(135deg,#00554e 0%,#003d38 40%,#1a1f3c 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;overflow-y:auto;
+  transition:opacity .5s ease, transform .5s ease;
+}
+.landing-overlay.hiding{opacity:0;transform:scale(1.04);pointer-events:none;}
+.landing-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.landing-bg-dot{position:absolute;border-radius:50%;opacity:.06;}
+.landing-header{text-align:center;margin-bottom:40px;animation:landingIn .7s ease both;}
+.landing-logo{width:60px;height:60px;background:white;border-radius:18px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;color:#00554e;margin:0 auto 16px;box-shadow:0 8px 24px rgba(0,0,0,.2);}
+.landing-title{color:white;font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800;margin-bottom:6px;letter-spacing:-.5px;}
+.landing-sub{color:rgba(255,255,255,.55);font-size:14px;font-weight:500;}
+.landing-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;max-width:560px;width:100%;margin-bottom:32px;}
+@media(max-width:480px){.landing-cards{grid-template-columns:1fr;}}
+.landing-card{
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;padding:22px 20px;cursor:pointer;
+  transition:.25s cubic-bezier(.34,1.56,.64,1);
+  text-align:left;position:relative;overflow:hidden;
+  animation:landingIn .7s ease both;
+}
+.landing-card:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);transform:translateY(-4px) scale(1.02);box-shadow:0 16px 40px rgba(0,0,0,.25);}
+.landing-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--lc-color,.3) 0%,transparent 60%);opacity:.15;pointer-events:none;border-radius:20px;}
+.lc-icon{font-size:2rem;margin-bottom:12px;display:block;}
+.lc-title{color:white;font-size:15px;font-weight:700;margin-bottom:4px;}
+.lc-desc{color:rgba(255,255,255,.5);font-size:11px;line-height:1.5;}
+.lc-arrow{position:absolute;top:16px;right:16px;color:rgba(255,255,255,.3);font-size:16px;transition:.2s;}
+.landing-card:hover .lc-arrow{color:rgba(255,255,255,.7);transform:translate(3px,-3px);}
+.landing-footer{color:rgba(255,255,255,.25);font-size:10px;text-align:center;animation:landingIn .7s .3s ease both;}
+@keyframes landingIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
@@ -264,7 +299,7 @@ thead th.ph-sticky{z-index:40;background:#f8fafc;}
 <nav class="sidebar" id="sidebar">
   <div class="sb-brand">
     <div class="sb-logo">JS</div>
-    <div class="sb-title">JS Operaciones</div>
+    <div class="sb-title">Organización Supers</div>
     <div class="sb-sub">Jerárquicos Salud</div>
   </div>
   <div class="sb-nav">
@@ -486,6 +521,47 @@ thead th.ph-sticky{z-index:40;background:#f8fafc;}
       <button class="btn" onclick="rotCloseModal()">Cancelar</button>
     </div>
   </div>
+</div>
+
+<!-- LANDING SCREEN -->
+<div class="landing-overlay" id="landing">
+  <!-- Animated bg dots -->
+  <div class="landing-bg" id="landing-bg"></div>
+
+  <div class="landing-header">
+    <div class="landing-logo">JS</div>
+    <h1 class="landing-title">Organización Supers</h1>
+    <p class="landing-sub">Jerárquicos Salud · ¿A dónde querés ir?</p>
+  </div>
+
+  <div class="landing-cards">
+    <div class="landing-card" style="--lc-color:#00cd94;" onclick="landingGoTo('rotacion')" style="animation-delay:.1s">
+      <span class="lc-icon">📅</span>
+      <div class="lc-title">Rotación Diaria</div>
+      <div class="lc-desc">Distribución mensual de tareas por supervisor</div>
+      <span class="lc-arrow">↗</span>
+    </div>
+    <div class="landing-card" style="--lc-color:#b688ea;" onclick="landingGoTo('anual')" style="animation-delay:.15s">
+      <span class="lc-icon">📆</span>
+      <div class="lc-title">Distribución Anual</div>
+      <div class="lc-desc">Asignación de roles por mes para todo el año</div>
+      <span class="lc-arrow">↗</span>
+    </div>
+    <div class="landing-card" style="--lc-color:#f39c12;" onclick="landingGoTo('sabados')" style="animation-delay:.2s">
+      <span class="lc-icon">🛡️</span>
+      <div class="lc-title">Guardias Sábados</div>
+      <div class="lc-desc">Planificación anual de guardias de fin de semana</div>
+      <span class="lc-arrow">↗</span>
+    </div>
+    <div class="landing-card" style="--lc-color:#4a537d;" onclick="landingGoTo('horarios')" style="animation-delay:.25s">
+      <span class="lc-icon">🕐</span>
+      <div class="lc-title">Planilla Horarios</div>
+      <div class="lc-desc">Gestión mensual de presencialidad y horarios</div>
+      <span class="lc-arrow">↗</span>
+    </div>
+  </div>
+
+  <div class="landing-footer">Hacé clic en cualquier sección para comenzar</div>
 </div>
 
 <script>
@@ -1519,7 +1595,7 @@ async function exportBackup() {
   const backup = {
     version: '1.0',
     fecha: new Date().toLocaleString('es-AR'),
-    generadoPor: 'JS Operaciones — Jerárquicos Salud',
+    generadoPor: 'Organización Supers — Jerárquicos Salud',
     rotacion_overrides: ovRows,
     js_dist_anual: distRows,
   };
@@ -1649,7 +1725,64 @@ async function init() {
 }
 
 // Iniciar
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+  buildLandingBg();
+  init();
+});
+
+// ── LANDING ────────────────────────────────────────────────────
+function buildLandingBg() {
+  const bg = document.getElementById('landing-bg');
+  if (!bg) return;
+  const colors = ['#00cd94','#b688ea','#f39c12','#4a537d','#00554e','white'];
+  for (let i = 0; i < 18; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'landing-bg-dot';
+    const size = Math.random() * 180 + 40;
+    dot.style.cssText = `
+      width:${size}px;height:${size}px;
+      background:${colors[i % colors.length]};
+      top:${Math.random()*110-10}%;
+      left:${Math.random()*110-10}%;
+      animation:float${i%3} ${6+Math.random()*6}s ease-in-out infinite ${Math.random()*4}s;
+    `;
+    bg.appendChild(dot);
+  }
+  // Add float keyframes
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes float0{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(15px,-20px) scale(1.05)}}
+    @keyframes float1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-20px,15px) scale(.95)}}
+    @keyframes float2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(10px,20px) scale(1.08)}}
+  `;
+  document.head.appendChild(style);
+}
+
+function landingGoTo(screen) {
+  const overlay = document.getElementById('landing');
+  overlay.classList.add('hiding');
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    goTo(screen);
+  }, 450);
+}
+
+// Click logo in sidebar → back to landing
+document.querySelector('.sb-brand').style.cursor = 'pointer';
+document.querySelector('.sb-brand').onclick = () => {
+  const overlay = document.getElementById('landing');
+  overlay.style.display = 'flex';
+  overlay.style.opacity = '0';
+  overlay.style.transform = 'scale(1.04)';
+  overlay.classList.remove('hiding');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      overlay.style.transition = 'opacity .4s ease, transform .4s ease';
+      overlay.style.opacity = '1';
+      overlay.style.transform = 'scale(1)';
+    });
+  });
+};
 </script>
 </body>
 </html>
