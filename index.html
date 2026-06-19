@@ -1220,7 +1220,7 @@ function phAutoAB(){
       for(let d=0;d<n;d++){
         const me=document.getElementById(`ph-st-${sIdx}-${d}`),dup=document.getElementById(`ph-st-${duplaIdx}-${d}`);
         if(!me||!dup)continue;
-        if(me.innerText===dup.innerText&&me.innerText!=='LIC'){
+        if(me.innerText===dup.innerText&&me.innerText!=='Licencia'){
           const opp=me.innerText==='Presencial'?{c:'bg-home',t:'HomeOffice'}:{c:'bg-pres',t:'Presencial'};
           dup.className=`ph-badge ${opp.c}`;dup.innerText=opp.t;
         }
