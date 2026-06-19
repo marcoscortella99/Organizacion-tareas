@@ -281,6 +281,14 @@ thead th.ph-sticky{z-index:40;background:#f8fafc;}
     <button class="nav-item" onclick="goTo('horarios')" id="nav-horarios">
       <span class="ni-icon">🕐</span> Planilla Horarios
     </button>
+    <div class="sb-section" style="margin-top:8px;">Seguridad</div>
+    <button class="nav-item" onclick="exportBackup()" style="color:#fcd34d;">
+      <span class="ni-icon">📤</span> Exportar respaldo
+    </button>
+    <button class="nav-item" onclick="document.getElementById('import-file').click()" style="color:#86efac;">
+      <span class="ni-icon">📥</span> Restaurar respaldo
+    </button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(event)">
   </div>
   <div class="sb-sync">
     <div class="sync-dot" id="sync-dot"></div>
@@ -1257,6 +1265,110 @@ function phLoadSaved(month){
   if(saved.guards)document.getElementById('ph-guards-body').innerHTML=saved.guards;
   if(saved.saturdays)document.getElementById('ph-sab-body').innerHTML=saved.saturdays;
   phUpdateCounters();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RESPALDO COMPLETO
+// ═══════════════════════════════════════════════════════════════
+async function exportBackup() {
+  setSyncStatus('saving');
+  // Recopilar todo desde Supabase en tiempo real
+  const ovRows  = await sbGet('rotacion_overrides','?select=key,role_id') || [];
+  const distRows = await sbGet('js_dist_anual','?select=key,data') || [];
+
+  const backup = {
+    version: '1.0',
+    fecha: new Date().toLocaleString('es-AR'),
+    generadoPor: 'JS Operaciones — Jerárquicos Salud',
+    rotacion_overrides: ovRows,
+    js_dist_anual: distRows,
+  };
+
+  const json = JSON.stringify(backup, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g,'-');
+  a.download = `JS_Operaciones_Respaldo_${fecha}.json`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+  setSyncStatus('ok');
+
+  // Mostrar confirmación
+  showBackupToast('📤 Respaldo descargado — guardalo en un lugar seguro (OneDrive, carpeta compartida)');
+}
+
+async function importBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  document.getElementById('import-file').value = '';
+
+  const text = await file.text();
+  let backup;
+  try { backup = JSON.parse(text); }
+  catch(e) { alert('❌ Archivo inválido. Asegurate de seleccionar un respaldo generado por esta app.'); return; }
+
+  if (!backup.version || (!backup.rotacion_overrides && !backup.js_dist_anual)) {
+    alert('❌ El archivo no parece un respaldo válido de JS Operaciones.');
+    return;
+  }
+
+  const confirm = window.confirm(
+    `¿Restaurar respaldo del ${backup.fecha}?
+
+` +
+    `Esto va a REEMPLAZAR todos los datos actuales en Supabase con los del respaldo.
+
+` +
+    `Esta acción no se puede deshacer.`
+  );
+  if (!confirm) return;
+
+  setSyncStatus('saving');
+  showBackupToast('⏳ Restaurando datos...');
+
+  let ok = true;
+
+  // 1. Restaurar rotacion_overrides
+  if (backup.rotacion_overrides?.length) {
+    // Borrar todo primero
+    await sbDelete('rotacion_overrides','?id=gt.0');
+    // Reinsertar
+    for (const row of backup.rotacion_overrides) {
+      const r = await sbUpsert('rotacion_overrides', {key: row.key, role_id: row.role_id, updated_at: new Date().toISOString()});
+      if (!r) ok = false;
+    }
+  }
+
+  // 2. Restaurar js_dist_anual
+  if (backup.js_dist_anual?.length) {
+    await sbDelete('js_dist_anual','?id=gt.0');
+    for (const row of backup.js_dist_anual) {
+      const r = await sbUpsert('js_dist_anual', {key: row.key, data: row.data, updated_at: new Date().toISOString()});
+      if (!r) ok = false;
+    }
+  }
+
+  // 3. Recargar todo en memoria
+  await init();
+
+  setSyncStatus(ok ? 'ok' : 'error');
+  showBackupToast(ok
+    ? `✅ Respaldo del ${backup.fecha} restaurado correctamente`
+    : '⚠️ Algunos datos no se pudieron restaurar — verificá la conexión');
+}
+
+function showBackupToast(msg) {
+  let toast = document.getElementById('backup-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'backup-toast';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:white;padding:12px 22px;border-radius:12px;font-size:12px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.3);';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  setTimeout(() => { toast.style.opacity = '0'; }, 5000);
 }
 
 // ═══════════════════════════════════════════════════════════════
