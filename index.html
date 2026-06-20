@@ -374,32 +374,21 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 }
 
 /* ── LANDING ── */
-.landing-overlay{
-  position:fixed;top:0;left:0;right:0;bottom:0;z-index:999;
-  background:#00554e;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-  transition:opacity .4s ease;
-}
-.landing-overlay.hiding{opacity:0;pointer-events:none;}
-.landing-inner{
-  display:table;
-  width:100%;
-  min-height:100vh;
-}
-.landing-inner-cell{
-  display:table-cell;
-  vertical-align:middle;
+.landing-page{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;width:100%;
+  background:linear-gradient(160deg,#00554e 0%,#003d38 60%,#1a1f3c 100%);
   padding:32px 20px;
-  text-align:center;
+  box-sizing:border-box;
 }
+.landing-page.hidden{display:none;}
 .landing-bg{display:none;}
 .landing-bg-dot{display:none;}
 .landing-header{text-align:center;margin-bottom:28px;animation:landingIn .7s ease both;margin:0 auto;}
 .landing-logo{width:56px;height:56px;background:white;border-radius:16px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#00554e;margin:0 auto 14px;box-shadow:0 4px 20px rgba(0,0,0,.25);flex-shrink:0;}
 .landing-title{color:white;font-size:clamp(1.4rem,4vw,2rem);font-weight:800;margin-bottom:6px;letter-spacing:-.5px;text-align:center;}
 .landing-sub{color:rgba(255,255,255,.55);font-size:14px;font-weight:500;text-align:center;}
-.landing-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:500px;width:100%;margin:0 auto 20px;}
+.landing-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:480px;width:100%;margin:0 auto 24px;}
 @media(max-width:480px){.landing-cards{grid-template-columns:1fr;}}
 .landing-card{
   background:rgba(255,255,255,.1);
@@ -682,9 +671,7 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 </div>
 
 <!-- LANDING SCREEN -->
-<div class="landing-overlay" id="landing">
-  <div class="landing-inner">
-  <div class="landing-inner-cell">
+<div class="landing-page" id="landing">
   <div class="landing-header">
     <div class="landing-logo">JS</div>
     <h1 class="landing-title">Organización Supers</h1>
@@ -719,8 +706,6 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   </div>
 
   <div class="landing-footer">Hacé clic en cualquier sección para comenzar</div>
-  </div><!-- /landing-inner-cell -->
-  </div><!-- /landing-inner -->
 </div>
 
 <script>
@@ -1914,7 +1899,16 @@ function initTheme() {
 // ═══════════════════════════════════════════════════════════════
 // LOGIN POR SUPERVISOR
 // ═══════════════════════════════════════════════════════════════
-let currentSupUser = localStorage.getItem('js_sup_user') || '';
+let currentSupUser = '';
+(function(){
+  const saved = localStorage.getItem('js_sup_user') || '';
+  if (saved) {
+    // Try exact match first, then partial
+    const exact = SUPERVISORS.find(s => s === saved);
+    const partial = SUPERVISORS.find(s => s.toLowerCase().includes(saved.toLowerCase()) || saved.toLowerCase().includes(s.split(' ')[0].toLowerCase()));
+    currentSupUser = exact || partial || '';
+  }
+})();
 
 function showLogin() {
   const overlay = document.getElementById('login-overlay');
@@ -1930,7 +1924,7 @@ function showLogin() {
       btn.style.background = 'var(--impulsa-lt)';
       btn.style.color = 'var(--impulsa)';
     }
-    btn.onclick = () => loginAs(sup);
+    btn.onclick = () => { loginAs(sup); localStorage.setItem('js_sup_user', sup); };
     grid.appendChild(btn);
   });
   overlay.style.display = 'flex';
@@ -1940,6 +1934,9 @@ function loginAs(sup) {
   currentSupUser = sup;
   localStorage.setItem('js_sup_user', sup);
   document.getElementById('login-overlay').style.display = 'none';
+  // Also set filter to this supervisor
+  const sel = document.getElementById('rot-sup-filter');
+  if (sel) sel.value = sup;
   updateUserBadge();
   rotRender();
 }
@@ -2024,7 +2021,9 @@ function initSupFilter() {
 // Iniciar
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
-  buildLandingBg();
+  // Hide main app, show only landing
+  document.getElementById('sidebar').style.display = 'none';
+  document.querySelector('.main').style.display = 'none';
   init().then(() => {
     initSupFilter();
     updateUserBadge();
@@ -2037,29 +2036,18 @@ document.addEventListener('DOMContentLoaded', () => {
 function buildLandingBg() { /* removed */ }
 
 function landingGoTo(screen) {
-  const overlay = document.getElementById('landing');
-  overlay.classList.add('hiding');
-  setTimeout(() => {
-    overlay.style.display = 'none';
-    goTo(screen);
-  }, 450);
+  document.getElementById('landing').classList.add('hidden');
+  document.getElementById('sidebar').style.display = 'flex';
+  document.querySelector('.main').style.display = 'flex';
+  goTo(screen);
 }
 
 // Click logo in sidebar → back to landing
 document.querySelector('.sb-brand').style.cursor = 'pointer';
 document.querySelector('.sb-brand').onclick = () => {
-  const overlay = document.getElementById('landing');
-  overlay.style.display = 'flex';
-  overlay.style.opacity = '0';
-  overlay.style.transform = 'scale(1.04)';
-  overlay.classList.remove('hiding');
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      overlay.style.transition = 'opacity .4s ease, transform .4s ease';
-      overlay.style.opacity = '1';
-      overlay.style.transform = 'scale(1)';
-    });
-  });
+  document.getElementById('landing').classList.remove('hidden');
+  document.getElementById('sidebar').style.display = 'none';
+  document.querySelector('.main').style.display = 'none';
 };
 </script>
 </body>
