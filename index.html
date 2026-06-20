@@ -365,6 +365,39 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;}
 .mob-overlay.open{display:block;}
 
+/* ── MOBILE CARD VIEW (rotación y horarios) ── */
+@media(max-width:640px){
+  /* Rotación: tabla horizontal → cards verticales por supervisor */
+  .rot-table-wrap{overflow:visible!important;}
+  .rot-table{display:none!important;}
+  .rot-cards{display:flex!important;flex-direction:column;gap:10px;}
+}
+.rot-cards{display:none;}
+.rot-card{background:var(--white);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;}
+.rot-card-header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);}
+.rot-card-name{font-weight:700;font-size:13px;color:var(--text);}
+.rot-card-sub{font-size:10px;color:var(--muted);}
+.rot-card-days{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px;}
+.rot-day-item{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:52px;}
+.rot-day-lbl{font-size:9px;font-weight:700;color:var(--muted);}
+.rot-day-chip{font-size:9px;font-weight:700;padding:4px 6px;border-radius:7px;text-align:center;width:100%;}
+
+/* Planilla horarios: tabla → cards */
+@media(max-width:640px){
+  .ph-wrap{overflow:visible!important;max-height:none!important;}
+  .ph-table{display:none!important;}
+  .ph-cards{display:flex!important;flex-direction:column;gap:8px;}
+}
+.ph-cards{display:none;}
+.ph-card{background:var(--white);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;}
+.ph-card-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.ph-card-name{font-weight:700;font-size:12px;color:var(--impulsa);}
+.ph-card-dupla{font-size:10px;color:var(--muted);}
+.ph-card-days{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:10px 12px;}
+.ph-card-day{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.ph-card-dlbl{font-size:8px;font-weight:700;color:var(--muted);}
+}
+
 @media print{
   .sidebar,.topbar,.mob-menu-btn,.btn,.no-print{display:none!important;}
   .main{margin-left:0;}
@@ -989,6 +1022,36 @@ function renderRotTabla(work, supFilter='') {
   });
   html+=`</tr></tfoot></table></div>`;
   el.innerHTML=html;
+
+  // Generate mobile card view
+  const isMobile = window.innerWidth <= 640;
+  let cardsHtml = '<div class="rot-cards">';
+  supsToShow.forEach(sup => {
+    const isMe = currentSupUser && sup === currentSupUser;
+    const ini = sup.split(' ').map(p=>p[0]).slice(0,2).join('');
+    cardsHtml += `<div class="rot-card" style="${isMe?'border:2px solid var(--impulsa);':''}">
+      <div class="rot-card-header">
+        <span style="width:32px;height:32px;border-radius:50%;background:#dbeafe;color:#1e3a8a;font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${ini}</span>
+        <div><div class="rot-card-name">${isMe?'⭐ ':''}${sup}</div></div>
+      </div>
+      <div class="rot-card-days">`;
+    work.filter(d=>!isHoliday(d)).forEach(d => {
+      const r = getRotRole(sup, d);
+      const fd = fmtDate(d);
+      const lbl = `${DIAS_CORTO[d.getDay()]} ${d.getDate()}`;
+      if (r) {
+        cardsHtml += `<div class="rot-day-item">
+          <span class="rot-day-lbl">${lbl}</span>
+          <span class="rot-day-chip" style="background:${r.bg};color:${r.fg}" onclick="rotOpenModal('${sup}','${fd}')">${r.label}</span>
+        </div>`;
+      } else {
+        cardsHtml += `<div class="rot-day-item"><span class="rot-day-lbl">${lbl}</span><span class="rot-day-chip" style="background:var(--bg);color:var(--muted)">—</span></div>`;
+      }
+    });
+    cardsHtml += `</div></div>`;
+  });
+  cardsHtml += '</div>';
+  el.innerHTML += cardsHtml;
 }
 
 function renderRotSemanal(work, supFilter='') {
@@ -1421,6 +1484,49 @@ function phRender(){
   phRenderSabados(parseInt(y),parseInt(m),days[0].getDate());
   phLoadSaved(document.getElementById('ph-month').value);
   phUpdateCounters();
+  phRenderCards(days);
+}
+
+function phRenderCards(days) {
+  // Remove old cards if any
+  let existing = document.getElementById('ph-cards-container');
+  if (existing) existing.remove();
+
+  const wrap = document.querySelector('.ph-wrap');
+  if (!wrap) return;
+
+  const diasL=['L','M','M','J','V'];
+  let html = '<div class="ph-cards" id="ph-cards-container">';
+  phSupervisores.forEach((sup, sIdx) => {
+    html += `<div class="ph-card">
+      <div class="ph-card-header">
+        <div>
+          <div class="ph-card-name">${sup.n}</div>
+          <div class="ph-card-dupla">↔ ${sup.d}</div>
+        </div>
+      </div>
+      <div class="ph-card-days">`;
+    days.forEach((d, dIdx) => {
+      const stEl = document.getElementById(`ph-st-${sIdx}-${dIdx}`);
+      const tmEl = document.getElementById(`ph-tm-${sIdx}-${dIdx}`);
+      const st = stEl ? stEl.innerText : 'HomeOffice';
+      const tm = tmEl ? tmEl.innerText : sup.h;
+      const stColors = {'HomeOffice':['#f5effd','#7c3aed'],'Presencial':['#d1fae5','#059669'],'Licencia':['#eef0f8','#4a537d']};
+      const [bg,fg] = stColors[st]||['#f1f5f9','#64748b'];
+      html += `<div class="ph-card-day">
+        <span class="ph-card-dlbl">${diasL[d.getDay()-1]}${d.getDate()}</span>
+        <span style="background:${bg};color:${fg};padding:3px 2px;border-radius:5px;font-size:8px;font-weight:700;text-align:center;width:100%;cursor:pointer;"
+          onclick="phToggleSt(document.getElementById('ph-st-${sIdx}-${dIdx}'));phRenderCards(Array.from(document.querySelectorAll('#ph-header th')).slice(1).map((_,i)=>i))">${st==='HomeOffice'?'HO':st==='Presencial'?'Pres':'Lic'}</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  html += '</div>';
+
+  // Insert after the ph-wrap
+  const container = document.createElement('div');
+  container.innerHTML = html;
+  wrap.parentNode.insertBefore(container.firstChild, wrap.nextSibling);
 }
 
 function phToggleSt(el){
