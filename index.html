@@ -53,7 +53,8 @@
 [data-theme="dark"] .da-table tr:hover td{background:#2a3347;}
 [data-theme="dark"] .res-card{background:var(--card);}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0;}
+.app-wrapper{display:flex;min-height:100vh;}
 
 /* ── SIDEBAR ── */
 .sidebar{width:var(--sidebar-w);background:var(--impulsa);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform .3s ease;will-change:transform;}
@@ -376,12 +377,13 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 /* ── LANDING ── */
 .landing-page{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:100vh;width:100%;
+  min-height:100vh;
+  width:100%;
   background:linear-gradient(160deg,#00554e 0%,#003d38 60%,#1a1f3c 100%);
   padding:32px 20px;
   box-sizing:border-box;
 }
-.landing-page.hidden{display:none;}
+.landing-page.hidden{display:none!important;}
 .landing-bg{display:none;}
 .landing-bg-dot{display:none;}
 .landing-header{text-align:center;margin-bottom:28px;animation:landingIn .7s ease both;margin:0 auto;}
@@ -410,6 +412,9 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 </style>
 </head>
 <body>
+
+<!-- APP WRAPPER -->
+<div class="app-wrapper" id="app-wrapper" style="display:none;">
 
 <!-- MOBILE OVERLAY -->
 <div class="mob-overlay" id="mob-overlay" onclick="closeSidebar()"></div>
@@ -658,6 +663,8 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
     </div>
   </div>
 </div>
+
+</div><!-- /app-wrapper -->
 
 <!-- LOGIN OVERLAY -->
 <div id="login-overlay" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,48,48,.92);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;">
@@ -2022,8 +2029,7 @@ function initSupFilter() {
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   // Hide main app, show only landing
-  document.getElementById('sidebar').style.display = 'none';
-  document.querySelector('.main').style.display = 'none';
+  document.getElementById('app-wrapper').style.display = 'none';
   init().then(() => {
     initSupFilter();
     updateUserBadge();
@@ -2037,8 +2043,7 @@ function buildLandingBg() { /* removed */ }
 
 function landingGoTo(screen) {
   document.getElementById('landing').classList.add('hidden');
-  document.getElementById('sidebar').style.display = 'flex';
-  document.querySelector('.main').style.display = 'flex';
+  document.getElementById('app-wrapper').style.display = 'flex';
   goTo(screen);
 }
 
@@ -2046,8 +2051,7 @@ function landingGoTo(screen) {
 document.querySelector('.sb-brand').style.cursor = 'pointer';
 document.querySelector('.sb-brand').onclick = () => {
   document.getElementById('landing').classList.remove('hidden');
-  document.getElementById('sidebar').style.display = 'none';
-  document.querySelector('.main').style.display = 'none';
+  document.getElementById('app-wrapper').style.display = 'none';
 };
 </script>
 </body>
