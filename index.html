@@ -19,12 +19,39 @@
   --danger:#e74c3c;  --danger-lt:#fdeaea;
   --white:#fff; --bg:#f1f5f9; --border:#e2e8f0;
   --text:#1e293b; --muted:#64748b;
+  --card:#fff;
   --sidebar-w:220px;
   --header-h:56px;
   --radius:12px; --radius-lg:18px;
   --shadow:0 2px 8px rgba(0,0,0,.07);
   --shadow-lg:0 8px 28px rgba(0,0,0,.1);
 }
+[data-theme="dark"]{
+  --white:#1e2433; --bg:#141824; --border:#2a3347;
+  --text:#e2e8f0; --muted:#8896b3; --card:#252d3f;
+  --elite-lt:#1e2433; --conecta-lt:#1e1a2e; --avanza-lt:#0d1f1a;
+  --danger-lt:#2d1515; --save-lt:#2d2010;
+  --impulsa-lt:#0d1f1c;
+  --shadow:0 2px 8px rgba(0,0,0,.3);
+}
+[data-theme="dark"] .card{background:var(--card);}
+[data-theme="dark"] .topbar{background:#1e2433;border-color:#2a3347;}
+[data-theme="dark"] .rot-table tbody td.col-sup{background:var(--card);}
+[data-theme="dark"] .rot-table tbody tr:hover td{background:#2a3347;}
+[data-theme="dark"] .rot-table tbody tr:hover td.col-sup{background:#2a3347;}
+[data-theme="dark"] .rot-table thead th.col-sup{background:#1e2433;}
+[data-theme="dark"] .modal-box{background:#1e2433;}
+[data-theme="dark"] input,[data-theme="dark"] select{background:var(--card);color:var(--text);border-color:var(--border);}
+[data-theme="dark"] .btn{background:var(--card);color:var(--text);border-color:var(--border);}
+[data-theme="dark"] .view-tab{color:var(--muted);}
+[data-theme="dark"] .view-tab.active{background:var(--card);color:var(--impulsa);}
+[data-theme="dark"] .view-tabs{background:#141824;}
+[data-theme="dark"] .legend-bar{background:var(--card);}
+[data-theme="dark"] .duplas-bar{background:#0d1f1c;border-color:#1a3d38;}
+[data-theme="dark"] .dupla-pill{background:#1e2433;border-color:#2a3347;color:#7dd3c0;}
+[data-theme="dark"] .stat-card{background:var(--card);}
+[data-theme="dark"] .da-table tr:hover td{background:#2a3347;}
+[data-theme="dark"] .res-card{background:var(--card);}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
 
@@ -350,14 +377,16 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .landing-overlay{
   position:fixed;top:0;left:0;width:100%;height:100%;z-index:999;
   background:#00554e;
-  display:flex;align-items:center;justify-content:center;
   transition:opacity .4s ease;
 }
 .landing-overlay.hiding{opacity:0;pointer-events:none;}
 .landing-inner{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
   display:flex;flex-direction:column;align-items:center;
-  padding:32px 20px;
-  width:100%;max-width:540px;
+  padding:24px 20px;
+  width:100%;max-width:520px;
 }
 .landing-bg{display:none;}
 .landing-bg-dot{display:none;}
@@ -421,10 +450,16 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
     </button>
     <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(event)">
   </div>
+  <div style="padding:8px 10px;border-top:1px solid rgba(255,255,255,.1);">
+    <button onclick="toggleDark()" id="dark-btn" class="nav-item" style="font-size:11px;padding:8px 12px;">
+      <span class="ni-icon">🌙</span> <span id="dark-lbl">Modo oscuro</span>
+    </button>
+  </div>
   <div class="sb-sync">
     <div class="sync-dot" id="sync-dot"></div>
     <span id="sync-text">Conectando...</span>
   </div>
+  <div style="padding:4px 14px 8px;font-size:9px;color:rgba(255,255,255,.3);line-height:1.4;" id="last-mod-sb"></div>
 </nav>
 
 <!-- MAIN -->
@@ -436,8 +471,15 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
       Rotación Diaria
       <small id="topbar-sub">Distribución mensual de tareas</small>
     </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <button id="user-badge" onclick="showLogin()" style="display:none;padding:5px 12px;border-radius:20px;border:1px solid var(--impulsa);background:var(--impulsa-lt);color:var(--impulsa);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;"></button>
+      <button onclick="showLogin()" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">👤 Ingresar</button>
+    </div>
     <div id="topbar-actions" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"></div>
   </div>
+
+  <!-- LAST MODIFIED BAR -->
+  <div id="last-mod-bar" style="background:#f0fdf9;border-bottom:1px solid #b2dfdb;padding:5px 24px;font-size:10px;color:#00554e;font-weight:600;display:none;"></div>
 
   <!-- CONTENT -->
   <div class="content">
@@ -457,6 +499,10 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
               <button class="view-tab" onclick="rotSetView('semanal',this)">Semanal</button>
               <button class="view-tab" onclick="rotSetView('resumen',this)">Resumen</button>
             </div>
+            <select id="rot-sup-filter" onchange="rotRender()" class="btn" style="padding:6px 10px;font-size:12px;cursor:pointer;">
+              <option value="">👥 Todos</option>
+            </select>
+            <button class="btn" id="rot-week-btn" onclick="rotToggleWeekOnly(this)" title="Ver solo semana actual">📅 Esta semana</button>
             <button class="btn" onclick="rotResetOverrides()">↺ Resetear</button>
             <button class="btn btn-primary" onclick="rotExportPDF()">📄 PDF</button>
           </div>
@@ -616,6 +662,17 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
       <button class="btn" onclick="rotClearOverride()">Restaurar automático</button>
       <button class="btn" onclick="rotCloseModal()">Cancelar</button>
     </div>
+  </div>
+</div>
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,48,48,.92);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--white);border-radius:24px;padding:32px 28px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:12px;">👤</div>
+    <h2 style="font-size:1.2rem;font-weight:800;color:var(--impulsa);margin-bottom:6px;">¿Quién sos?</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:20px;">Seleccioná tu nombre para ver tus tareas resaltadas</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;" id="login-sup-grid"></div>
+    <button onclick="loginSkip()" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Continuar sin seleccionar</button>
   </div>
 </div>
 
@@ -878,13 +935,15 @@ function rotSetView(v, btn) {
 
 function rotRender() {
   document.getElementById('rot-month-disp').textContent = `${MESES[rotMonth]} ${rotYear}`;
-  const work = getWorkDays(rotYear, rotMonth);
+  const allWork = getWorkDays(rotYear, rotMonth);
+  const work = rotWeekOnly ? getWeekDays(rotYear, rotMonth) : allWork;
+  const supFilter = document.getElementById('rot-sup-filter')?.value || '';
   renderDuplasBanner();
   renderRotLegend();
-  if(rotView==='tabla') renderRotTabla(work);
-  else if(rotView==='semanal') renderRotSemanal(work);
-  else renderRotResumen(work);
-  renderRotAlerts(work);
+  if(rotView==='tabla') renderRotTabla(work, supFilter);
+  else if(rotView==='semanal') renderRotSemanal(work, supFilter);
+  else renderRotResumen(allWork, supFilter);
+  renderRotAlerts(allWork);
 }
 
 function renderDuplasBanner() {
@@ -904,14 +963,16 @@ function renderRotLegend() {
     ROLES.filter(r=>r.id!=='licencia').map(r=>`<span class="leg-pill" style="background:${r.bg};color:${r.fg}">${r.label}</span>`).join('');
 }
 
-function renderRotTabla(work) {
+function renderRotTabla(work, supFilter='') {
   const el=document.getElementById('rot-content');
   const days=work;
   let html=`<div class="rot-table-wrap"><table class="rot-table"><thead><tr><th class="col-sup">Supervisor</th>`;
   days.forEach(d=>{const hol=isHoliday(d);html+=`<th class="col-day${hol?' feriado-head':''}">${DIAS_CORTO[d.getDay()]}<br><span style="font-size:9px;font-weight:400;opacity:.75">${d.getDate()} ${MESES[rotMonth].slice(0,3)}</span>${hol?' ✶':''}</th>`;});
   html+=`</tr></thead><tbody>`;
-  SUPERVISORS.forEach(sup=>{
-    html+=`<tr><td class="col-sup"><span style="display:inline-flex;width:24px;height:24px;border-radius:50%;background:#dbeafe;color:#1e3a8a;font-size:9px;font-weight:800;align-items:center;justify-content:center;margin-right:6px;">${sup.split(' ').map(p=>p[0]).slice(0,2).join('')}</span>${sup}</td>`;
+  const supsToShow = supFilter ? SUPERVISORS.filter(s=>s===supFilter) : SUPERVISORS;
+  supsToShow.forEach(sup=>{
+    const isMe = currentSupUser && sup === currentSupUser;
+    html+=`<tr style="${isMe?'outline:2px solid var(--impulsa);outline-offset:-1px;border-radius:0;':''}" ><td class="col-sup" style="${isMe?'background:#e0f2f0!important;font-weight:800;':''}">${isMe?'⭐ ':''}${sup}</td>`;
     days.forEach(d=>{
       if(isHoliday(d)){html+=`<td><span class="chip feriado-cell">Fer.</span></td>`;return;}
       const r=getRotRole(sup,d);
@@ -931,7 +992,7 @@ function renderRotTabla(work) {
   el.innerHTML=html;
 }
 
-function renderRotSemanal(work) {
+function renderRotSemanal(work, supFilter='') {
   const semanas=[];let sem=[];
   work.forEach(d=>{if(d.getDay()===1&&sem.length){semanas.push(sem);sem=[];}sem.push(d);});
   if(sem.length)semanas.push(sem);
@@ -942,8 +1003,10 @@ function renderRotSemanal(work) {
     html+=`<div class="rot-table-wrap" style="margin-bottom:16px;"><table class="rot-table"><thead><tr><th class="col-sup">Supervisor</th>`;
     s.forEach(d=>html+=`<th class="col-day">${DIAS_CORTO[d.getDay()]}<br><span style="font-size:9px;opacity:.7">${d.getDate()}</span></th>`);
     html+=`</tr></thead><tbody>`;
-    SUPERVISORS.forEach(sup=>{
-      html+=`<tr><td class="col-sup">${sup}</td>`;
+    const supsToShow = supFilter ? SUPERVISORS.filter(s=>s===supFilter) : SUPERVISORS;
+    supsToShow.forEach(sup=>{
+      const isMe = currentSupUser && sup === currentSupUser;
+      html+=`<tr><td class="col-sup" style="${isMe?'background:#e0f2f0!important;font-weight:800;':''}">${isMe?'⭐ ':''}${sup}</td>`;
       s.forEach(d=>{
         if(isHoliday(d)){html+=`<td><span class="chip feriado-cell">Fer.</span></td>`;return;}
         const r=getRotRole(sup,d);
@@ -957,14 +1020,16 @@ function renderRotSemanal(work) {
   document.getElementById('rot-content').innerHTML=html;
 }
 
-function renderRotResumen(work) {
+function renderRotResumen(work, supFilter='') {
   const days=work.filter(d=>!isHoliday(d));
   const el=document.getElementById('rot-content');
   let html='<div class="res-grid">';
-  const maxPerRole=Math.max(1,...ALL_TASK_ROLES.map(r=>Math.max(...SUPERVISORS.map(s=>days.filter(d=>getRotRole(s,d)?.id===r).length))));
-  SUPERVISORS.forEach(sup=>{
+  const supsToShow = supFilter ? SUPERVISORS.filter(s=>s===supFilter) : SUPERVISORS;
+  const maxPerRole=Math.max(1,...ALL_TASK_ROLES.map(r=>Math.max(...supsToShow.map(s=>days.filter(d=>getRotRole(s,d)?.id===r).length))));
+  supsToShow.forEach(sup=>{
+    const isMe = currentSupUser && sup === currentSupUser;
     const total=days.filter(d=>getRotRole(sup,d)&&!['guardia-a','guardia-b'].includes(getRotRole(sup,d)?.id)).length;
-    html+=`<div class="res-card"><div class="res-head"><span class="res-name">${sup}</span><span class="res-total">${total}</span></div><div class="res-bars">`;
+    html+=`<div class="res-card" style="${isMe?'border:2px solid var(--impulsa);':''}"><div class="res-head"><span class="res-name">${isMe?'⭐ ':''}${sup}</span><span class="res-total">${total}</span></div><div class="res-bars">`;
     ALL_TASK_ROLES.forEach(rid=>{
       const role=ROLES.find(r=>r.id===rid);
       const cnt=days.filter(d=>getRotRole(sup,d)?.id===rid).length;
@@ -1029,6 +1094,7 @@ async function rotSaveOverride() {
   setSyncStatus('saving');
   const ok=await sbUpsert('rotacion_overrides',{key:k,role_id:rotSelectedRole,updated_at:new Date().toISOString()});
   setSyncStatus(ok?'ok':'error');
+  if(ok) setLastMod(currentSupUser||'Admin');
 }
 async function rotClearOverride() {
   const k=`${rotModalSup}|${rotModalDate}`;
@@ -1819,10 +1885,145 @@ async function init() {
   rotRender();
 }
 
+// ═══════════════════════════════════════════════════════════════
+// DARK MODE
+// ═══════════════════════════════════════════════════════════════
+function toggleDark() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('dark-lbl').textContent = isDark ? 'Modo oscuro' : 'Modo claro';
+  document.getElementById('dark-btn').querySelector('.ni-icon').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('js_theme', isDark ? 'light' : 'dark');
+}
+function initTheme() {
+  const t = localStorage.getItem('js_theme') || 'light';
+  if (t === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    if(document.getElementById('dark-lbl')) document.getElementById('dark-lbl').textContent = 'Modo claro';
+    if(document.getElementById('dark-btn')) document.getElementById('dark-btn').querySelector('.ni-icon').textContent = '☀️';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LOGIN POR SUPERVISOR
+// ═══════════════════════════════════════════════════════════════
+let currentSupUser = localStorage.getItem('js_sup_user') || '';
+
+function showLogin() {
+  const overlay = document.getElementById('login-overlay');
+  const grid = document.getElementById('login-sup-grid');
+  grid.innerHTML = '';
+  SUPERVISORS.forEach(sup => {
+    const btn = document.createElement('button');
+    btn.style.cssText = 'padding:8px 6px;border:2px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;';
+    btn.textContent = sup.split(' ')[0]; // Solo primer nombre
+    btn.title = sup;
+    if (sup === currentSupUser) {
+      btn.style.borderColor = 'var(--impulsa)';
+      btn.style.background = 'var(--impulsa-lt)';
+      btn.style.color = 'var(--impulsa)';
+    }
+    btn.onclick = () => loginAs(sup);
+    grid.appendChild(btn);
+  });
+  overlay.style.display = 'flex';
+}
+
+function loginAs(sup) {
+  currentSupUser = sup;
+  localStorage.setItem('js_sup_user', sup);
+  document.getElementById('login-overlay').style.display = 'none';
+  updateUserBadge();
+  rotRender();
+}
+
+function loginSkip() {
+  currentSupUser = '';
+  localStorage.setItem('js_sup_user', '');
+  document.getElementById('login-overlay').style.display = 'none';
+  updateUserBadge();
+}
+
+function updateUserBadge() {
+  const badge = document.getElementById('user-badge');
+  if (!badge) return;
+  if (currentSupUser) {
+    badge.textContent = '👤 ' + currentSupUser.split(' ')[0];
+    badge.style.display = 'inline-flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ÚLTIMA MODIFICACIÓN
+// ═══════════════════════════════════════════════════════════════
+function setLastMod(who) {
+  const now = new Date().toLocaleString('es-AR');
+  const msg = `Último guardado: ${who} · ${now}`;
+  localStorage.setItem('js_last_mod', msg);
+  showLastMod(msg);
+}
+
+function showLastMod(msg) {
+  const bar = document.getElementById('last-mod-bar');
+  const sb  = document.getElementById('last-mod-sb');
+  if (bar && msg) { bar.textContent = '🕐 ' + msg; bar.style.display = 'block'; }
+  if (sb  && msg) { sb.textContent = msg; }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VISTA SOLO SEMANA ACTUAL (toggle)
+// ═══════════════════════════════════════════════════════════════
+let rotWeekOnly = false;
+
+function rotToggleWeekOnly(btn) {
+  rotWeekOnly = !rotWeekOnly;
+  btn.style.background = rotWeekOnly ? 'var(--impulsa)' : '';
+  btn.style.color = rotWeekOnly ? 'white' : '';
+  btn.style.borderColor = rotWeekOnly ? 'var(--impulsa)' : '';
+  rotRender();
+}
+
+function getWeekDays(year, month) {
+  // Returns only days of current week within the month
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 4);
+  const allDays = getWorkDays(year, month);
+  return allDays.filter(d => d >= startOfWeek && d <= endOfWeek);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FILTRO DE SUPERVISOR
+// ═══════════════════════════════════════════════════════════════
+function initSupFilter() {
+  const sel = document.getElementById('rot-sup-filter');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">👥 Todos</option>';
+  SUPERVISORS.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s;
+    opt.textContent = s.split(' ')[0] + ' ' + s.split(' ').slice(-1)[0];
+    if (s === currentSupUser) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+
 // Iniciar
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   buildLandingBg();
-  init();
+  init().then(() => {
+    initSupFilter();
+    updateUserBadge();
+    const lastMod = localStorage.getItem('js_last_mod');
+    if (lastMod) showLastMod(lastMod);
+  });
 });
 
 // ── LANDING ────────────────────────────────────────────────────
