@@ -375,26 +375,31 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
 /* ── LANDING ── */
 .landing-overlay{
-  position:fixed;top:0;left:0;width:100%;height:100%;z-index:999;
+  position:fixed;top:0;left:0;right:0;bottom:0;z-index:999;
   background:#00554e;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
   transition:opacity .4s ease;
 }
 .landing-overlay.hiding{opacity:0;pointer-events:none;}
 .landing-inner{
-  position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  display:flex;flex-direction:column;align-items:center;
-  padding:24px 20px;
-  width:100%;max-width:520px;
+  display:table;
+  width:100%;
+  min-height:100vh;
+}
+.landing-inner-cell{
+  display:table-cell;
+  vertical-align:middle;
+  padding:32px 20px;
+  text-align:center;
 }
 .landing-bg{display:none;}
 .landing-bg-dot{display:none;}
-.landing-header{text-align:center;margin-bottom:28px;animation:landingIn .7s ease both;}
-.landing-logo{width:56px;height:56px;background:white;border-radius:16px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#00554e;margin:0 auto 14px;box-shadow:0 4px 20px rgba(0,0,0,.25);}
-.landing-title{color:white;font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800;margin-bottom:6px;letter-spacing:-.5px;}
-.landing-sub{color:rgba(255,255,255,.55);font-size:14px;font-weight:500;}
-.landing-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;margin-bottom:20px;}
+.landing-header{text-align:center;margin-bottom:28px;animation:landingIn .7s ease both;margin:0 auto;}
+.landing-logo{width:56px;height:56px;background:white;border-radius:16px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#00554e;margin:0 auto 14px;box-shadow:0 4px 20px rgba(0,0,0,.25);flex-shrink:0;}
+.landing-title{color:white;font-size:clamp(1.4rem,4vw,2rem);font-weight:800;margin-bottom:6px;letter-spacing:-.5px;text-align:center;}
+.landing-sub{color:rgba(255,255,255,.55);font-size:14px;font-weight:500;text-align:center;}
+.landing-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:500px;width:100%;margin:0 auto 20px;}
 @media(max-width:480px){.landing-cards{grid-template-columns:1fr;}}
 .landing-card{
   background:rgba(255,255,255,.1);
@@ -679,6 +684,7 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 <!-- LANDING SCREEN -->
 <div class="landing-overlay" id="landing">
   <div class="landing-inner">
+  <div class="landing-inner-cell">
   <div class="landing-header">
     <div class="landing-logo">JS</div>
     <h1 class="landing-title">Organización Supers</h1>
@@ -713,6 +719,7 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   </div>
 
   <div class="landing-footer">Hacé clic en cualquier sección para comenzar</div>
+  </div><!-- /landing-inner-cell -->
   </div><!-- /landing-inner -->
 </div>
 
