@@ -1750,49 +1750,35 @@ function phExportExcel() {
   const mesNombre = MESES[parseInt(m)-1] + ' ' + y;
   let d = new Date(parseInt(y), parseInt(m)-1, 1);
   while(d.getDay()!==1) d.setDate(d.getDate()+1);
-  let days=[];
-  const startMonth = parseInt(m)-1;
-  while(d.getMonth()===startMonth){
-    if(d.getDay()>=1&&d.getDay()<=5) days.push(new Date(d));
-    d.setDate(d.getDate()+1);
-    if(days.length>=25) break;
-  }
+  let days=[], sm=parseInt(m)-1;
+  while(d.getMonth()===sm){ if(d.getDay()>=1&&d.getDay()<=5) days.push(new Date(d)); d.setDate(d.getDate()+1); if(days.length>=25)break; }
   const diasL=['','L','M','M','J','V'];
-  const rows = [];
-  rows.push(['Planilla de Horarios - ' + mesNombre + ' - Jerarquicos Salud']);
-  rows.push([]);
-  rows.push(['Supervisor', ...days.map(wd => diasL[wd.getDay()]+' '+wd.getDate())]);
-  phSupervisores.forEach((sup, sIdx) => {
-    const row = [sup.n];
-    days.forEach((wd, dIdx) => {
-      const fd = fmtDate(wd);
-      if (HOLIDAYS_2026&&HOLIDAYS_2026.includes(fd)){row.push('FERIADO');return;}
-      const stEl=document.getElementById('ph-st-'+sIdx+'-'+dIdx);
-      const tmEl=document.getElementById('ph-tm-'+sIdx+'-'+dIdx);
-      const st=stEl?stEl.innerText:'HomeOffice';
-      const tm=tmEl?tmEl.innerText:sup.h;
+  const rows=[['Planilla de Horarios - '+mesNombre+' - Jerarquicos Salud'],[],
+    ['Supervisor',...days.map(wd=>diasL[wd.getDay()]+' '+wd.getDate())]];
+  phSupervisores.forEach((sup,sIdx)=>{
+    const row=[sup.n];
+    days.forEach((wd,dIdx)=>{
+      const fd=fmtDate(wd);
+      if(HOLIDAYS_2026&&HOLIDAYS_2026.includes(fd)){row.push('FERIADO');return;}
+      const st=document.getElementById('ph-st-'+sIdx+'-'+dIdx)?.innerText||'HomeOffice';
+      const tm=document.getElementById('ph-tm-'+sIdx+'-'+dIdx)?.innerText||sup.h;
       row.push(st==='Presencial'?tm:st==='Licencia'?'LICENCIA':'HomeOffice');
     });
     rows.push(row);
   });
   rows.push([]);
-  const cntRow=['Presenciales'];
+  const cnt=['Presenciales'];
   days.forEach((wd,dIdx)=>{
     const fd=fmtDate(wd);
-    if(HOLIDAYS_2026&&HOLIDAYS_2026.includes(fd)){cntRow.push('-');return;}
-    let p=0;
-    phSupervisores.forEach((_,sIdx)=>{
-      const el=document.getElementById('ph-st-'+sIdx+'-'+dIdx);
-      if(el&&el.innerText==='Presencial')p++;
-    });
-    cntRow.push(p);
+    if(HOLIDAYS_2026&&HOLIDAYS_2026.includes(fd)){cnt.push('-');return;}
+    let p=0; phSupervisores.forEach((_,sIdx)=>{if(document.getElementById('ph-st-'+sIdx+'-'+dIdx)?.innerText==='Presencial')p++;});
+    cnt.push(p);
   });
-  rows.push(cntRow);
-  const csv='﻿'+rows.map(r=>r.map(c=>{const s=String(c==null?'':c);return s.includes(';')||s.includes('"')?'"'+s.replace(/"/g,'""')+'"':s;}).join(';')).join('
+  rows.push(cnt);
+  const csv='﻿'+rows.map(r=>r.map(c=>{const s=String(c??'');return s.includes(';')||s.includes('"')?'"'+s.replace(/"/g,'""')+'"':s;}).join(';')).join('
 ');
-  const uri='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
-  const a=document.createElement('a');a.href=uri;a.download='Horarios_'+mesNombre.replace(' ','_')+'.csv';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='Horarios_'+mesNombre.replace(' ','_')+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);
 }
 
 // ═══════════════════════════════════════════════════════════════
