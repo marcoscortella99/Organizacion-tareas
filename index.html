@@ -1787,7 +1787,6 @@ function phExportExcel() {
   const [y, m] = monthVal.split('-');
   const mesNombre = MESES[parseInt(m)-1] + ' ' + y;
 
-  // Collect days
   let d = new Date(y, m-1, 1);
   while(d.getDay()!==1) d.setDate(d.getDate()+1);
   let days=[]; let startM=d.getMonth();
@@ -1798,42 +1797,45 @@ function phExportExcel() {
 
   const diasL=['L','M','M','J','V'];
 
-  // Style definitions
-  const styles = `
-    <Style ss:ID="titulo"><Font ss:Bold="1" ss:Size="13" ss:Color="#FFFFFF"/><Interior ss:Color="#4A537D" ss:Pattern="Solid"/><Alignment ss:Horizontal="Left" ss:Vertical="Center"/></Style>
-    <Style ss:ID="header"><Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="10"/><Interior ss:Color="#00554E" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
-    <Style ss:ID="supName"><Font ss:Bold="1" ss:Color="#00554E" ss:Size="10"/><Interior ss:Color="#E0F2F0" ss:Pattern="Solid"/><Alignment ss:Vertical="Center" ss:WrapText="0"/></Style>
-    <Style ss:ID="pres"><Interior ss:Color="#D1FAE5" ss:Pattern="Solid"/><Font ss:Color="#065F46" ss:Bold="1" ss:Size="9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style>
-    <Style ss:ID="home"><Interior ss:Color="#F5EFFD" ss:Pattern="Solid"/><Font ss:Color="#7C3AED" ss:Size="9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
-    <Style ss:ID="lic"><Interior ss:Color="#EEF0F8" ss:Pattern="Solid"/><Font ss:Color="#4A537D" ss:Size="9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
-    <Style ss:ID="fer"><Interior ss:Color="#FEF3C7" ss:Pattern="Solid"/><Font ss:Color="#92400E" ss:Bold="1" ss:Size="9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
-    <Style ss:ID="cntOk"><Interior ss:Color="#D1FAE5" ss:Pattern="Solid"/><Font ss:Bold="1" ss:Color="#065F46" ss:Size="9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
-    <Style ss:ID="cntBad"><Interior ss:Color="#FDEAEA" ss:Pattern="Solid"/><Font ss:Bold="1" ss:Color="#991B1B" ss:Size="9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
-    <Style ss:ID="empty"><Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/><Font ss:Size="9"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>`;
+  // Build HTML table — Excel opens .xls HTML tables perfectly with colors
+  let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+    xmlns:x="urn:schemas-microsoft-com:office:excel"
+    xmlns="http://www.w3.org/TR/REC-html40">
+  <head><meta charset="UTF-8">
+  <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>
+  <x:ExcelWorksheet><x:Name>${mesNombre}</x:Name>
+  <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+  </x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+  <style>
+    td,th{border:1px solid #ccc;font-family:Calibri,Arial,sans-serif;font-size:10pt;padding:4px 8px;}
+    .titulo{background:#4a537d;color:white;font-weight:bold;font-size:12pt;}
+    .hdr{background:#00554e;color:white;font-weight:bold;text-align:center;}
+    .sup{background:#e0f2f0;color:#00554e;font-weight:bold;}
+    .pres{background:#d1fae5;color:#065f46;font-weight:bold;text-align:center;}
+    .home{background:#f5effd;color:#7c3aed;text-align:center;}
+    .lic{background:#eef0f8;color:#4a537d;text-align:center;}
+    .fer{background:#fef3c7;color:#92400e;font-weight:bold;text-align:center;}
+    .cnt-ok{background:#d1fae5;color:#065f46;font-weight:bold;text-align:center;}
+    .cnt-bad{background:#fdeaea;color:#991b1b;font-weight:bold;text-align:center;}
+  </style></head><body>
+  <table>
+    <tr><td class="titulo" colspan="${days.length+1}">Planilla de Horarios — ${mesNombre} — Jerárquicos Salud</td></tr>
+    <tr><td style="height:6px;border:none;" colspan="${days.length+1}"></td></tr>
+    <tr>
+      <th class="hdr" style="width:160px;">Supervisor</th>`;
 
-  // Header row: Supervisor + day columns
-  let headerRow = `<Row ss:Height="32">
-    <Cell ss:StyleID="header" ss:Width="160"><Data ss:Type="String">Supervisor</Data></Cell>`;
-  days.forEach((wd,i) => {
-    headerRow += `<Cell ss:StyleID="header"><Data ss:Type="String">${diasL[wd.getDay()-1]} ${wd.getDate()}</Data></Cell>`;
+  days.forEach(wd => {
+    html += `<th class="hdr" style="width:88px;">${diasL[wd.getDay()-1]} ${wd.getDate()}</th>`;
   });
-  headerRow += `</Row>`;
+  html += `</tr>`;
 
-  // Data rows — ONE row per supervisor
-  let dataRows = '';
+  // One row per supervisor
   phSupervisores.forEach((sup, sIdx) => {
-    let row = `<Row ss:Height="22">
-      <Cell ss:StyleID="supName"><Data ss:Type="String">${sup.n}</Data></Cell>`;
-
+    html += `<tr><td class="sup">${sup.n}</td>`;
     days.forEach((wd, dIdx) => {
-      // Check if holiday
       const fd = fmtDate(wd);
       const isHol = HOLIDAYS_2026 && HOLIDAYS_2026.includes(fd);
-
-      if (isHol) {
-        row += `<Cell ss:StyleID="fer"><Data ss:Type="String">Feriado</Data></Cell>`;
-        return;
-      }
+      if (isHol) { html += `<td class="fer">Feriado</td>`; return; }
 
       const stEl = document.getElementById('ph-st-' + sIdx + '-' + dIdx);
       const tmEl = document.getElementById('ph-tm-' + sIdx + '-' + dIdx);
@@ -1841,64 +1843,39 @@ function phExportExcel() {
       const tm = tmEl ? tmEl.innerText : sup.h;
 
       if (st === 'Presencial') {
-        row += `<Cell ss:StyleID="pres"><Data ss:Type="String">${tm}</Data></Cell>`;
+        html += `<td class="pres">${tm}</td>`;
       } else if (st === 'Licencia') {
-        row += `<Cell ss:StyleID="lic"><Data ss:Type="String">Licencia</Data></Cell>`;
+        html += `<td class="lic">Licencia</td>`;
       } else {
-        row += `<Cell ss:StyleID="home"><Data ss:Type="String">HomeOffice</Data></Cell>`;
+        html += `<td class="home">HomeOffice</td>`;
       }
     });
-
-    row += `</Row>`;
-    dataRows += row;
+    html += `</tr>`;
   });
 
-  // Count row — presenciales per day
-  let cntRow = `<Row ss:Height="20">
-    <Cell ss:StyleID="header"><Data ss:Type="String">Presenciales</Data></Cell>`;
+  // Presenciales count row
+  html += `<tr style="height:6px;"><td colspan="${days.length+1}" style="border:none;"></td></tr>`;
+  html += `<tr><th class="hdr">Presenciales</th>`;
   days.forEach((wd, dIdx) => {
     const fd = fmtDate(wd);
     const isHol = HOLIDAYS_2026 && HOLIDAYS_2026.includes(fd);
-    if (isHol) {
-      cntRow += `<Cell ss:StyleID="fer"><Data ss:Type="String">—</Data></Cell>`;
-      return;
-    }
+    if (isHol) { html += `<td class="fer">—</td>`; return; }
     let p = 0;
     phSupervisores.forEach((_, sIdx) => {
       const el = document.getElementById('ph-st-' + sIdx + '-' + dIdx);
       if (el && el.innerText === 'Presencial') p++;
     });
-    cntRow += `<Cell ss:StyleID="${p>=6?'cntOk':'cntBad'}"><Data ss:Type="Number">${p}</Data></Cell>`;
+    html += `<td class="${p>=6?'cnt-ok':'cnt-bad'}">${p}</td>`;
   });
-  cntRow += `</Row>`;
+  html += `</tr></table></body></html>`;
 
-  const xml = `<?xml version="1.0"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
-  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
-  <Styles>${styles}</Styles>
-  <Worksheet ss:Name="${mesNombre}">
-    <Table ss:DefaultColumnWidth="90" ss:DefaultRowHeight="20">
-      <Column ss:Width="160"/>
-      <Row ss:Height="28">
-        <Cell ss:StyleID="titulo" ss:MergeAcross="${days.length}">
-          <Data ss:Type="String">Planilla de Horarios — ${mesNombre} — Jerárquicos Salud</Data>
-        </Cell>
-      </Row>
-      <Row ss:Height="6"/>
-      ${headerRow}
-      ${dataRows}
-      <Row ss:Height="6"/>
-      ${cntRow}
-    </Table>
-  </Worksheet>
-</Workbook>`;
-
-  const blob = new Blob([xml], {type:'application/vnd.ms-excel;charset=utf-8'});
+  const blob = new Blob([html], {type:'application/vnd.ms-excel;charset=utf-8'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'Horarios_' + mesNombre.replace(' ','_') + '.xls';
+  a.download = 'Horarios_' + mesNombre.replace(' ', '_') + '.xls';
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(a.href), 3000);
 }
 
