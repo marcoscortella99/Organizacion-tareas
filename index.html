@@ -435,6 +435,304 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 </style>
 </head>
 <body>
+<!-- LANDING SCREEN -->
+<div id="landing" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#00554e;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:20px;box-sizing:border-box;">
+  <div style="text-align:center;width:100%;max-width:480px;">
+    <div style="width:52px;height:52px;background:white;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;color:#00554e;margin-bottom:12px;">JS</div>
+    <h1 style="color:white;font-size:1.5rem;font-weight:800;margin:0 0 4px;">Organización Supers</h1>
+    <p style="color:rgba(255,255,255,.6);font-size:13px;margin:0 0 28px;">Jerárquicos Salud · ¿A dónde querés ir?</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <button onclick="landingGoTo('rotacion')" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:18px 12px;cursor:pointer;text-align:left;color:white;font-family:inherit;">
+        <div style="font-size:1.6rem;margin-bottom:8px;">📅</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:3px;">Rotación Diaria</div>
+        <div style="font-size:10px;opacity:.65;">Distribución mensual de tareas</div>
+      </button>
+      <button onclick="landingGoTo('anual')" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:18px 12px;cursor:pointer;text-align:left;color:white;font-family:inherit;">
+        <div style="font-size:1.6rem;margin-bottom:8px;">📆</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:3px;">Distribución Anual</div>
+        <div style="font-size:10px;opacity:.65;">Asignación de roles por mes</div>
+      </button>
+      <button onclick="landingGoTo('sabados')" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:18px 12px;cursor:pointer;text-align:left;color:white;font-family:inherit;">
+        <div style="font-size:1.6rem;margin-bottom:8px;">🛡️</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:3px;">Guardias Sábados</div>
+        <div style="font-size:10px;opacity:.65;">Planificación anual de guardias</div>
+      </button>
+      <button onclick="landingGoTo('horarios')" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:18px 12px;cursor:pointer;text-align:left;color:white;font-family:inherit;">
+        <div style="font-size:1.6rem;margin-bottom:8px;">🕐</div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:3px;">Planilla Horarios</div>
+        <div style="font-size:10px;opacity:.65;">Gestión mensual de presencialidad</div>
+      </button>
+    </div>
+    <p style="color:rgba(255,255,255,.3);font-size:10px;margin:0;">Tocá cualquier sección para comenzar</p>
+  </div>
+</div>
+
+
+<!-- APP WRAPPER -->
+<div class="app-wrapper" id="app-wrapper" style="display:none;">
+
+<!-- MOBILE OVERLAY -->
+<div class="mob-overlay" id="mob-overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">JS</div>
+    <div class="sb-title">Organización Supers</div>
+    <div class="sb-sub">Jerárquicos Salud</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section">Organización</div>
+    <button class="nav-item active" onclick="goTo('rotacion')" id="nav-rotacion">
+      <span class="ni-icon">📅</span> Rotación Diaria
+    </button>
+    <button class="nav-item" onclick="goTo('anual')" id="nav-anual">
+      <span class="ni-icon">📆</span> Distribución Anual
+    </button>
+    <button class="nav-item" onclick="goTo('sabados')" id="nav-sabados">
+      <span class="ni-icon">🛡️</span> Guardias Sábados
+    </button>
+    <button class="nav-item" onclick="goTo('horarios')" id="nav-horarios">
+      <span class="ni-icon">🕐</span> Planilla Horarios
+    </button>
+    <div class="sb-section" style="margin-top:8px;">Seguridad</div>
+    <button class="nav-item" onclick="exportBackup()" style="color:#fcd34d;">
+      <span class="ni-icon">📤</span> Exportar respaldo
+    </button>
+    <button class="nav-item" onclick="document.getElementById('import-file').click()" style="color:#86efac;">
+      <span class="ni-icon">📥</span> Restaurar respaldo
+    </button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(event)">
+  </div>
+  <div style="padding:8px 10px;border-top:1px solid rgba(255,255,255,.1);">
+    <button onclick="toggleDark()" id="dark-btn" class="nav-item" style="font-size:11px;padding:8px 12px;">
+      <span class="ni-icon">🌙</span> <span id="dark-lbl">Modo oscuro</span>
+    </button>
+  </div>
+  <div class="sb-sync">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-text">Conectando...</span>
+  </div>
+  <div style="padding:4px 14px 8px;font-size:9px;color:rgba(255,255,255,.3);line-height:1.4;" id="last-mod-sb"></div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="mob-menu-btn" onclick="openSidebar()">☰</button>
+    <div class="topbar-title" id="topbar-title">
+      Rotación Diaria
+      <small id="topbar-sub">Distribución mensual de tareas</small>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <button id="user-badge" onclick="showLogin()" style="display:none;padding:5px 12px;border-radius:20px;border:1px solid var(--impulsa);background:var(--impulsa-lt);color:var(--impulsa);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;"></button>
+      <button onclick="showLogin()" style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">👤 Ingresar</button>
+    </div>
+    <div id="topbar-actions" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"></div>
+  </div>
+
+  <!-- LAST MODIFIED BAR -->
+  <div id="last-mod-bar" style="background:#f0fdf9;border-bottom:1px solid #b2dfdb;padding:5px 24px;font-size:10px;color:#00554e;font-weight:600;display:none;"></div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══ SCREEN: ROTACIÓN ══ -->
+    <div class="screen active" id="screen-rotacion">
+      <div class="card">
+        <div class="card-header">
+          <div class="rot-controls">
+            <div class="month-nav">
+              <button class="nav-btn" onclick="rotChangeMonth(-1)">‹</button>
+              <div class="month-disp" id="rot-month-disp"></div>
+              <button class="nav-btn" onclick="rotChangeMonth(1)">›</button>
+            </div>
+            <div class="view-tabs">
+              <button class="view-tab active" onclick="rotSetView('tabla',this)">Tabla</button>
+              <button class="view-tab" onclick="rotSetView('semanal',this)">Semanal</button>
+              <button class="view-tab" onclick="rotSetView('resumen',this)">Resumen</button>
+            </div>
+            <select id="rot-sup-filter" onchange="rotRender()" class="btn" style="padding:6px 10px;font-size:12px;cursor:pointer;">
+              <option value="">👥 Todos</option>
+            </select>
+            <button class="btn" id="rot-week-btn" onclick="rotToggleWeekOnly(this)" title="Ver solo semana actual">📅 Esta semana</button>
+            <button class="btn" onclick="rotResetOverrides()">↺ Resetear</button>
+            <button class="btn btn-primary" onclick="rotExportPDF()">📄 PDF</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0 0 16px;">
+          <div style="padding:16px 16px 8px;">
+            <div class="duplas-bar" id="rot-duplas-bar"></div>
+            <div class="legend-bar" id="rot-legend"></div>
+          </div>
+          <div id="rot-content" style="padding:0 16px;"></div>
+          <div id="rot-alerts" style="padding:0 16px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN: DISTRIBUCIÓN ANUAL ══ -->
+    <div class="screen" id="screen-anual">
+      <div class="card">
+        <div class="card-header">
+          <h2>Distribución Anual de Tareas</h2>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="number" id="da-year" value="2026" min="2026" max="2035" style="width:90px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-weight:700;font-size:13px;" onchange="daRender()">
+            <label style="font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <input type="checkbox" id="da-edit-mode" onchange="daRender()" style="cursor:pointer;">
+              Modo edición
+            </label>
+            <button class="btn btn-primary" onclick="daSave()">💾 Guardar</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <div class="da-table-wrap">
+            <table class="da-table">
+              <thead>
+                <tr>
+                  <th style="width:120px;">Mes</th>
+                  <th style="background:#00554e;">🕐 Horarios Supervisores</th>
+                  <th style="background:#4a537d;">📋 Tareas Colaboradores</th>
+                  <th style="background:#92610a;">🎯 Tareas Supervisores</th>
+                </tr>
+              </thead>
+              <tbody id="da-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Resumen de carga anual</h2></div>
+        <div class="card-body">
+          <div class="da-res-grid" id="da-res-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN: GUARDIAS SÁBADOS ══ -->
+    <div class="screen" id="screen-sabados">
+      <div class="card">
+        <div class="card-header">
+          <h2>Guardias de Sábados</h2>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="number" id="sab-year" value="2026" min="2026" max="2035" style="width:90px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-weight:700;font-size:13px;" onchange="sabRender()">
+            <button class="btn btn-primary" onclick="sabSave()">💾 Guardar</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="sab-grid" id="sab-grid"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h2>Feriados y Fines de Semana Largos</h2>
+          <button class="btn btn-primary" onclick="sabAddFeriado()">＋ Agregar feriado</button>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <div style="overflow-x:auto;">
+            <table class="fer-table">
+              <thead><tr><th>Día Feriado</th><th>Sábado de Guardia</th><th>Motivo</th><th>Responsable</th><th></th></tr></thead>
+              <tbody id="sab-fer-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>Resumen de carga anual</h2></div>
+        <div class="card-body" style="padding:0;">
+          <div style="overflow-x:auto;">
+            <table class="sab-res-table">
+              <thead><tr><th>Supervisor</th><th style="width:80px;text-align:center;">Total</th><th>Fechas asignadas</th></tr></thead>
+              <tbody id="sab-res-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN: PLANILLA HORARIOS ══ -->
+    <div class="screen" id="screen-horarios">
+      <div class="card">
+        <div class="card-header">
+          <h2>Planilla de Horarios</h2>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="month" id="ph-month" value="2026-07" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:12px;" onchange="phRender()">
+            <button class="btn" onclick="phAutoAB()">⚡ Auto A/B</button>
+            <button class="btn btn-primary" onclick="phSave()">💾 Guardar</button>
+            <button class="btn" onclick="phExportPDF()">📄 PDF</button>
+            <button class="btn" onclick="phExportExcel()">📊 CSV</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <div class="ph-wrap">
+            <table class="ph-table" id="ph-table">
+              <thead><tr id="ph-header"><th class="ph-sticky">Supervisor / Dupla</th></tr></thead>
+              <tbody id="ph-body"></tbody>
+              <tfoot><tr id="ph-foot" class="ph-foot"><td class="ph-sticky" style="text-align:left;padding-left:16px;"><b>Presenciales (mín. 6)</b></td></tr></tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" class="ph-bottom">
+        <div class="card">
+          <div class="card-header"><h2>Guardias Semanales</h2></div>
+          <div class="card-body" style="padding:0;">
+            <table class="ph-guards-table" id="ph-guards-table">
+              <tbody id="ph-guards-body">
+                <tr style="background:#f0fbf9;"><td>Apertura (07-15):</td><td contenteditable="true">Lumila Perri y David Leiva</td></tr>
+                <tr><td>Lunes:</td><td contenteditable="true">Martin Paraván y Marcos Cortella</td></tr>
+                <tr><td>Martes:</td><td contenteditable="true">Alejandra Sosa y Ximena Epelbaum</td></tr>
+                <tr><td>Miércoles:</td><td contenteditable="true">Gisela Spies y Victoria Palombizio</td></tr>
+                <tr><td>Jueves:</td><td contenteditable="true">Fabricio Figueroa y Jesica Carrasco</td></tr>
+                <tr><td>Viernes:</td><td contenteditable="true">Yanina Pacheco y Sol Celli</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2>Sábados del Mes</h2></div>
+          <div class="card-body" style="padding:0;">
+            <table class="ph-guards-table">
+              <thead style="background:var(--bg);"><tr><th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--muted);">FECHA</th><th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--muted);">RESPONSABLE</th></tr></thead>
+              <tbody id="ph-sab-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- MODAL ROTACIÓN -->
+<div class="modal-bg" id="rot-modal" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-title" id="rot-modal-title">Ajustar asignación</div>
+    <div class="modal-sub" id="rot-modal-sub"></div>
+    <div class="modal-roles" id="rot-modal-roles"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="rotSaveOverride()">Guardar</button>
+      <button class="btn" onclick="rotClearOverride()">Restaurar automático</button>
+      <button class="btn" onclick="rotCloseModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app-wrapper -->
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,48,48,.92);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--white);border-radius:24px;padding:32px 28px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:12px;">👤</div>
+    <h2 style="font-size:1.2rem;font-weight:800;color:var(--impulsa);margin-bottom:6px;">¿Quién sos?</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:20px;">Seleccioná tu nombre para ver tus tareas resaltadas</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;" id="login-sup-grid"></div>
+    <button onclick="loginSkip()" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Continuar sin seleccionar</button>
+  </div>
+</div>
+
+
 
 <!-- APP WRAPPER -->
 <div class="app-wrapper" id="app-wrapper" style="display:none;">
@@ -1988,911 +2286,4 @@ function rotExportPDF() {
   <div class="lc"><div class="lt">Referencias</div><div class="lw">${legHTML}</div></div>
   <div class="pb"><button onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button></div>
   <div class="ft">Jerárquicos Salud · Rotación de Supervisores · ${mes} ${rotYear}</div>
-  </div></body></html>`;
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.target='_blank';a.rel='noopener';a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// ══ MÓDULO 2: DISTRIBUCIÓN ANUAL ══
-// ═══════════════════════════════════════════════════════════════
-const DA_SUPS=['Fabricio Figueroa','Gisela Spies','Martin Paravan','Jesica Carrasco','Lumila Perri','Alejandra Sosa','David Leiva','Victoria Palombizio','Sol Celli','Ximena Epelbaum','Yanina Pacheco','Marcos Cortella'];
-const DA_N=DA_SUPS.length;
-
-function daGetCascada(mesIndex, year) {
-  const yOff=year-2026, base=(yOff*5)+mesIndex;
-  const patrones=[[0,1,4,7],[0,2,5,8],[0,3,6,9],[0,1,7,10]];
-  const p=patrones[Math.abs(yOff)%patrones.length];
-  return {h:DA_SUPS[(base+p[0])%DA_N],tc1:DA_SUPS[(base+p[1])%DA_N],tc2:DA_SUPS[(base+p[2])%DA_N],ts:DA_SUPS[(base+p[3])%DA_N]};
-}
-
-let daEditMode=false;
-document.getElementById('da-edit-mode').onchange=function(){daEditMode=this.checked;daRender();};
-
-function daMakeSel(id, value, cls) {
-  return `<select class="sel-da ${cls}" id="${id}" onchange="daUpdateResumen()">
-    ${DA_SUPS.map(s=>`<option value="${s}" ${s===value?'selected':''}>${s}</option>`).join('')}
-  </select>`;
-}
-
-let daSavedData={};
-
-async function daRender() {
-  const year=parseInt(document.getElementById('da-year').value);
-  const saved=daSavedData[year]||{};
-  const tbody=document.getElementById('da-tbody'); tbody.innerHTML='';
-  MESES.forEach((mes,i)=>{
-    const auto=daGetCascada(i,year);
-    const rid=`r${year}_${i}`;
-    const h=saved[`${rid}_h`]??auto.h, tc1=saved[`${rid}_tc1`]??auto.tc1, tc2=saved[`${rid}_tc2`]??auto.tc2, ts=saved[`${rid}_ts`]??auto.ts;
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td><span class="mes-num">${String(i+1).padStart(2,'0')}</span><span class="mes-name">${mes}</span></td>
-      <td>${daEditMode?daMakeSel(`${rid}_h`,h,'sel-h'):`<span class="chip-da chip-h">${h}</span>`}</td>
-      <td><div style="display:flex;gap:6px;flex-wrap:wrap;">${daEditMode?daMakeSel(`${rid}_tc1`,tc1,'sel-tc')+daMakeSel(`${rid}_tc2`,tc2,'sel-tc'):`<span class="chip-da chip-tc">${tc1}</span><span class="chip-da chip-tc">${tc2}</span>`}</div></td>
-      <td>${daEditMode?daMakeSel(`${rid}_ts`,ts,'sel-ts'):`<span class="chip-da chip-ts">${ts}</span>`}</td>`;
-    tbody.appendChild(tr);
-  });
-  daUpdateResumen();
-}
-
-function daGetValues() {
-  const year=parseInt(document.getElementById('da-year').value);
-  const saved=daSavedData[year]||{};
-  return MESES.map((_,i)=>{
-    const rid=`r${year}_${i}`, auto=daGetCascada(i,year);
-    return {mes:i,
-      h:  (daEditMode?document.getElementById(`${rid}_h`)?.value:null)??saved[`${rid}_h`]??auto.h,
-      tc1:(daEditMode?document.getElementById(`${rid}_tc1`)?.value:null)??saved[`${rid}_tc1`]??auto.tc1,
-      tc2:(daEditMode?document.getElementById(`${rid}_tc2`)?.value:null)??saved[`${rid}_tc2`]??auto.tc2,
-      ts: (daEditMode?document.getElementById(`${rid}_ts`)?.value:null)??saved[`${rid}_ts`]??auto.ts,
-    };
-  });
-}
-
-function daUpdateResumen() {
-  const year=parseInt(document.getElementById('da-year').value);
-  const rows=daGetValues(), cnt={};
-  DA_SUPS.forEach(s=>cnt[s]={total:0,tags:[]});
-  rows.forEach(r=>{
-    const nm=MESES[r.mes].substring(0,3);
-    const add=(name,tcls,lbl)=>{if(cnt[name]){cnt[name].total++;cnt[name].tags.push(`<span class="tag ${tcls}">${lbl}·${nm}</span>`);}};
-    add(r.h,'tag-h','H');add(r.tc1,'tag-tc','TC');add(r.tc2,'tag-tc','TC');add(r.ts,'tag-ts','TS');
-  });
-  const grid=document.getElementById('da-res-grid'); grid.innerHTML='';
-  DA_SUPS.forEach(s=>{
-    grid.innerHTML+=`<div class="da-res-card"><div class="da-res-head"><span class="da-res-name">${s}</span><span class="da-res-total">${cnt[s].total}</span></div><div class="da-res-tags">${cnt[s].tags.join('')}</div></div>`;
-  });
-}
-
-async function daSave() {
-  const year=parseInt(document.getElementById('da-year').value);
-  if(!daEditMode){alert('Activá Modo Edición primero.');return;}
-  const data={};
-  MESES.forEach((_,i)=>{
-    const rid=`r${year}_${i}`;
-    data[`${rid}_h`]=document.getElementById(`${rid}_h`).value;
-    data[`${rid}_tc1`]=document.getElementById(`${rid}_tc1`).value;
-    data[`${rid}_tc2`]=document.getElementById(`${rid}_tc2`).value;
-    data[`${rid}_ts`]=document.getElementById(`${rid}_ts`).value;
-  });
-  daSavedData[year]=data;
-  setSyncStatus('saving');
-  const ok=await sbUpsert('js_dist_anual',{key:'tareas_'+year,data:JSON.stringify(data),updated_at:new Date().toISOString()});
-  setSyncStatus(ok?'ok':'error');
-  if(ok)alert('✅ Guardado en Supabase');
-  daRender();
-}
-
-// ═══════════════════════════════════════════════════════════════
-// ══ MÓDULO 3: GUARDIAS SÁBADOS ══
-// ═══════════════════════════════════════════════════════════════
-const SAB_SUPS=['Martin Paravan','Yanina Pacheco','Fabricio Figueroa','Gisela Spies','Ximena Epelbaum','Sol Celli','Jesica Carrasco','Victoria Palombizio','Alejandra Sosa','Marcos Cortella','Lumila Perri','David Leiva'];
-const SAB_SEED=new Date(2026,0,3);
-
-function sabGetSup(targetDate) {
-  const diff=Math.round((targetDate.getTime()-SAB_SEED.getTime())/(7*24*60*60*1000));
-  return SAB_SUPS[((diff%SAB_SUPS.length)+SAB_SUPS.length)%SAB_SUPS.length];
-}
-
-let sabSavedData={};
-
-async function sabRender() {
-  const year=parseInt(document.getElementById('sab-year').value);
-  const saved=sabSavedData[year]||{sab:{},fer:[]};
-  const grid=document.getElementById('sab-grid'); grid.innerHTML='';
-  MESES.forEach((mes,mi)=>{
-    const card=document.createElement('div'); card.className='sab-card';
-    card.innerHTML=`<h3>${mes}</h3>`;
-    let d=new Date(year,mi,1);
-    while(d.getMonth()===mi){
-      if(d.getDay()===6){
-        const fd=`sab-${year}-${mi}-${d.getDate()}`;
-        const fechaStr=`${String(d.getDate()).padStart(2,'0')}/${String(mi+1).padStart(2,'0')}`;
-        const auto=sabGetSup(d);
-        const val=saved.sab[fd]||auto;
-        const item=document.createElement('div'); item.className='guardia-item';
-        item.innerHTML=`<div class="fecha-lbl">Sáb ${fechaStr}</div>
-          <select class="sel-sup sab-sel" id="${fd}" onchange="sabUpdateResumen()">
-            ${SAB_SUPS.map(s=>`<option value="${s}" ${s===val?'selected':''}>${s}</option>`).join('')}
-          </select>`;
-        card.appendChild(item);
-      }
-      d.setDate(d.getDate()+1);
-    }
-    grid.appendChild(card);
-  });
-  // Feriados
-  document.getElementById('sab-fer-body').innerHTML='';
-  (saved.fer||[]).forEach(f=>sabAddFeriadoRow(f.fd,f.fs,f.desc,f.resp));
-  sabUpdateResumen();
-}
-
-function sabAddFeriado(){sabAddFeriadoRow('','','','');}
-function sabAddFeriadoRow(fd='',fs='',desc='',resp=''){
-  const tbody=document.getElementById('sab-fer-body');
-  const tr=document.createElement('tr'); tr.className='fer-row';
-  tr.innerHTML=`<td><input type="text" class="fer-input f-dia" placeholder="Lun 16/02" value="${fd}"></td>
-    <td><input type="text" class="fer-input f-sab" placeholder="Sáb 14/02" value="${fs}"></td>
-    <td><input type="text" class="fer-input f-desc" placeholder="Motivo" value="${desc}"></td>
-    <td><select class="sel-sup f-resp" onchange="sabUpdateResumen()">
-      <option value="">- Seleccionar -</option>
-      ${SAB_SUPS.map(s=>`<option value="${s}" ${s===resp?'selected':''}>${s}</option>`).join('')}
-    </select></td>
-    <td><button class="btn-del" onclick="this.parentElement.parentElement.remove();sabUpdateResumen();">✖</button></td>`;
-  tbody.appendChild(tr); sabUpdateResumen();
-}
-
-function sabUpdateResumen(){
-  const body=document.getElementById('sab-res-body'); body.innerHTML='';
-  const cnt={}; SAB_SUPS.forEach(s=>cnt[s]={total:0,fechas:[]});
-  document.querySelectorAll('.sab-sel').forEach(sel=>{
-    const v=sel.value;if(cnt[v]){cnt[v].total++;cnt[v].fechas.push(sel.parentElement.querySelector('.fecha-lbl')?.innerText.replace('Sáb ',''));}
-  });
-  document.querySelectorAll('.fer-row').forEach(row=>{
-    const resp=row.querySelector('.f-resp').value, fSab=row.querySelector('.f-sab').value;
-    if(cnt[resp]){cnt[resp].total++;cnt[resp].fechas.push(`${fSab}*`);}
-  });
-  SAB_SUPS.forEach(s=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td><b>${s}</b></td><td class="cnt">${cnt[s].total}</td><td class="dates">${cnt[s].fechas.join(' · ')}</td>`;
-    body.appendChild(tr);
-  });
-}
-
-async function sabSave(){
-  const year=parseInt(document.getElementById('sab-year').value);
-  const sab={};
-  document.querySelectorAll('.sab-sel').forEach(s=>sab[s.id]=s.value);
-  const fer=[];
-  document.querySelectorAll('.fer-row').forEach(row=>{
-    fer.push({fd:row.querySelector('.f-dia').value,fs:row.querySelector('.f-sab').value,desc:row.querySelector('.f-desc').value,resp:row.querySelector('.f-resp').value});
-  });
-  sabSavedData[year]={sab,fer};
-  setSyncStatus('saving');
-  const ok=await sbUpsert('js_dist_anual',{key:'sabados_'+year,data:JSON.stringify({sab,fer}),updated_at:new Date().toISOString()});
-  setSyncStatus(ok?'ok':'error');
-  if(ok)alert('✅ Guardado en Supabase');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// ══ MÓDULO 4: PLANILLA HORARIOS ══
-// ═══════════════════════════════════════════════════════════════
-let phSupervisores=[
-  {n:'Martin Paravan',   d:'Marcos Cortella',      g:'A',h:'08:00 a 16:00'},
-  {n:'Marcos Cortella',  d:'Martin Paravan',        g:'B',h:'08:00 a 16:00'},
-  {n:'Alejandra Sosa',   d:'Ximena Epelbaum',       g:'A',h:'08:00 a 16:00'},
-  {n:'Ximena Epelbaum',  d:'Alejandra Sosa',        g:'B',h:'11:00 a 19:00'},
-  {n:'Gisela Spies',     d:'Victoria Palombizio',   g:'A',h:'08:00 a 16:00'},
-  {n:'Victoria Palombizio',d:'Gisela Spies',        g:'B',h:'08:00 a 16:00'},
-  {n:'Fabricio Figueroa',d:'Jesica Carrasco',       g:'A',h:'11:00 a 19:00'},
-  {n:'Jesica Carrasco',  d:'Fabricio Figueroa',     g:'B',h:'08:00 a 16:00'},
-  {n:'Lumila Perri',     d:'David Leiva',           g:'A',h:'07:00 a 15:00'},
-  {n:'David Leiva',      d:'Lumila Perri',          g:'B',h:'07:00 a 15:00'},
-  {n:'Yanina Pacheco',   d:'Sol Celli',             g:'A',h:'08:00 a 16:00'},
-  {n:'Sol Celli',        d:'Yanina Pacheco',        g:'B',h:'08:00 a 16:00'},
-];
-const phHorarios=['07:00 a 15:00','08:00 a 16:00','11:00 a 19:00'];
-let phSavedData={};
-
-function phRender(){
-  const [y,m]=document.getElementById('ph-month').value.split('-');
-  let d=new Date(y,m-1,1);
-  while(d.getDay()!==1)d.setDate(d.getDate()+1);
-  let days=[];let startM=d.getMonth();
-  while(d.getMonth()===startM||days.length<20){
-    if(d.getDay()!==0&&d.getDay()!==6)days.push(new Date(d));
-    d.setDate(d.getDate()+1);if(days.length>=25)break;
-  }
-  const header=document.getElementById('ph-header');
-  const body=document.getElementById('ph-body');
-  const foot=document.getElementById('ph-foot');
-  header.innerHTML='<th class="ph-sticky">Supervisor / Dupla</th>';
-  foot.innerHTML='<td class="ph-sticky" style="text-align:left;padding-left:16px;"><b>Presenciales (mín. 6)</b></td>';
-  days.forEach((wd,i)=>{
-    header.innerHTML+=`<th>${['L','M','M','J','V'][wd.getDay()-1]}<br>${wd.getDate()}</th>`;
-    foot.innerHTML+=`<td id="ph-cnt-${i}"><span class="ph-cnt-invalid">0</span></td>`;
-  });
-  body.innerHTML='';
-  phSupervisores.forEach((s,sIdx)=>{
-    let row=`<tr><td class="ph-sticky">
-      <span class="ph-sup-name">${s.n}</span>
-      <div style="display:flex;align-items:center;gap:4px;margin-top:2px;">
-        <input class="ph-dupla-input" id="ph-dup-${sIdx}" value="${s.d}" onchange="phUpdateDupla(${sIdx},this.value)" onfocus="this.select()">
-        <span style="font-size:9px;color:#ccc;cursor:pointer;" onclick="document.getElementById('ph-dup-${sIdx}').focus()">✏️</span>
-      </div>
-      <div class="ph-week-btns">
-        <span class="ph-wlbl">Estado semana:</span>
-        ${[1,2,3,4,5].map(w=>`<button class="ph-wbtn" onclick="phSetWeekState(${sIdx},${w})">${w}</button>`).join('')}
-        <span class="ph-wlbl">Horario semana:</span>
-        ${[1,2,3,4,5].map(w=>`<button class="ph-wbtn-h" onclick="phSetWeekHorario(${sIdx},${w})">${w}</button>`).join('')}
-      </div>
-    </td>`;
-    days.forEach((_,dIdx)=>{
-      row+=`<td><div style="padding:3px;text-align:center;">
-        <div class="ph-badge bg-home" id="ph-st-${sIdx}-${dIdx}" onclick="phToggleSt(this)">HomeOffice</div>
-        <div class="ph-time" id="ph-tm-${sIdx}-${dIdx}" onclick="phToggleTm(this)">${s.h}</div>
-      </div></td>`;
-    });
-    body.innerHTML+=row+'</tr>';
-  });
-  phRenderSabados(parseInt(y),parseInt(m),days[0].getDate());
-  phLoadSaved(document.getElementById('ph-month').value);
-  phUpdateCounters();
-  phRenderCards(days);
-  // Store days for re-render on toggle
-  window._phDays = days;
-}
-
-function phRenderCards(days) {
-  // Remove old cards if any
-  let existing = document.getElementById('ph-cards-container');
-  if (existing) existing.remove();
-
-  const wrap = document.querySelector('.ph-wrap');
-  if (!wrap) return;
-
-  const diasL=['L','M','M','J','V'];
-  let html = '<div class="ph-cards" id="ph-cards-container">';
-  phSupervisores.forEach((sup, sIdx) => {
-    html += `<div class="ph-card">
-      <div class="ph-card-header">
-        <div>
-          <div class="ph-card-name">${sup.n}</div>
-          <div class="ph-card-dupla">↔ ${sup.d}</div>
-        </div>
-      </div>
-      <div class="ph-card-days">`;
-    days.forEach((d, dIdx) => {
-      const stEl = document.getElementById(`ph-st-${sIdx}-${dIdx}`);
-      const tmEl = document.getElementById(`ph-tm-${sIdx}-${dIdx}`);
-      const st = stEl ? stEl.innerText : 'HomeOffice';
-      const tm = tmEl ? tmEl.innerText : sup.h;
-      const stColors = {'HomeOffice':['#f5effd','#7c3aed'],'Presencial':['#d1fae5','#059669'],'Licencia':['#eef0f8','#4a537d']};
-      const horColors = {'07:00 a 15:00':['#fff7ed','#c2410c'],'08:00 a 16:00':['#eff6ff','#1d4ed8'],'11:00 a 19:00':['#fdf4ff','#7e22ce']};
-      const [bg,fg] = stColors[st]||['#f1f5f9','#64748b'];
-      const [hbg,hfg] = horColors[tm]||['#f8fafc','#64748b'];
-      html += `<div class="ph-card-day">
-        <span class="ph-card-dlbl">${diasL[d.getDay()-1]}${d.getDate()}</span>
-        <span style="background:${bg};color:${fg};padding:3px 2px;border-radius:5px 5px 0 0;font-size:8px;font-weight:700;text-align:center;width:100%;display:block;cursor:pointer;"
-          onclick="phToggleSt(document.getElementById('ph-st-${sIdx}-${dIdx}'));setTimeout(()=>phRenderCards(window._phDays||[]),50)">${st==='HomeOffice'?'HO':st==='Presencial'?'Pres':'Lic'}</span>
-        <span style="background:${hbg};color:${hfg};padding:2px 1px;border-radius:0 0 5px 5px;font-size:7px;font-weight:600;text-align:center;width:100%;display:block;cursor:pointer;border-top:1px solid rgba(0,0,0,.06);"
-          onclick="phToggleTm(document.getElementById('ph-tm-${sIdx}-${dIdx}'));setTimeout(()=>phRenderCards(window._phDays||[]),50)">${tm.replace(' a ',' ')}</span>
-      </div>`;
-    });
-    html += `</div></div>`;
-  });
-  html += '</div>';
-
-  // Insert after the ph-wrap
-  const container = document.createElement('div');
-  container.innerHTML = html;
-  wrap.parentNode.insertBefore(container.firstChild, wrap.nextSibling);
-}
-
-function phToggleSt(el){
-  const s=[{c:'bg-home',t:'HomeOffice'},{c:'bg-pres',t:'Presencial'},{c:'bg-lic',t:'LIC'}];
-  let cur=s.findIndex(x=>el.classList.contains(x.c));
-  const nxt=s[(cur+1)%3];
-  el.className=`ph-badge ${nxt.c}`;el.innerText=nxt.t;phUpdateCounters();
-}
-function phToggleTm(el){el.innerText=phHorarios[(phHorarios.indexOf(el.innerText)+1)%3];}
-function phUpdateDupla(sIdx,v){phSupervisores[sIdx].d=v.trim();}
-function phSetWeekState(sIdx,week){
-  const n=document.querySelectorAll('#ph-header th').length-1;
-  for(let d=0;d<n;d++){if(Math.floor(d/5)+1===week)phToggleSt(document.getElementById(`ph-st-${sIdx}-${d}`));}
-}
-function phSetWeekHorario(sIdx,week){
-  const n=document.querySelectorAll('#ph-header th').length-1;
-  for(let d=0;d<n;d++){if(Math.floor(d/5)+1===week)phToggleTm(document.getElementById(`ph-tm-${sIdx}-${d}`));}
-}
-function phUpdateCounters(){
-  const n=document.querySelectorAll('#ph-header th').length-1;
-  for(let j=0;j<n;j++){
-    let p=0;phSupervisores.forEach((_,i)=>{const el=document.getElementById(`ph-st-${i}-${j}`);if(el&&el.innerText==='Presencial')p++;});
-    const td=document.getElementById(`ph-cnt-${j}`);if(td){td.innerHTML=`<span class="${p>=6?'ph-cnt-valid':'ph-cnt-invalid'}">${p}</span>`;}
-  }
-}
-function phAutoAB(){
-  const n=document.querySelectorAll('#ph-header th').length-1;
-  phSupervisores.forEach((s,sIdx)=>{
-    for(let d=0;d<n;d++){
-      const wk=Math.floor(d/5),isP=(wk%2===0)?(s.g==='A'):(s.g==='B');
-      const el=document.getElementById(`ph-st-${sIdx}-${d}`);
-      el.className=isP?'ph-badge bg-pres':'ph-badge bg-home';el.innerText=isP?'Presencial':'HomeOffice';
-    }
-  });
-  phSupervisores.forEach((s,sIdx)=>{
-    const duplaIdx=phSupervisores.findIndex(x=>x.n===s.d);
-    if(duplaIdx!==-1){
-      for(let d=0;d<n;d++){
-        const me=document.getElementById(`ph-st-${sIdx}-${d}`),dup=document.getElementById(`ph-st-${duplaIdx}-${d}`);
-        if(!me||!dup)continue;
-        if(me.innerText===dup.innerText&&me.innerText!=='Licencia'){
-          const opp=me.innerText==='Presencial'?{c:'bg-home',t:'HomeOffice'}:{c:'bg-pres',t:'Presencial'};
-          dup.className=`ph-badge ${opp.c}`;dup.innerText=opp.t;
-        }
-      }
-    }
-  });
-  phUpdateCounters();
-}
-
-function phRenderSabados(y,m,startDay){
-  const sb=document.getElementById('ph-sab-body');sb.innerHTML='';
-  let d=new Date(y,m-1,startDay),i=0,cnt=0;
-  while(cnt<5){if(d.getDay()===6){sb.innerHTML+=`<tr><td style="padding:8px 12px;border-bottom:1px solid var(--border)">${d.getDate()}/${d.getMonth()+1}</td><td style="padding:8px 12px;border-bottom:1px solid var(--border)" contenteditable="true">${phSupervisores[i%12].n}</td></tr>`;i++;cnt++;}d.setDate(d.getDate()+1);}
-}
-
-async function phSave(){
-  const month=document.getElementById('ph-month').value;
-  const n=document.querySelectorAll('#ph-header th').length-1;
-  const states=[];
-  phSupervisores.forEach((_,sIdx)=>{
-    for(let dIdx=0;dIdx<n;dIdx++){
-      const st=document.getElementById(`ph-st-${sIdx}-${dIdx}`),tm=document.getElementById(`ph-tm-${sIdx}-${dIdx}`);
-      if(st)states.push({sIdx,dIdx,stClass:st.className,stText:st.innerText,tmText:tm?tm.innerText:''});
-    }
-  });
-  const data={states,guards:document.getElementById('ph-guards-body').innerHTML,saturdays:document.getElementById('ph-sab-body').innerHTML,duplas:phSupervisores.map(s=>s.d)};
-  phSavedData[month]=data;
-  setSyncStatus('saving');
-  const ok=await sbUpsert('js_dist_anual',{key:'horarios_'+month,data:JSON.stringify(data),updated_at:new Date().toISOString()});
-  setSyncStatus(ok?'ok':'error');
-  if(ok)alert('✅ Guardado en Supabase');
-}
-
-function phLoadSaved(month){
-  const saved=phSavedData[month];if(!saved)return;
-  if(saved.duplas)saved.duplas.forEach((d,i)=>{if(phSupervisores[i])phSupervisores[i].d=d;const inp=document.getElementById(`ph-dup-${i}`);if(inp)inp.value=d;});
-  saved.states.forEach(item=>{
-    const st=document.getElementById(`ph-st-${item.sIdx}-${item.dIdx}`),tm=document.getElementById(`ph-tm-${item.sIdx}-${item.dIdx}`);
-    if(st){st.className=item.stClass;st.innerText=item.stText;}
-    if(tm)tm.innerText=item.tmText;
-  });
-  if(saved.guards)document.getElementById('ph-guards-body').innerHTML=saved.guards;
-  if(saved.saturdays)document.getElementById('ph-sab-body').innerHTML=saved.saturdays;
-  phUpdateCounters();
-}
-
-// ═══════════════════════════════════════════════════════════════
-// PLANILLA HORARIOS — EXPORT PDF
-// ═══════════════════════════════════════════════════════════════
-function phExportPDF() {
-  const monthVal = document.getElementById('ph-month').value;
-  const [y, m] = monthVal.split('-');
-  const mesNombre = MESES[parseInt(m)-1] + ' ' + y;
-
-  // Collect days
-  let d = new Date(y, m-1, 1);
-  while(d.getDay()!==1) d.setDate(d.getDate()+1);
-  let days=[]; let startM=d.getMonth();
-  while(d.getMonth()===startM||days.length<20){
-    if(d.getDay()!==0&&d.getDay()!==6) days.push(new Date(d));
-    d.setDate(d.getDate()+1); if(days.length>=25)break;
-  }
-
-  const diasL=['L','M','M','J','V'];
-  const stateColor = {'HomeOffice':['#f5effd','#7c3aed'],'Presencial':['#d1fae5','#059669'],'Licencia':['#eef0f8','#4a537d']};
-  const horColor = {'07:00 a 15:00':['#fff7ed','#c2410c'],'08:00 a 16:00':['#eff6ff','#1d4ed8'],'11:00 a 19:00':['#fdf4ff','#7e22ce']};
-
-  // Group by week
-  const semanas=[]; let sem=[];
-  days.forEach(d=>{ if(d.getDay()===1&&sem.length){semanas.push(sem);sem=[];} sem.push(d); });
-  if(sem.length) semanas.push(sem);
-
-  let tablaHTML='';
-  semanas.forEach((s,si)=>{
-    tablaHTML+=`<div class="st">Semana ${si+1} · ${s[0].getDate()} al ${s[s.length-1].getDate()} de ${mesNombre}</div>
-    <table><thead><tr><th class="cs">Supervisor</th>`;
-    s.forEach(wd=>{ tablaHTML+=`<th>${diasL[wd.getDay()-1]}<br><b>${wd.getDate()}</b></th>`; });
-    tablaHTML+=`</tr></thead><tbody>`;
-
-    phSupervisores.forEach((sup,sIdx)=>{
-      const ini=sup.n.split(' ').map(p=>p[0]).slice(0,2).join('');
-      tablaHTML+=`<tr class="${sIdx%2===0?'ev':'od'}"><td class="cs"><span class="av">${ini}</span>${sup.n}<div class="dup-lbl">↔ ${sup.d}</div></td>`;
-      s.forEach((_,dIdx)=>{
-        const realIdx=days.indexOf(s[dIdx])||0;
-        // find actual index in days array
-        const di=days.findIndex(x=>x.getTime()===s[dIdx].getTime());
-        const stEl=document.getElementById(`ph-st-${sIdx}-${di}`);
-        const tmEl=document.getElementById(`ph-tm-${sIdx}-${di}`);
-        const st=stEl?stEl.innerText:'HomeOffice';
-        const tm=tmEl?tmEl.innerText:sup.h;
-        const [sb,sc]=stateColor[st]||['#f8fafc','#64748b'];
-        const [hb,hc]=horColor[tm]||['#f8fafc','#64748b'];
-        tablaHTML+=`<td>
-          <span class="ch" style="background:${sb};color:${sc}">${st}</span>
-          <span class="ht" style="background:${hb};color:${hc}">${tm}</span>
-        </td>`;
-      });
-      tablaHTML+=`</tr>`;
-    });
-
-    // Presencial count row
-    tablaHTML+=`<tr class="cnt-row"><td class="cs" style="font-size:9px;font-weight:700;color:#64748b;">Presenciales</td>`;
-    s.forEach((_,dIdx)=>{
-      const di=days.findIndex(x=>x.getTime()===s[dIdx].getTime());
-      let p=0; phSupervisores.forEach((_2,sIdx)=>{ const el=document.getElementById(`ph-st-${sIdx}-${di}`); if(el&&el.innerText==='Presencial')p++; });
-      tablaHTML+=`<td><span style="background:${p>=6?'#d1fae5':'#fdeaea'};color:${p>=6?'#065f46':'#991b1b'};padding:2px 6px;border-radius:5px;font-size:10px;font-weight:800;">${p}</span></td>`;
-    });
-    tablaHTML+=`</tr></tbody></table>`;
-  });
-
-  // Guards section
-  const guardsHTML = Array.from(document.querySelectorAll('#ph-guards-body tr')).map(tr=>{
-    const tds=tr.querySelectorAll('td');
-    return `<tr><td style="font-weight:700;color:#00554e;padding:7px 12px;border-bottom:1px solid #f1f5f9;width:160px;">${tds[0]?.innerText||''}</td><td style="padding:7px 12px;border-bottom:1px solid #f1f5f9;">${tds[1]?.innerText||''}</td></tr>`;
-  }).join('');
-
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Horarios ${mesNombre}</title>
-  <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Inter',sans-serif;background:#f8fafc;color:#1e293b;padding:20px;font-size:11px;}
-  .page{max-width:1100px;margin:0 auto;}
-  .hdr{background:linear-gradient(135deg,#4a537d,#6a73a1);border-radius:14px;padding:18px 24px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
-  .hdr h1{color:white;font-size:16px;font-weight:800;margin-bottom:2px;}.hdr p{color:rgba(255,255,255,.7);font-size:10px;}
-  .hdr-r{text-align:right;color:white;font-weight:700;font-size:12px;}.hdr-r small{display:block;color:rgba(255,255,255,.6);font-size:9px;font-weight:400;margin-top:2px;}
-  .leg-card{background:white;border-radius:10px;padding:10px 16px;margin-bottom:12px;border:1px solid #e2e8f0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
-  .leg-title{font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;width:100%;margin-bottom:2px;}
-  .leg-item{padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;}
-  .st{font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin:12px 0 5px;border-left:3px solid #4a537d;padding-left:7px;}
-  table{width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:6px;border:1px solid #e2e8f0;}
-  thead th{background:#f1f5f9;color:#64748b;font-size:9px;font-weight:700;text-transform:uppercase;padding:7px 4px;text-align:center;border-bottom:2px solid #e2e8f0;line-height:1.5;}
-  th.cs{text-align:left;padding-left:12px;min-width:155px;}thead th b{font-size:12px;color:#1e293b;display:block;}
-  tbody td{padding:4px 3px;text-align:center;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
-  tbody td.cs{text-align:left;padding:6px 12px;font-weight:600;font-size:10px;white-space:nowrap;}
-  tr.ev td{background:white;}tr.od td{background:#fafbfc;}
-  tr.cnt-row td{background:#f8fafc;border-top:1px solid #e2e8f0;}
-  .av{display:inline-flex;width:20px;height:20px;border-radius:50%;background:#eef0f8;color:#4a537d;font-size:7px;font-weight:800;align-items:center;justify-content:center;margin-right:5px;vertical-align:middle;}
-  .dup-lbl{font-size:8px;color:#94a3b8;font-style:italic;margin-top:1px;}
-  .ch{display:inline-block;padding:3px 5px;border-radius:5px;font-size:9px;font-weight:700;white-space:nowrap;line-height:1.3;display:block;margin-bottom:2px;}
-  .ht{display:inline-block;padding:2px 5px;border-radius:4px;font-size:8px;font-weight:600;white-space:nowrap;}
-  .guards-card{background:white;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,.06);}
-  .guards-title{background:#4a537d;color:white;padding:9px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
-  .pb{text-align:center;margin:14px 0 4px;}.pb button{background:#4a537d;color:white;border:none;border-radius:8px;padding:9px 24px;font-size:12px;font-weight:700;cursor:pointer;}
-  .ft{text-align:center;color:#94a3b8;font-size:9px;margin-top:10px;padding-top:8px;border-top:1px solid #e2e8f0;}
-  @media print{body{background:white;padding:10px;}.pb{display:none;}
-  .ch,.av,.hdr{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-  @page{size:A4 landscape;margin:8mm;}}
-  </style></head><body><div class="page">
-  <div class="hdr"><div><h1>Planilla de Horarios</h1><p>Jerárquicos Salud · Supervisores · ${mesNombre}</p></div>
-  <div class="hdr-r">${mesNombre}<small>Generado el ${new Date().toLocaleDateString('es-AR')}</small></div></div>
-  <div class="leg-card"><div class="leg-title">Referencias de estado</div>
-    <span class="leg-item" style="background:#f5effd;color:#7c3aed;">HomeOffice</span>
-    <span class="leg-item" style="background:#d1fae5;color:#059669;">Presencial</span>
-    <span class="leg-item" style="background:#eef0f8;color:#4a537d;">Licencia</span>
-    <span style="margin-left:12px;font-size:9px;font-weight:700;color:#64748b;">HORARIOS:</span>
-    <span class="leg-item" style="background:#fff7ed;color:#c2410c;">07:00 a 15:00</span>
-    <span class="leg-item" style="background:#eff6ff;color:#1d4ed8;">08:00 a 16:00</span>
-    <span class="leg-item" style="background:#fdf4ff;color:#7e22ce;">11:00 a 19:00</span>
-  </div>
-  ${tablaHTML}
-  <div style="display:grid;grid-template-columns:1fr;gap:12px;margin-top:14px;">
-    <div class="guards-card"><div class="guards-title">Guardias Semanales</div>
-    <table style="border-radius:0;box-shadow:none;border:none;">${guardsHTML}</table></div>
-  </div>
-  <div class="pb"><button onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button></div>
-  <div class="ft">Jerárquicos Salud · Planilla de Horarios · ${mesNombre}</div>
-  </div></body></html>`;
-
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.target='_blank';a.rel='noopener';a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// PLANILLA HORARIOS — EXPORT EXCEL
-// ═══════════════════════════════════════════════════════════════
-function phExportExcel() {
-  const monthVal = document.getElementById('ph-month').value;
-  const [y, m] = monthVal.split('-');
-  const mesNombre = MESES[parseInt(m)-1] + ' ' + y;
-
-  let d = new Date(y, m-1, 1);
-  while(d.getDay()!==1) d.setDate(d.getDate()+1);
-  let days=[]; let startM=d.getMonth();
-  while(d.getMonth()===startM||days.length<20){
-    if(d.getDay()!==0&&d.getDay()!==6) days.push(new Date(d));
-    d.setDate(d.getDate()+1); if(days.length>=25)break;
-  }
-
-  const diasL=['L','M','M','J','V'];
-  const rows = [];
-
-  // Title
-  rows.push(['Planilla de Horarios - ' + mesNombre + ' - Jerarquicos Salud']);
-  rows.push([]);
-
-  // Header
-  const header = ['Supervisor', ...days.map(wd => diasL[wd.getDay()-1] + ' ' + wd.getDate())];
-  rows.push(header);
-
-  // Data
-  phSupervisores.forEach((sup, sIdx) => {
-    const row = [sup.n];
-    days.forEach((wd, dIdx) => {
-      const fd = fmtDate(wd);
-      if (HOLIDAYS_2026 && HOLIDAYS_2026.includes(fd)) { row.push('Feriado'); return; }
-      const stEl = document.getElementById('ph-st-' + sIdx + '-' + dIdx);
-      const tmEl = document.getElementById('ph-tm-' + sIdx + '-' + dIdx);
-      const st = stEl ? stEl.innerText : 'HomeOffice';
-      const tm = tmEl ? tmEl.innerText : sup.h;
-      row.push(st === 'Presencial' ? tm : st === 'Licencia' ? 'Licencia' : 'HomeOffice');
-    });
-    rows.push(row);
-  });
-
-  // Count row
-  rows.push([]);
-  const cntRow = ['Presenciales'];
-  days.forEach((wd, dIdx) => {
-    const fd = fmtDate(wd);
-    if (HOLIDAYS_2026 && HOLIDAYS_2026.includes(fd)) { cntRow.push('-'); return; }
-    let p = 0;
-    phSupervisores.forEach((_, sIdx) => {
-      const el = document.getElementById('ph-st-' + sIdx + '-' + dIdx);
-      if (el && el.innerText === 'Presencial') p++;
-    });
-    cntRow.push(p);
-  });
-  rows.push(cntRow);
-
-  // Build CSV string
-  const csv = rows.map(r => r.map(c => {
-    const s = String(c);
-    return s.includes(';') || s.includes('"') || s.includes('
-') ? '"' + s.replace(/"/g,'""') + '"' : s;
-  }).join(';')).join('
-');
-
-  // Use data URI — always works, no Blob issues
-  const uri = 'data:text/csv;charset=utf-8,' + encodeURIComponent('﻿' + csv);
-  const a = document.createElement('a');
-  a.href = uri;
-  a.download = 'Horarios_' + mesNombre.replace(' ', '_') + '.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// RESPALDO COMPLETO
-// ═══════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════
-async function exportBackup() {
-  setSyncStatus('saving');
-  // Recopilar todo desde Supabase en tiempo real
-  const ovRows  = await sbGet('rotacion_overrides','?select=key,role_id') || [];
-  const distRows = await sbGet('js_dist_anual','?select=key,data') || [];
-
-  const backup = {
-    version: '1.0',
-    fecha: new Date().toLocaleString('es-AR'),
-    generadoPor: 'Organización Supers — Jerárquicos Salud',
-    rotacion_overrides: ovRows,
-    js_dist_anual: distRows,
-  };
-
-  const json = JSON.stringify(backup, null, 2);
-  const blob = new Blob([json], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g,'-');
-  a.download = `JS_Operaciones_Respaldo_${fecha}.json`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
-  setSyncStatus('ok');
-
-  // Mostrar confirmación
-  showBackupToast('📤 Respaldo descargado — guardalo en un lugar seguro (OneDrive, carpeta compartida)');
-}
-
-async function importBackup(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  document.getElementById('import-file').value = '';
-
-  const text = await file.text();
-  let backup;
-  try { backup = JSON.parse(text); }
-  catch(e) { alert('❌ Archivo inválido. Asegurate de seleccionar un respaldo generado por esta app.'); return; }
-
-  if (!backup.version || (!backup.rotacion_overrides && !backup.js_dist_anual)) {
-    alert('❌ El archivo no parece un respaldo válido de JS Operaciones.');
-    return;
-  }
-
-  const confirm = window.confirm(
-    `¿Restaurar respaldo del ${backup.fecha}?
-
-` +
-    `Esto va a REEMPLAZAR todos los datos actuales en Supabase con los del respaldo.
-
-` +
-    `Esta acción no se puede deshacer.`
-  );
-  if (!confirm) return;
-
-  setSyncStatus('saving');
-  showBackupToast('⏳ Restaurando datos...');
-
-  let ok = true;
-
-  // 1. Restaurar rotacion_overrides
-  if (backup.rotacion_overrides?.length) {
-    // Borrar todo primero
-    await sbDelete('rotacion_overrides','?id=gt.0');
-    // Reinsertar
-    for (const row of backup.rotacion_overrides) {
-      const r = await sbUpsert('rotacion_overrides', {key: row.key, role_id: row.role_id, updated_at: new Date().toISOString()});
-      if (!r) ok = false;
-    }
-  }
-
-  // 2. Restaurar js_dist_anual
-  if (backup.js_dist_anual?.length) {
-    await sbDelete('js_dist_anual','?id=gt.0');
-    for (const row of backup.js_dist_anual) {
-      const r = await sbUpsert('js_dist_anual', {key: row.key, data: row.data, updated_at: new Date().toISOString()});
-      if (!r) ok = false;
-    }
-  }
-
-  // 3. Recargar todo en memoria
-  await init();
-
-  setSyncStatus(ok ? 'ok' : 'error');
-  showBackupToast(ok
-    ? `✅ Respaldo del ${backup.fecha} restaurado correctamente`
-    : '⚠️ Algunos datos no se pudieron restaurar — verificá la conexión');
-}
-
-function showBackupToast(msg) {
-  let toast = document.getElementById('backup-toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'backup-toast';
-    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:white;padding:12px 22px;border-radius:12px;font-size:12px;font-weight:600;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.3);';
-    document.body.appendChild(toast);
-  }
-  toast.textContent = msg;
-  toast.style.opacity = '1';
-  setTimeout(() => { toast.style.opacity = '0'; }, 5000);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// INIT — cargar todo desde Supabase
-// ═══════════════════════════════════════════════════════════════
-async function init() {
-  setSyncStatus('loading');
-
-  // 1. Crear tabla js_dist_anual si no existe (via upsert vacío la inicializa)
-  // 2. Cargar overrides de rotación
-  const ovRows = await sbGet('rotacion_overrides','?select=key,role_id');
-  if (Array.isArray(ovRows)) {
-    ovRows.forEach(row => { rotOverrides[row.key] = row.role_id; });
-  }
-
-  // 3. Cargar datos de distribución anual + sábados + horarios
-  const rows = await sbGet('js_dist_anual','?select=key,data');
-  if (Array.isArray(rows)) {
-    rows.forEach(row => {
-      try {
-        const data = JSON.parse(row.data);
-        if (row.key.startsWith('tareas_')) {
-          const year = parseInt(row.key.replace('tareas_',''));
-          daSavedData[year] = data;
-        } else if (row.key.startsWith('sabados_')) {
-          const year = parseInt(row.key.replace('sabados_',''));
-          sabSavedData[year] = data;
-        } else if (row.key.startsWith('horarios_')) {
-          const month = row.key.replace('horarios_','');
-          phSavedData[month] = data;
-        }
-      } catch(e) {}
-    });
-  }
-
-  setSyncStatus('ok');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// DARK MODE
-// ═══════════════════════════════════════════════════════════════
-function toggleDark() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  document.getElementById('dark-lbl').textContent = isDark ? 'Modo oscuro' : 'Modo claro';
-  document.getElementById('dark-btn').querySelector('.ni-icon').textContent = isDark ? '🌙' : '☀️';
-  localStorage.setItem('js_theme', isDark ? 'light' : 'dark');
-}
-function initTheme() {
-  const t = localStorage.getItem('js_theme') || 'light';
-  if (t === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    if(document.getElementById('dark-lbl')) document.getElementById('dark-lbl').textContent = 'Modo claro';
-    if(document.getElementById('dark-btn')) document.getElementById('dark-btn').querySelector('.ni-icon').textContent = '☀️';
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// LOGIN POR SUPERVISOR
-// ═══════════════════════════════════════════════════════════════
-let currentSupUser = '';
-(function(){
-  const saved = localStorage.getItem('js_sup_user') || '';
-  if (saved) {
-    // Try exact match first, then partial
-    const exact = SUPERVISORS.find(s => s === saved);
-    const partial = SUPERVISORS.find(s => s.toLowerCase().includes(saved.toLowerCase()) || saved.toLowerCase().includes(s.split(' ')[0].toLowerCase()));
-    currentSupUser = exact || partial || '';
-  }
-})();
-
-function showLogin() {
-  const overlay = document.getElementById('login-overlay');
-  const grid = document.getElementById('login-sup-grid');
-  grid.innerHTML = '';
-  SUPERVISORS.forEach(sup => {
-    const btn = document.createElement('button');
-    btn.style.cssText = 'padding:8px 6px;border:2px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;';
-    btn.textContent = sup.split(' ')[0]; // Solo primer nombre
-    btn.title = sup;
-    if (sup === currentSupUser) {
-      btn.style.borderColor = 'var(--impulsa)';
-      btn.style.background = 'var(--impulsa-lt)';
-      btn.style.color = 'var(--impulsa)';
-    }
-    btn.onclick = () => { loginAs(sup); localStorage.setItem('js_sup_user', sup); };
-    grid.appendChild(btn);
-  });
-  overlay.style.display = 'flex';
-}
-
-function loginAs(sup) {
-  currentSupUser = sup;
-  localStorage.setItem('js_sup_user', sup);
-  document.getElementById('login-overlay').style.display = 'none';
-  // Also set filter to this supervisor
-  const sel = document.getElementById('rot-sup-filter');
-  if (sel) sel.value = sup;
-  updateUserBadge();
-  rotRender();
-}
-
-function loginSkip() {
-  currentSupUser = '';
-  localStorage.setItem('js_sup_user', '');
-  document.getElementById('login-overlay').style.display = 'none';
-  updateUserBadge();
-}
-
-function updateUserBadge() {
-  const badge = document.getElementById('user-badge');
-  if (!badge) return;
-  if (currentSupUser) {
-    badge.textContent = '👤 ' + currentSupUser.split(' ')[0];
-    badge.style.display = 'inline-flex';
-  } else {
-    badge.style.display = 'none';
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// ÚLTIMA MODIFICACIÓN
-// ═══════════════════════════════════════════════════════════════
-function setLastMod(who) {
-  const now = new Date().toLocaleString('es-AR');
-  const msg = `Último guardado: ${who} · ${now}`;
-  localStorage.setItem('js_last_mod', msg);
-  showLastMod(msg);
-}
-
-function showLastMod(msg) {
-  const bar = document.getElementById('last-mod-bar');
-  const sb  = document.getElementById('last-mod-sb');
-  if (bar && msg) { bar.textContent = '🕐 ' + msg; bar.style.display = 'block'; }
-  if (sb  && msg) { sb.textContent = msg; }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// VISTA SOLO SEMANA ACTUAL (toggle)
-// ═══════════════════════════════════════════════════════════════
-let rotWeekOnly = false;
-
-function rotToggleWeekOnly(btn) {
-  rotWeekOnly = !rotWeekOnly;
-  btn.style.background = rotWeekOnly ? 'var(--impulsa)' : '';
-  btn.style.color = rotWeekOnly ? 'white' : '';
-  btn.style.borderColor = rotWeekOnly ? 'var(--impulsa)' : '';
-  rotRender();
-}
-
-function getWeekDays(year, month) {
-  // Returns only days of current week within the month
-  const today = new Date();
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 4);
-  const allDays = getWorkDays(year, month);
-  return allDays.filter(d => d >= startOfWeek && d <= endOfWeek);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// FILTRO DE SUPERVISOR
-// ═══════════════════════════════════════════════════════════════
-function initSupFilter() {
-  const sel = document.getElementById('rot-sup-filter');
-  if (!sel) return;
-  sel.innerHTML = '<option value="">👥 Todos</option>';
-  SUPERVISORS.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s;
-    opt.textContent = s.split(' ')[0] + ' ' + s.split(' ').slice(-1)[0];
-    if (s === currentSupUser) opt.selected = true;
-    sel.appendChild(opt);
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-
-// Iniciar
-document.addEventListener('DOMContentLoaded', () => {
-  try {
-    initTheme();
-    document.getElementById('app-wrapper').style.display = 'none';
-    init().then(() => {
-      try {
-        initSupFilter();
-        updateUserBadge();
-        const lastMod = localStorage.getItem('js_last_mod');
-        if (lastMod) showLastMod(lastMod);
-      } catch(e) { console.warn('Post-init error:', e); }
-    }).catch(e => {
-      console.warn('Init error:', e);
-      setSyncStatus('error');
-    });
-  } catch(e) { console.warn('DOM load error:', e); }
-});
-
-// ── LANDING ────────────────────────────────────────────────────
-function buildLandingBg() { /* removed */ }
-
-function landingGoTo(screen) {
-  document.getElementById('landing').style.display = 'none';
-  document.getElementById('app-wrapper').style.display = 'flex';
-  goTo(screen);
-}
-
-// Click logo in sidebar → back to landing
-document.querySelector('.sb-brand').style.cursor = 'pointer';
-document.querySelector('.sb-brand').onclick = () => {
-  document.getElementById('landing').style.display = 'flex';
-  document.getElementById('app-wrapper').style.display = 'none';
-};
-</script>
-</body>
-</html>
+  </div></body></html>
