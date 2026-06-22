@@ -996,39 +996,7 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;" id="login-sup-grid"></div>
     <button onclick="loginSkip()" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Continuar sin seleccionar</button>
   </div>
-</div>
-
-<!-- LANDING SCREEN -->
-<div id="landing" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#00554e;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:20px;box-sizing:border-box;">
-  <div style="text-align:center;width:100%;max-width:480px;">
-    <div style="width:52px;height:52px;background:white;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;color:#00554e;margin-bottom:12px;">JS</div>
-    <h1 style="color:white;font-size:1.5rem;font-weight:800;margin:0 0 4px;">Organización Supers</h1>
-    <p style="color:rgba(255,255,255,.6);font-size:13px;margin:0 0 28px;">Jerárquicos Salud · ¿A dónde querés ir?</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-      <button onclick="landingGoTo('rotacion')" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:18px 12px;cursor:pointer;text-align:left;color:white;font-family:inherit;">
-        <div style="font-size:1.6rem;margin-bottom:8px;">📅</div>
-        <div style="font-weight:700;font-size:13px;margin-bottom:3px;">Rotación Diaria</div>
-        <div style="font-size:10px;opacity:.65;">Distribución mensual de tareas</div>
-      </button>
-      <button onclick="landingGoTo('anual')" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:18px 12px;cursor:pointer;text-align:left;color:white;font-family:inherit;">
-        <div style="font-size:1.6rem;margin-bottom:8px;">📆</div>
-        <div style="font-weight:700;font-size:13px;margin-bottom:3px;">Distribución Anual</div>
-        <div style="font-size:10px;opacity:.65;">Asignación de roles por mes</div>
-      </button>
-      <button onclick="landingGoTo('sabados')" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:18px 12px;cursor:pointer;text-align:left;color:white;font-family:inherit;">
-        <div style="font-size:1.6rem;margin-bottom:8px;">🛡️</div>
-        <div style="font-weight:700;font-size:13px;margin-bottom:3px;">Guardias Sábados</div>
-        <div style="font-size:10px;opacity:.65;">Planificación anual de guardias</div>
-      </button>
-      <button onclick="landingGoTo('horarios')" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:18px 12px;cursor:pointer;text-align:left;color:white;font-family:inherit;">
-        <div style="font-size:1.6rem;margin-bottom:8px;">🕐</div>
-        <div style="font-weight:700;font-size:13px;margin-bottom:3px;">Planilla Horarios</div>
-        <div style="font-size:10px;opacity:.65;">Gestión mensual de presencialidad</div>
-      </button>
-    </div>
-    <p style="color:rgba(255,255,255,.3);font-size:10px;margin:0;">Tocá cualquier sección para comenzar</p>
-  </div>
-</div>TYPE html>
+</TYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -1769,6 +1737,15 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════════════
+// LANDING NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function landingGoTo(screen) {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('app-wrapper').style.display = 'flex';
+  goTo(screen);
+}
+
 // ═══════════════════════════════════════════════════════════════
 // SUPABASE
 // ═══════════════════════════════════════════════════════════════
