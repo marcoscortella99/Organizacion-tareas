@@ -810,9 +810,10 @@ function goTo(screen) {
   document.getElementById('topbar-sub').textContent = info.sub;
   currentScreen = screen;
   closeSidebar();
-  if (screen === 'anual')   daRender();
-  if (screen === 'sabados') sabRender();
-  if (screen === 'horarios') phRender();
+  if (screen === 'rotacion') { try { rotRender(); } catch(e) { console.warn(e); } }
+  if (screen === 'anual')    { try { daRender(); } catch(e) { console.warn(e); } }
+  if (screen === 'sabados')  { try { sabRender(); } catch(e) { console.warn(e); } }
+  if (screen === 'horarios') { try { phRender(); } catch(e) { console.warn(e); } }
 }
 function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('mob-overlay').classList.add('open'); }
 function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('mob-overlay').classList.remove('open'); }
@@ -1993,7 +1994,6 @@ async function init() {
   }
 
   setSyncStatus('ok');
-  rotRender();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2139,24 +2139,32 @@ function initSupFilter() {
 
 // Iniciar
 document.addEventListener('DOMContentLoaded', () => {
-  initTheme();
-  // Hide main app, show only landing
-  document.getElementById('app-wrapper').style.display = 'none';
-  init().then(() => {
-    initSupFilter();
-    updateUserBadge();
-    const lastMod = localStorage.getItem('js_last_mod');
-    if (lastMod) showLastMod(lastMod);
-  });
+  try {
+    initTheme();
+    document.getElementById('app-wrapper').style.display = 'none';
+    init().then(() => {
+      try {
+        initSupFilter();
+        updateUserBadge();
+        const lastMod = localStorage.getItem('js_last_mod');
+        if (lastMod) showLastMod(lastMod);
+      } catch(e) { console.warn('Post-init error:', e); }
+    }).catch(e => {
+      console.warn('Init error:', e);
+      setSyncStatus('error');
+    });
+  } catch(e) { console.warn('DOM load error:', e); }
 });
 
 // ── LANDING ────────────────────────────────────────────────────
 function buildLandingBg() { /* removed */ }
 
 function landingGoTo(screen) {
-  document.getElementById('landing').classList.add('hidden');
-  document.getElementById('app-wrapper').style.display = 'flex';
-  goTo(screen);
+  try {
+    document.getElementById('landing').classList.add('hidden');
+    document.getElementById('app-wrapper').style.display = 'flex';
+    goTo(screen);
+  } catch(e) { console.warn('Navigation error:', e); }
 }
 
 // Click logo in sidebar → back to landing
