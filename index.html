@@ -446,6 +446,46 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 </head>
 <body>
 
+<!-- LANDING SCREEN -->
+<div class="landing-page" id="landing">
+  <div class="landing-header">
+    <div class="landing-logo">JS</div>
+    <h1 class="landing-title">Organización Supers</h1>
+    <p class="landing-sub">Jerárquicos Salud · ¿A dónde querés ir?</p>
+  </div>
+
+  <div class="landing-cards">
+    <div class="landing-card" style="--lc-color:#00cd94;" onclick="landingGoTo('rotacion')" style="animation-delay:.1s">
+      <span class="lc-icon">📅</span>
+      <div class="lc-title">Rotación Diaria</div>
+      <div class="lc-desc">Distribución mensual de tareas por supervisor</div>
+      <span class="lc-arrow">↗</span>
+    </div>
+    <div class="landing-card" style="--lc-color:#b688ea;" onclick="landingGoTo('anual')" style="animation-delay:.15s">
+      <span class="lc-icon">📆</span>
+      <div class="lc-title">Distribución Anual</div>
+      <div class="lc-desc">Asignación de roles por mes para todo el año</div>
+      <span class="lc-arrow">↗</span>
+    </div>
+    <div class="landing-card" style="--lc-color:#f39c12;" onclick="landingGoTo('sabados')" style="animation-delay:.2s">
+      <span class="lc-icon">🛡️</span>
+      <div class="lc-title">Guardias Sábados</div>
+      <div class="lc-desc">Planificación anual de guardias de fin de semana</div>
+      <span class="lc-arrow">↗</span>
+    </div>
+    <div class="landing-card" style="--lc-color:#4a537d;" onclick="landingGoTo('horarios')" style="animation-delay:.25s">
+      <span class="lc-icon">🕐</span>
+      <div class="lc-title">Planilla Horarios</div>
+      <div class="lc-desc">Gestión mensual de presencialidad y horarios</div>
+      <span class="lc-arrow">↗</span>
+    </div>
+  </div>
+
+  <div class="landing-footer">Hacé clic en cualquier sección para comenzar</div>
+</div>
+
+
+
 <!-- APP WRAPPER -->
 <div class="app-wrapper" id="app-wrapper" style="display:none;">
 
@@ -710,43 +750,7 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   </div>
 </div>
 
-<!-- LANDING SCREEN -->
-<div class="landing-page" id="landing">
-  <div class="landing-header">
-    <div class="landing-logo">JS</div>
-    <h1 class="landing-title">Organización Supers</h1>
-    <p class="landing-sub">Jerárquicos Salud · ¿A dónde querés ir?</p>
-  </div>
 
-  <div class="landing-cards">
-    <div class="landing-card" style="--lc-color:#00cd94;" onclick="landingGoTo('rotacion')" style="animation-delay:.1s">
-      <span class="lc-icon">📅</span>
-      <div class="lc-title">Rotación Diaria</div>
-      <div class="lc-desc">Distribución mensual de tareas por supervisor</div>
-      <span class="lc-arrow">↗</span>
-    </div>
-    <div class="landing-card" style="--lc-color:#b688ea;" onclick="landingGoTo('anual')" style="animation-delay:.15s">
-      <span class="lc-icon">📆</span>
-      <div class="lc-title">Distribución Anual</div>
-      <div class="lc-desc">Asignación de roles por mes para todo el año</div>
-      <span class="lc-arrow">↗</span>
-    </div>
-    <div class="landing-card" style="--lc-color:#f39c12;" onclick="landingGoTo('sabados')" style="animation-delay:.2s">
-      <span class="lc-icon">🛡️</span>
-      <div class="lc-title">Guardias Sábados</div>
-      <div class="lc-desc">Planificación anual de guardias de fin de semana</div>
-      <span class="lc-arrow">↗</span>
-    </div>
-    <div class="landing-card" style="--lc-color:#4a537d;" onclick="landingGoTo('horarios')" style="animation-delay:.25s">
-      <span class="lc-icon">🕐</span>
-      <div class="lc-title">Planilla Horarios</div>
-      <div class="lc-desc">Gestión mensual de presencialidad y horarios</div>
-      <span class="lc-arrow">↗</span>
-    </div>
-  </div>
-
-  <div class="landing-footer">Hacé clic en cualquier sección para comenzar</div>
-</div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
