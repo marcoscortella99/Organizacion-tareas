@@ -639,7 +639,7 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
             <button class="btn" onclick="phAutoAB()">⚡ Auto A/B</button>
             <button class="btn btn-primary" onclick="phSave()">💾 Guardar</button>
             <button class="btn" onclick="phExportPDF()">📄 PDF</button>
-            <button class="btn" onclick="phExportExcel()">📊 Excel</button>
+            <button class="btn" onclick="phExportExcel()">📊 CSV</button>
           </div>
         </div>
         <div class="card-body" style="padding:0;">
@@ -1796,46 +1796,28 @@ function phExportExcel() {
   }
 
   const diasL=['L','M','M','J','V'];
+  const SEP = ';';
 
-  // Build HTML table — Excel opens .xls HTML tables perfectly with colors
-  let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
-    xmlns:x="urn:schemas-microsoft-com:office:excel"
-    xmlns="http://www.w3.org/TR/REC-html40">
-  <head><meta charset="UTF-8">
-  <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>
-  <x:ExcelWorksheet><x:Name>${mesNombre}</x:Name>
-  <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
-  </x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
-  <style>
-    td,th{border:1px solid #ccc;font-family:Calibri,Arial,sans-serif;font-size:10pt;padding:4px 8px;}
-    .titulo{background:#4a537d;color:white;font-weight:bold;font-size:12pt;}
-    .hdr{background:#00554e;color:white;font-weight:bold;text-align:center;}
-    .sup{background:#e0f2f0;color:#00554e;font-weight:bold;}
-    .pres{background:#d1fae5;color:#065f46;font-weight:bold;text-align:center;}
-    .home{background:#f5effd;color:#7c3aed;text-align:center;}
-    .lic{background:#eef0f8;color:#4a537d;text-align:center;}
-    .fer{background:#fef3c7;color:#92400e;font-weight:bold;text-align:center;}
-    .cnt-ok{background:#d1fae5;color:#065f46;font-weight:bold;text-align:center;}
-    .cnt-bad{background:#fdeaea;color:#991b1b;font-weight:bold;text-align:center;}
-  </style></head><body>
-  <table>
-    <tr><td class="titulo" colspan="${days.length+1}">Planilla de Horarios — ${mesNombre} — Jerárquicos Salud</td></tr>
-    <tr><td style="height:6px;border:none;" colspan="${days.length+1}"></td></tr>
-    <tr>
-      <th class="hdr" style="width:160px;">Supervisor</th>`;
+  // Header row
+  let csv = '﻿'; // BOM for Excel UTF-8
+  csv += 'Planilla de Horarios - ' + mesNombre + ' - Jerarquicos Salud
 
-  days.forEach(wd => {
-    html += `<th class="hdr" style="width:88px;">${diasL[wd.getDay()-1]} ${wd.getDate()}</th>`;
-  });
-  html += `</tr>`;
+';
+
+  // Column headers
+  csv += 'Supervisor' + SEP;
+  csv += days.map(wd => diasL[wd.getDay()-1] + ' ' + wd.getDate()).join(SEP);
+  csv += '
+';
 
   // One row per supervisor
   phSupervisores.forEach((sup, sIdx) => {
-    html += `<tr><td class="sup">${sup.n}</td>`;
+    csv += '"' + sup.n + '"' + SEP;
+    const cells = [];
     days.forEach((wd, dIdx) => {
       const fd = fmtDate(wd);
       const isHol = HOLIDAYS_2026 && HOLIDAYS_2026.includes(fd);
-      if (isHol) { html += `<td class="fer">Feriado</td>`; return; }
+      if (isHol) { cells.push('Feriado'); return; }
 
       const stEl = document.getElementById('ph-st-' + sIdx + '-' + dIdx);
       const tmEl = document.getElementById('ph-tm-' + sIdx + '-' + dIdx);
@@ -1843,36 +1825,40 @@ function phExportExcel() {
       const tm = tmEl ? tmEl.innerText : sup.h;
 
       if (st === 'Presencial') {
-        html += `<td class="pres">${tm}</td>`;
+        cells.push(tm);
       } else if (st === 'Licencia') {
-        html += `<td class="lic">Licencia</td>`;
+        cells.push('Licencia');
       } else {
-        html += `<td class="home">HomeOffice</td>`;
+        cells.push('HomeOffice');
       }
     });
-    html += `</tr>`;
+    csv += cells.join(SEP) + '
+';
   });
 
-  // Presenciales count row
-  html += `<tr style="height:6px;"><td colspan="${days.length+1}" style="border:none;"></td></tr>`;
-  html += `<tr><th class="hdr">Presenciales</th>`;
+  // Blank row then presenciales count
+  csv += '
+';
+  csv += 'Presenciales' + SEP;
+  const cnts = [];
   days.forEach((wd, dIdx) => {
     const fd = fmtDate(wd);
     const isHol = HOLIDAYS_2026 && HOLIDAYS_2026.includes(fd);
-    if (isHol) { html += `<td class="fer">—</td>`; return; }
+    if (isHol) { cnts.push('-'); return; }
     let p = 0;
     phSupervisores.forEach((_, sIdx) => {
       const el = document.getElementById('ph-st-' + sIdx + '-' + dIdx);
       if (el && el.innerText === 'Presencial') p++;
     });
-    html += `<td class="${p>=6?'cnt-ok':'cnt-bad'}">${p}</td>`;
+    cnts.push(p);
   });
-  html += `</tr></table></body></html>`;
+  csv += cnts.join(SEP) + '
+';
 
-  const blob = new Blob([html], {type:'application/vnd.ms-excel;charset=utf-8'});
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'Horarios_' + mesNombre.replace(' ', '_') + '.xls';
+  a.download = 'Horarios_' + mesNombre.replace(' ', '_') + '.csv';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
