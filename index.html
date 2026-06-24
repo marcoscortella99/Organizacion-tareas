@@ -917,6 +917,7 @@ function buildRotCal(year, month) {
     const poolOff=[...pool];
     const assignedToday=new Set();
 
+    const daysLeft=wdCount-dayIdx;
     DAILY_SLOTS.forEach(rid=>{
       let cands=poolOff.filter(s=>!assignedToday.has(s));
       if(ANTI_CONSEC_ROLES.has(rid)){const maxC=MAX_CONSEC_ROL_MAP[rid]||1;const nc=cands.filter(s=>(consec[s][rid]||0)<maxC);if(nc.length)cands=nc;}
@@ -925,6 +926,9 @@ function buildRotCal(year, month) {
       if(rid==='des7076'||rid==='r7076des'){const sp=cands.filter(s=>(dayIdx-lastDes[s][rid])>=COOLDOWN);if(sp.length)cands=sp;}
       const cap=monthlyCap(rid,wdCount);
       if(cap<999){const uc=cands.filter(s=>mc[s][rid]<cap);if(uc.length)cands=uc;}
+      // Prioridad dura: si alguien tiene 0 de este rol y quedan dias suficientes, darles prioridad absoluta
+      const zeroRol=cands.filter(s=>mc[s][rid]===0);
+      if(zeroRol.length>0&&daysLeft>zeroRol.length){cands=zeroRol;}
       cands.sort((a,b)=>{const dr=roleDeuda[b][rid]-roleDeuda[a][rid];if(dr!==0)return dr;const dt=ALL_TASK_ROLES.reduce((ac,r)=>ac+roleDeuda[b][r]-roleDeuda[a][r],0);return dt!==0?dt:poolOff.indexOf(a)-poolOff.indexOf(b);});
       const chosen=cands[0];
       dayAssign[chosen]=rid; assignedToday.add(chosen); mc[chosen][rid]++;
