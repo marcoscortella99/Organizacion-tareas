@@ -934,13 +934,23 @@ function buildRotCal(year, month) {
       if(rid==='des7076'||rid==='r7076des'){const sp=cands.filter(s=>(dayIdx-lastDes[s][rid])>=COOLDOWN);if(sp.length)cands=sp;}
       const cap=monthlyCap(rid,wdCount);
       if(cap<999){const uc=cands.filter(s=>mc[s][rid]<cap);if(uc.length)cands=uc;}
-      // Cap dinamico: frena a quien ya tiene mas del minimo cuando hay otros con menos
-      const dcap=dynamicCap(rid,mc,cands,SUPERVISORS.length);
-      if(dcap<999){const dc=cands.filter(s=>mc[s][rid]<dcap);if(dc.length)cands=dc;}
-      // Prioridad dura: si alguien tiene 0 de este rol y quedan dias suficientes, darles prioridad absoluta
-      const zeroRol=cands.filter(s=>mc[s][rid]===0);
-      if(zeroRol.length>0&&daysLeft>zeroRol.length){cands=zeroRol;}
-      cands.sort((a,b)=>{const dr=roleDeuda[b][rid]-roleDeuda[a][rid];if(dr!==0)return dr;const dt=ALL_TASK_ROLES.reduce((ac,r)=>ac+roleDeuda[b][r]-roleDeuda[a][r],0);return dt!==0?dt:poolOff.indexOf(a)-poolOff.indexOf(b);});
+      // Cap equitativo: usar minimo GLOBAL (todos los sups) para no penalizar a quien estuvo de guardia
+      const globalMin=Math.min(...SUPERVISORS.map(s=>mc[s][rid]));
+      const globalMax=Math.max(...SUPERVISORS.map(s=>mc[s][rid]));
+      if(globalMax>globalMin){
+        // Si hay desbalance, frena a quien ya supero el minimo global+1
+        const eq=cands.filter(s=>mc[s][rid]<=globalMin+1);
+        if(eq.length)cands=eq;
+      }
+      // Prioridad dura sobre candidatos: primero quien tenga menos del rol (criterio primario)
+      cands.sort((a,b)=>{
+        const diffRol=mc[a][rid]-mc[b][rid]; // menor cantidad primero
+        if(diffRol!==0)return diffRol;
+        const dr=roleDeuda[b][rid]-roleDeuda[a][rid];
+        if(dr!==0)return dr;
+        const dt=ALL_TASK_ROLES.reduce((ac,r)=>ac+roleDeuda[b][r]-roleDeuda[a][r],0);
+        return dt!==0?dt:poolOff.indexOf(a)-poolOff.indexOf(b);
+      });
       const chosen=cands[0];
       dayAssign[chosen]=rid; assignedToday.add(chosen); mc[chosen][rid]++;
       if(rid==='des7076'||rid==='r7076des') lastDes[chosen][rid]=dayIdx;
