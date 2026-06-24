@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exportar Planilla de Horarios</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#f1f5f9;color:#1e293b;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.card{background:white;border-radius:20px;padding:32px;max-width:500px;width:100%;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+.logo{width:48px;height:48px;background:#00554e;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:white;margin-bottom:16px;}
+h1{font-size:1.3rem;font-weight:800;color:#00554e;margin-bottom:6px;}
+p{font-size:13px;color:#64748b;margin-bottom:24px;line-height:1.5;}
+.field{margin-bottom:14px;}
+label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;}
+input[type="month"],select{width:100%;padding:10px 14px;border:2px solid #e2e8f0;border-radius:10px;font-family:inherit;font-size:14px;font-weight:600;color:#1e293b;outline:none;}
+input:focus,select:focus{border-color:#00554e;}
+.btn{width:100%;padding:14px;background:#00554e;color:white;border:none;border-radius:12px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;}
+.btn:hover{background:#007a72;}
+.btn-csv{background:#4a537d;}
+.btn-csv:hover{background:#3a4260;}
+.note{font-size:11px;color:#94a3b8;text-align:center;margin-top:16px;line-height:1.5;}
+.divider{border:none;border-top:1px solid #e2e8f0;margin:20px 0;}
+.sup-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px;}
+.sup-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;}
+.sup-name{flex:1;font-weight:600;}
+.sup-select{font-size:11px;border:1px solid #e2e8f0;border-radius:6px;padding:3px 6px;font-family:inherit;}
+#status{text-align:center;padding:10px;border-radius:10px;font-size:13px;font-weight:600;display:none;margin-top:12px;}
+.ok{background:#d1fae5;color:#065f46;}
+.err{background:#fdeaea;color:#991b1b;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">JS</div>
+  <h1>Exportar Planilla de Horarios</h1>
+  <p>Completá los datos y exportá la planilla mensual directamente a CSV para abrir en Excel.</p>
+
+  <div class="field">
+    <label>Mes a exportar</label>
+    <input type="month" id="mes" value="2026-07">
+  </div>
+
+  <hr class="divider">
+  <label style="margin-bottom:12px;display:block;">Supervisores — Estado por semana</label>
+  <div id="sup-container"></div>
+
+  <button class="btn btn-csv" onclick="exportar()">📊 Exportar CSV para Excel</button>
+  <div id="status"></div>
+  <p class="note">El archivo se descarga directo. Abrilo con Excel o doble clic.</p>
+</div>
+
+<script>
+const SUPERVISORS = [
+  'Martin Paravan','Marcos Cortella','Alejandra Sosa','Ximena Epelbaum',
+  'Gisela Spies','Victoria Palombizio','Fabricio Figueroa','Jesica Carrasco',
+  'Lumila Perri','David Leiva','Yanina Pacheco','Sol Celli'
+];
+const HORARIOS = ['07:00 a 15:00','08:00 a 16:00','11:00 a 19:00'];
+const ESTADOS = ['HomeOffice','Presencial','Licencia'];
+const DIAS_N = ['','Lunes','Martes','Miercoles','Jueves','Viernes'];
+const MESES_N = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const FERIADOS = ['2026-01-01','2026-03-03','2026-03-04','2026-03-24','2026-04-02','2026-04-03','2026-04-06','2026-05-01','2026-05-25','2026-06-15','2026-06-19','2026-07-09','2026-08-17','2026-10-09','2026-10-12','2026-11-20','2026-12-08','2026-12-25'];
+const HORARIOS_DEF = {
+  'Martin Paravan':'08:00 a 16:00','Marcos Cortella':'08:00 a 16:00',
+  'Alejandra Sosa':'08:00 a 16:00','Ximena Epelbaum':'11:00 a 19:00',
+  'Gisela Spies':'08:00 a 16:00','Victoria Palombizio':'08:00 a 16:00',
+  'Fabricio Figueroa':'11:00 a 19:00','Jesica Carrasco':'08:00 a 16:00',
+  'Lumila Perri':'07:00 a 15:00','David Leiva':'07:00 a 15:00',
+  'Yanina Pacheco':'08:00 a 16:00','Sol Celli':'08:00 a 16:00'
+};
+
+function fmtDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+
+function getDays(y, m) {
+  let d = new Date(y, m, 1);
+  while(d.getDay()!==1) d.setDate(d.getDate()+1);
+  const days=[];
+  while(d.getMonth()===m){
+    if(d.getDay()>=1&&d.getDay()<=5) days.push(new Date(d));
+    d.setDate(d.getDate()+1);
+    if(days.length>=25) break;
+  }
+  return days;
+}
+
+// Build supervisor grid
+function buildGrid() {
+  const [y,m] = document.getElementById('mes').value.split('-');
+  const days = getDays(parseInt(y), parseInt(m)-1);
+  const container = document.getElementById('sup-container');
+  container.innerHTML = '';
+
+  SUPERVISORS.forEach(sup => {
+    const div = document.createElement('div');
+    div.style.cssText = 'border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-bottom:8px;';
+    div.innerHTML = `
+      <div style="font-weight:700;font-size:12px;color:#00554e;margin-bottom:8px;">${sup}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div>
+          <div style="font-size:10px;color:#94a3b8;margin-bottom:3px;">Estado semanas 1-2</div>
+          <select id="st1-${sup.replace(/ /g,'_')}" style="width:100%;padding:5px;border:1px solid #e2e8f0;border-radius:6px;font-size:11px;">
+            ${ESTADOS.map(e=>`<option>${e}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <div style="font-size:10px;color:#94a3b8;margin-bottom:3px;">Estado semanas 3-4</div>
+          <select id="st2-${sup.replace(/ /g,'_')}" style="width:100%;padding:5px;border:1px solid #e2e8f0;border-radius:6px;font-size:11px;">
+            ${ESTADOS.map(e=>`<option ${e==='Presencial'?'selected':''}">${e}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <div style="font-size:10px;color:#94a3b8;margin-bottom:3px;">Horario</div>
+          <select id="hr-${sup.replace(/ /g,'_')}" style="width:100%;padding:5px;border:1px solid #e2e8f0;border-radius:6px;font-size:11px;">
+            ${HORARIOS.map(h=>`<option ${h===HORARIOS_DEF[sup]?'selected':''}>${h}</option>`).join('')}
+          </select>
+        </div>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+document.getElementById('mes').addEventListener('change', buildGrid);
+buildGrid();
+
+function exportar() {
+  const [y,m] = document.getElementById('mes').value.split('-');
+  const mes = MESES_N[parseInt(m)-1] + ' ' + y;
+  const days = getDays(parseInt(y), parseInt(m)-1);
+
+  // Get week number for each day (1-based)
+  const week = d => {
+    const firstMon = days[0];
+    return Math.floor((d - firstMon) / (7*24*60*60*1000) / 1) + 1;
+  };
+
+  const lines = [
+    'Planilla de Horarios - ' + mes,
+    '',
+    ['Supervisor',...days.map(d=>DIAS_N[d.getDay()]+' '+d.getDate()+' de '+MESES_N[d.getMonth()])].join(';')
+  ];
+
+  SUPERVISORS.forEach(sup => {
+    const key = sup.replace(/ /g,'_');
+    const st1 = document.getElementById('st1-'+key)?.value||'HomeOffice';
+    const st2 = document.getElementById('st2-'+key)?.value||'Presencial';
+    const hr  = document.getElementById('hr-'+key)?.value||HORARIOS_DEF[sup];
+    const cells = [sup];
+    days.forEach((d,i) => {
+      const fd = fmtDate(d);
+      if(FERIADOS.includes(fd)){cells.push('FERIADO');return;}
+      // Semana 1-2 vs 3+
+      const wk = Math.floor(i/5)+1;
+      const st = wk<=2 ? st1 : st2;
+      cells.push(st==='Presencial' ? hr : st==='Licencia' ? 'Licencia' : 'HomeOffice');
+    });
+    lines.push(cells.join(';'));
+  });
+
+  lines.push('');
+  const cnt = ['Presenciales'];
+  days.forEach((d,i) => {
+    if(FERIADOS.includes(fmtDate(d))){cnt.push('-');return;}
+    let p=0;
+    SUPERVISORS.forEach(sup=>{
+      const key=sup.replace(/ /g,'_');
+      const hr=document.getElementById('hr-'+key)?.value||HORARIOS_DEF[sup];
+      const wk=Math.floor(i/5)+1;
+      const st1=document.getElementById('st1-'+key)?.value||'HomeOffice';
+      const st2=document.getElementById('st2-'+key)?.value||'Presencial';
+      const st=wk<=2?st1:st2;
+      if(st==='Presencial') p++;
+    });
+    cnt.push(p);
+  });
+  lines.push(cnt.join(';'));
+
+  const csv = '\uFEFF' + lines.join('\r\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Horarios_'+mes.replace(' ','_')+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+
+  const s = document.getElementById('status');
+  s.className='ok'; s.style.display='block';
+  s.textContent='✅ Archivo descargado — abrilo directamente en Excel';
+}
+</script>
+</body>
+</html>
