@@ -930,16 +930,33 @@ function buildRotCal(year, month) {
     const daysLeft=wdCount-dayIdx;
     DAILY_SLOTS.forEach(rid=>{
       let cands=poolOff.filter(s=>!assignedToday.has(s));
-      if(ANTI_CONSEC_ROLES.has(rid)){const maxC=MAX_CONSEC_ROL_MAP[rid]||1;const nc=cands.filter(s=>(consec[s][rid]||0)<maxC);if(nc.length)cands=nc;}
+
+      // 1. Anti-consecutivo por rol individual
+      if(ANTI_CONSEC_ROLES.has(rid)){
+        const maxC=MAX_CONSEC_ROL_MAP[rid]||1;
+        const nc=cands.filter(s=>(consec[s][rid]||0)<maxC);
+        if(nc.length)cands=nc;
+      }
+
+      // 2. Anti-consecutivo por grupo (TAREAS / LINEA / DESLOG independientes)
       const grupo=getGrupo(rid);
-      if(grupo){const ng=cands.filter(s=>(consecGrupo[s][grupo]||0)<MAX_CONSEC_GRUPO);if(ng.length)cands=ng;}
-      // Ademas frenar si lleva 2+ dias en cualquier grupo de linea (linea+deslog juntos)
-      if(grupo==='linea'||grupo==='deslog'){const nl=cands.filter(s=>((consecGrupo[s].linea||0)+(consecGrupo[s].deslog||0))<2);if(nl.length)cands=nl;}
-      if(rid==='des7076'||rid==='r7076des'){const sp=cands.filter(s=>(dayIdx-lastDes[s][rid])>=COOLDOWN);if(sp.length)cands=sp;}
-      // Regla 07-15: no pueden tener r7076des; en des7076 tienen cap fijo de 6
-      if(rid==='r7076des'){const nr=cands.filter(s=>!SUPS_0715.includes(s));if(nr.length)cands=nr;}
+      if(grupo){
+        const ng=cands.filter(s=>(consecGrupo[s][grupo]||0)<MAX_CONSEC_GRUPO);
+        if(ng.length)cands=ng;
+      }
+
+      // 3. Cooldown para roles deslog
+      if(rid==='des7076'||rid==='r7076des'){
+        const sp=cands.filter(s=>(dayIdx-lastDes[s][rid])>=COOLDOWN);
+        if(sp.length)cands=sp;
+      }
+
+      // 4. Reglas 07-15: nunca r7076des; prioridad en des7076 hasta 6
+      if(rid==='r7076des'){
+        const nr=cands.filter(s=>!SUPS_0715.includes(s));
+        if(nr.length)cands=nr;
+      }
       if(rid==='des7076'){
-        // Sups 07-15: siempre priorizarlos hasta llegar a 6, luego frenarlos
         const need0715=cands.filter(s=>SUPS_0715.includes(s)&&mc[s][rid]<6);
         if(need0715.length){cands=need0715;}
         else{
@@ -947,27 +964,36 @@ function buildRotCal(year, month) {
           if(cap6.length)cands=cap6;
         }
       }
+
+      // 5. Cap mensual
       const cap=monthlyCap(rid,wdCount);
       if(cap<999){const uc=cands.filter(s=>mc[s][rid]<cap);if(uc.length)cands=uc;}
-      // Equidad: calcular min/max solo entre candidatos elegibles para este rol
-      // (excluir a 07-15 de r7076des y del calculo de des7076 una vez que llegan a 6)
-      if(cands.length>1){
-        const minCands=Math.min(...cands.map(s=>mc[s][rid]));
-        const maxCands=Math.max(...cands.map(s=>mc[s][rid]));
-        if(maxCands>minCands){
-          // frena a quien ya tiene mas que el minimo+1 dentro del pool elegible
-          const eq=cands.filter(s=>mc[s][rid]<=minCands+1);
+
+      // 6. Equidad estricta: calcular slots disponibles restantes para este rol
+      //    Si alguien tiene 0 y hay slots restantes suficientes, forzarlo primero
+      const slotsRestantes=workdays.slice(dayIdx+1).filter(d2=>!isHoliday(d2)).length+1;
+      const elegibles=cands; // snapshot del pool elegible tras todos los filtros
+      const ceroEnRol=elegibles.filter(s=>mc[s][rid]===0);
+      if(ceroEnRol.length>0&&slotsRestantes>ceroEnRol.length){
+        cands=ceroEnRol;
+      } else if(elegibles.length>1){
+        // Comprimir: nadie puede tener más que minimo+1
+        const minC=Math.min(...elegibles.map(s=>mc[s][rid]));
+        const maxC2=Math.max(...elegibles.map(s=>mc[s][rid]));
+        if(maxC2>minC){
+          const eq=elegibles.filter(s=>mc[s][rid]<=minC+1);
           if(eq.length)cands=eq;
         }
       }
-      // Sort primario: menor conteo del rol primero; desempate por deuda global
+
+      // 7. Sort final: menor conteo del rol → menor total de tareas → deuda
       cands.sort((a,b)=>{
-        const diffRol=mc[a][rid]-mc[b][rid];
-        if(diffRol!==0)return diffRol;
-        const dr=roleDeuda[b][rid]-roleDeuda[a][rid];
+        const dr=mc[a][rid]-mc[b][rid];
         if(dr!==0)return dr;
-        const dt=ALL_TASK_ROLES.reduce((ac,r)=>ac+roleDeuda[b][r]-roleDeuda[a][r],0);
-        return dt!==0?dt:poolOff.indexOf(a)-poolOff.indexOf(b);
+        const totalA=ALL_TASK_ROLES.reduce((ac,r)=>ac+mc[a][r],0);
+        const totalB=ALL_TASK_ROLES.reduce((ac,r)=>ac+mc[b][r],0);
+        if(totalA!==totalB)return totalA-totalB;
+        return roleDeuda[b][rid]-roleDeuda[a][rid];
       });
       const chosen=cands[0];
       dayAssign[chosen]=rid; assignedToday.add(chosen); mc[chosen][rid]++;
