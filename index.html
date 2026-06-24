@@ -840,8 +840,9 @@ const ALL_TASK_ROLES = ['bandeja','kh','entrena','r7076','solo7076','des7076','r
 const ANTI_CONSEC_ROLES = new Set(ALL_TASK_ROLES);
 const GRUPO_TAREAS = new Set(['bandeja','kh','entrena']);
 const GRUPO_LINEA  = new Set(['r7076','solo7076','des7076','r7076des']);
-const MAX_CONSEC_ROL   = 2;
+const MAX_CONSEC_ROL_MAP = {'des7076':2,'r7076des':2,'solo7076':1,'r7076':1,'bandeja':1,'kh':1,'entrena':1};
 const MAX_CONSEC_GRUPO = 2;
+const SUPS_0715 = ['Lumila Perri','David Leiva'];
 const DAILY_SLOTS = ['des7076','des7076','r7076des','r7076des','solo7076','solo7076','r7076','bandeja','kh','entrena'];
 
 const DUPLAS_BASE = [
@@ -902,7 +903,7 @@ function buildRotCal(year, month) {
   SUPERVISORS.forEach(s=>{mc[s]={};consec[s]={};consecGrupo[s]={tareas:0,linea:0};ALL_TASK_ROLES.forEach(r=>{mc[s][r]=0;consec[s][r]=0;});});
   const lastDes = {}; const COOLDOWN = 3;
   SUPERVISORS.forEach(s=>{lastDes[s]={};ALL_TASK_ROLES.forEach(r=>lastDes[s][r]=-99);});
-  const roleDeuda = {}; SUPERVISORS.forEach(s=>{roleDeuda[s]={};ALL_TASK_ROLES.forEach(r=>roleDeuda[s][r]=0);});
+  const roleDeuda = {}; SUPERVISORS.forEach(s=>{roleDeuda[s]={};ALL_TASK_ROLES.forEach(r=>roleDeuda[s][r]=SUPS_0715.includes(s)?2:0);});
   const calendar = {};
 
   workdays.forEach((day,dayIdx)=>{
@@ -918,7 +919,7 @@ function buildRotCal(year, month) {
 
     DAILY_SLOTS.forEach(rid=>{
       let cands=poolOff.filter(s=>!assignedToday.has(s));
-      if(ANTI_CONSEC_ROLES.has(rid)){const nc=cands.filter(s=>(consec[s][rid]||0)<MAX_CONSEC_ROL);if(nc.length)cands=nc;}
+      if(ANTI_CONSEC_ROLES.has(rid)){const maxC=MAX_CONSEC_ROL_MAP[rid]||1;const nc=cands.filter(s=>(consec[s][rid]||0)<maxC);if(nc.length)cands=nc;}
       const grupo=getGrupo(rid);
       if(grupo){const ng=cands.filter(s=>(consecGrupo[s][grupo]||0)<MAX_CONSEC_GRUPO);if(ng.length)cands=ng;}
       if(rid==='des7076'||rid==='r7076des'){const sp=cands.filter(s=>(dayIdx-lastDes[s][rid])>=COOLDOWN);if(sp.length)cands=sp;}
@@ -1115,8 +1116,7 @@ function renderRotAlerts(work) {
     ALL_TASK_ROLES.forEach(rid=>{
       let consec=0;
       days.forEach(d=>{
-        if(getRotRole(sup,d)?.id===rid){consec++;if(consec>MAX_CONSEC_ROL)issues.push(`<b>${sup.split(' ')[0]}</b>: ${consec} días seguidos de ${ROLES.find(r=>r.id===rid)?.label}`);}
-        else consec=0;
+        if(getRotRole(sup,d)?.id===rid){consec++;const maxC=MAX_CONSEC_ROL_MAP[rid]||1;if(consec>maxC)issues.push(`<b>${sup.split(' ')[0]}</b>: ${consec} días seguidos de ${ROLES.find(r=>r.id===rid)?.label}`);}        else consec=0;
       });
     });
     ['tareas','linea'].forEach(grupo=>{
