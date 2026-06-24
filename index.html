@@ -869,7 +869,8 @@ function getDupla0715(year, month) { return getDuplasForMonth(year,month)['0715'
 function getGrupo(rid) { if(GRUPO_TAREAS.has(rid))return'tareas'; if(GRUPO_LINEA.has(rid))return'linea'; return null; }
 
 function monthlyCap(rid, wdCount) {
-  if (rid==='des7076'||rid==='r7076des') return Math.ceil((wdCount*2)/12);
+  if (rid==='r7076des') return Math.ceil((wdCount*2)/12);
+  if (rid==='des7076') return 6; // 07-15 tienen cap propio; resto se equilibra con globalMin
   return 999;
 }
 // Cap dinamico: frena a quien ya lleva 2+ cuando hay supers con 0 en ese rol
@@ -935,14 +936,10 @@ function buildRotCal(year, month) {
       // Regla 07-15: no pueden tener r7076des; en des7076 tienen cap fijo de 6
       if(rid==='r7076des'){const nr=cands.filter(s=>!SUPS_0715.includes(s));if(nr.length)cands=nr;}
       if(rid==='des7076'){
-        // forzar que 07-15 lleguen a 6; frenarlos si ya tienen 6
-        const s0715enPool=cands.filter(s=>SUPS_0715.includes(s));
-        const otros=cands.filter(s=>!SUPS_0715.includes(s));
-        // si alguno de 07-15 tiene menos de 6 y quedan dias, priorizarlos
-        const need0715=s0715enPool.filter(s=>mc[s][rid]<6&&daysLeft<=(6-mc[s][rid])*2+2);
+        // Sups 07-15: siempre priorizarlos hasta llegar a 6, luego frenarlos
+        const need0715=cands.filter(s=>SUPS_0715.includes(s)&&mc[s][rid]<6);
         if(need0715.length){cands=need0715;}
         else{
-          // frenar a 07-15 si ya llegaron a 6
           const cap6=cands.filter(s=>!(SUPS_0715.includes(s)&&mc[s][rid]>=6));
           if(cap6.length)cands=cap6;
         }
