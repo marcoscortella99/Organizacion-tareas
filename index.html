@@ -872,6 +872,14 @@ function monthlyCap(rid, wdCount) {
   if (rid==='des7076'||rid==='r7076des') return Math.ceil((wdCount*2)/12);
   return 999;
 }
+// Cap dinamico: frena a quien ya lleva 2+ cuando hay supers con 0 en ese rol
+function dynamicCap(rid, mc, cands, totalSups) {
+  if(!['bandeja','kh','entrena','r7076','solo7076'].includes(rid)) return 999;
+  const zeros = cands.filter(s=>mc[s][rid]===0).length;
+  if(zeros>0) return 1; // si hay alguien con 0, nadie puede tener mas de 1 hasta que todos tengan al menos 1
+  const mins = Math.min(...cands.map(s=>mc[s][rid]));
+  return mins+1; // nadie puede superar al minimo+1
+}
 
 function getWorkDays(y, m) {
   const days = [];
@@ -926,6 +934,9 @@ function buildRotCal(year, month) {
       if(rid==='des7076'||rid==='r7076des'){const sp=cands.filter(s=>(dayIdx-lastDes[s][rid])>=COOLDOWN);if(sp.length)cands=sp;}
       const cap=monthlyCap(rid,wdCount);
       if(cap<999){const uc=cands.filter(s=>mc[s][rid]<cap);if(uc.length)cands=uc;}
+      // Cap dinamico: frena a quien ya tiene mas del minimo cuando hay otros con menos
+      const dcap=dynamicCap(rid,mc,cands,SUPERVISORS.length);
+      if(dcap<999){const dc=cands.filter(s=>mc[s][rid]<dcap);if(dc.length)cands=dc;}
       // Prioridad dura: si alguien tiene 0 de este rol y quedan dias suficientes, darles prioridad absoluta
       const zeroRol=cands.filter(s=>mc[s][rid]===0);
       if(zeroRol.length>0&&daysLeft>zeroRol.length){cands=zeroRol;}
