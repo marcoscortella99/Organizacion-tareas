@@ -10,21 +10,43 @@
 <meta name="theme-color" content="#00554e">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes snake-spin {
+  to { --angle: 360deg; }
+}
+@keyframes snake-glow {
+  0%, 100% { 
+    filter: drop-shadow(0 0 2px rgba(83, 102, 255, 0.6)) drop-shadow(0 0 8px rgba(83, 102, 255, 0.3)); 
+    opacity: 0.7;
+  }
+  50% { 
+    filter: drop-shadow(0 0 8px rgba(83, 102, 255, 1)) drop-shadow(0 0 20px rgba(131, 150, 255, 0.6)); 
+    opacity: 1;
+  }
+}
+@keyframes pulse-border {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
 :root {
-  --impulsa:#00554e; --impulsa-lt:#e0f2f0; --impulsa-md:#007a72;
+  --impulsa:#5366ff; --impulsa-lt:#e8eeff; --impulsa-md:#3d4acc;
   --elite:#4a537d;   --elite-lt:#eef0f8;
   --conecta:#b688ea; --conecta-lt:#f5effd;
   --avanza:#00cd94;  --avanza-lt:#e0fdf4;
   --save:#f39c12;    --save-lt:#fef3cd;
   --danger:#e74c3c;  --danger-lt:#fdeaea;
-  --white:#fff; --bg:#f1f5f9; --border:#e2e8f0;
+  --white:#fff; --bg:#f8faff; --border:#e2e8f0;
   --text:#1e293b; --muted:#64748b;
   --card:#fff;
   --sidebar-w:220px;
   --header-h:56px;
   --radius:12px; --radius-lg:18px;
-  --shadow:0 2px 8px rgba(0,0,0,.07);
-  --shadow-lg:0 8px 28px rgba(0,0,0,.1);
+  --shadow:0 2px 8px rgba(83,102,255,.07);
+  --shadow-lg:0 8px 28px rgba(83,102,255,.1);
 }
 [data-theme="dark"]{
   --white:#1e2433; --bg:#141824; --border:#2a3347;
@@ -411,7 +433,7 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .landing-page{
   position:fixed;top:0;left:0;width:100%;height:100%;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:linear-gradient(160deg,#00554e 0%,#003d38 60%,#1a1f3c 100%);
+  background:linear-gradient(160deg,#5366ff 0%,#3d4acc 60%,#667eea 100%);
   padding:32px 20px;box-sizing:border-box;
   z-index:9999;overflow-y:auto;
   -webkit-overflow-scrolling:touch;
@@ -420,7 +442,7 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .landing-bg{display:none;}
 .landing-bg-dot{display:none;}
 .landing-header{text-align:center;margin-bottom:28px;animation:landingIn .7s ease both;margin:0 auto;}
-.landing-logo{width:56px;height:56px;background:white;border-radius:16px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#00554e;margin:0 auto 14px;box-shadow:0 4px 20px rgba(0,0,0,.25);flex-shrink:0;}
+.landing-logo{width:56px;height:56px;background:white;border-radius:16px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#5366ff;margin:0 auto 14px;box-shadow:0 4px 20px rgba(0,0,0,.25);flex-shrink:0;}
 .landing-title{color:white;font-size:clamp(1.4rem,4vw,2rem);font-weight:800;margin-bottom:6px;letter-spacing:-.5px;text-align:center;}
 .landing-sub{color:rgba(255,255,255,.55);font-size:14px;font-weight:500;text-align:center;}
 .landing-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:480px;width:100%;margin:0 auto 24px;}
@@ -440,6 +462,58 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .lc-desc{color:rgba(255,255,255,.5);font-size:11px;line-height:1.5;}
 .lc-arrow{position:absolute;top:16px;right:16px;color:rgba(255,255,255,.3);font-size:16px;transition:.2s;}
 .landing-card:hover .lc-arrow{color:rgba(255,255,255,.7);transform:translate(3px,-3px);}
+
+/* SNAKE BORDER ANIMATION */
+.landing-card-snake {
+  position: relative;
+  border: 2px solid transparent !important;
+  background: rgba(255,255,255,.1) !important;
+  padding: 16px 14px;
+  background-clip: padding-box;
+}
+.landing-card-snake::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 16px;
+  padding: 0;
+  background: conic-gradient(
+    from var(--angle),
+    #667eea 0%, #5366ff 12%, #3d4acc 25%,
+    #7c8ef5 37%, #5366ff 50%, #667eea 62%,
+    #5a7fff 75%, #667eea 87%, #667eea 100%
+  );
+  border-radius: 16px;
+  animation: snake-spin 2.2s linear infinite, snake-glow 3s ease-in-out infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+.landing-card-snake::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 16px;
+  background: conic-gradient(
+    from var(--angle),
+    transparent 0%, 
+    rgba(83, 102, 255, 0.4) 20%,
+    rgba(102, 126, 234, 0.5) 40%,
+    transparent 50%,
+    rgba(131, 150, 255, 0.3) 70%,
+    transparent 90%
+  );
+  animation: snake-spin 3.5s linear infinite;
+  filter: blur(10px);
+  z-index: -1;
+  pointer-events: none;
+}
+.landing-card-snake .lc-icon,
+.landing-card-snake .lc-title,
+.landing-card-snake .lc-desc,
+.landing-card-snake .lc-arrow {
+  position: relative;
+  z-index: 2;
+}
 .landing-footer{color:rgba(255,255,255,.25);font-size:10px;text-align:center;animation:landingIn .7s .3s ease both;}
 @keyframes landingIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 </style>
@@ -449,31 +523,36 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 <!-- LANDING SCREEN -->
 <div class="landing-page" id="landing">
   <div class="landing-header">
-    <div class="landing-logo">JS</div>
+    <div class="landing-logo">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="#5366ff" stroke-width="8"/>
+        <text x="50" y="62" font-size="48" font-weight="bold" fill="#5366ff" text-anchor="middle" font-family="Arial, sans-serif">JS</text>
+      </svg>
+    </div>
     <h1 class="landing-title">Organización Supers</h1>
     <p class="landing-sub">Jerárquicos Salud · ¿A dónde querés ir?</p>
   </div>
 
   <div class="landing-cards">
-    <div class="landing-card" style="--lc-color:#00cd94;" onclick="landingGoTo('rotacion')" style="animation-delay:.1s">
+    <div class="landing-card landing-card-snake" style="--lc-color:#00cd94;" onclick="landingGoTo('rotacion')" style="animation-delay:.1s">
       <span class="lc-icon">📅</span>
       <div class="lc-title">Rotación Diaria</div>
       <div class="lc-desc">Distribución mensual de tareas por supervisor</div>
       <span class="lc-arrow">↗</span>
     </div>
-    <div class="landing-card" style="--lc-color:#b688ea;" onclick="landingGoTo('anual')" style="animation-delay:.15s">
+    <div class="landing-card landing-card-snake" style="--lc-color:#b688ea;" onclick="landingGoTo('anual')" style="animation-delay:.15s">
       <span class="lc-icon">📆</span>
       <div class="lc-title">Distribución Anual</div>
       <div class="lc-desc">Asignación de roles por mes para todo el año</div>
       <span class="lc-arrow">↗</span>
     </div>
-    <div class="landing-card" style="--lc-color:#f39c12;" onclick="landingGoTo('sabados')" style="animation-delay:.2s">
+    <div class="landing-card landing-card-snake" style="--lc-color:#f39c12;" onclick="landingGoTo('sabados')" style="animation-delay:.2s">
       <span class="lc-icon">🛡️</span>
       <div class="lc-title">Guardias Sábados</div>
       <div class="lc-desc">Planificación anual de guardias de fin de semana</div>
       <span class="lc-arrow">↗</span>
     </div>
-    <div class="landing-card" style="--lc-color:#4a537d;" onclick="landingGoTo('horarios')" style="animation-delay:.25s">
+    <div class="landing-card landing-card-snake" style="--lc-color:#4a537d;" onclick="landingGoTo('horarios')" style="animation-delay:.25s">
       <span class="lc-icon">🕐</span>
       <div class="lc-title">Planilla Horarios</div>
       <div class="lc-desc">Gestión mensual de presencialidad y horarios</div>
@@ -495,7 +574,7 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 <!-- SIDEBAR -->
 <nav class="sidebar" id="sidebar">
   <div class="sb-brand">
-    <div class="sb-logo">JS</div>
+    <div class="sb-logo" style="font-size: 18px; font-style: italic;">JS</div>
     <div class="sb-title">Organización Supers</div>
     <div class="sb-sub">Jerárquicos Salud</div>
   </div>
